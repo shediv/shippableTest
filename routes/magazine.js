@@ -8,7 +8,13 @@ var Media = require('../models/media').Media;
 
 router.get("/", function(req, res){
     Media.find({}, function(err, results){
-        res.status(200).json(results);
+        res.status(200).json({magazines : results});
+    });
+});
+
+router.get("/:urlSlug", function(req, res){
+    Media.findOne({urlSlug: req.params.urlSlug}, function(err, results){
+        res.status(200).json({magazines : results});
     });
 });
 
