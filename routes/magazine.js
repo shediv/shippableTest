@@ -14,6 +14,39 @@ router.get("/", function(req, res){
 
 
 /**
+Compare Magazines based on the ID's
+// API link : /magazine/compare
+
+Input : List of magazine's ID's
+Output : Details of a Magazine
+**/
+router.get("/compare", function(req, res){
+    var ID = JSON.parse(req.query.params);
+    console.log(ID);
+
+    Media.find({_id: { $in: ID }}, function(err, results){
+        //res.status(200).json(results);
+var data = {};
+for(key in results) {
+    var tmp = [];
+            tmp['_id'] = results[key].urlSlug;
+            tmp['name'] = results[key].name;
+
+    //data = tmp.slice();;            
+   //console.log(tmp);
+   //document.write(results[key]);
+   res.status(200).json(tmp);
+}
+
+   //res.status(200).json(results[key]);
+
+   //res.status(200).json(data);
+
+    });
+})
+
+
+/**
 Search for a Magazine based on the urlSlug
 // API link : magazine/sony
 
