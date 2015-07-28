@@ -33,10 +33,9 @@ router.get("/compare", function(req, res){
             tmp['_id'] = media._id;
             tmp['name'] = media.name;
             tmp['urlSlug'] = media.urlSlug;
+            tmp['thumbnail'] = media.thumbnail;            
             data[mediaKey] = tmp;
         }
-
-   //res.status(200).json(results[key]);
 
    res.status(200).json({magazines : data});
 
