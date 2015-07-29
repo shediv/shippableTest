@@ -4,28 +4,6 @@
 
 var mongoose = require('mongoose');
 
-var MediaSchema = new mongoose.Schema({
-    "toolId" : {type: String},
-    "categoryId" : {type: String},
-    "name" : {type: String},
-    "targetGroups" : [],
-    "tabs" : [],
-    "attributes" : {},
-    "sections" : [],
-    "mediaOptions" : {},
-    "artWorkFormats" : [],
-    "timeline" : {},
-    "thumbnail" : {type: String},
-    "imageUrl" : {type: String},
-    "urlSlug" : {type: String},
-    "createdAt" : {type: Date, default:Date.now},
-    "createdBy" : {type: String},
-    "isActive" : {type: Number},
-    "views" : {type: Number},
-    "eliminators" : {},
-    "keywords" : [],
-    "geography" : []
-});
-
-var media = mongoose.model('medias', MediaSchema);
-module.exports = { Media: media };
+var media = mongoose.model('medias', new mongoose.Schema({},{strict : false}));
+var tools = mongoose.model('tools', new mongoose.Schema({},{strict : false}));
+module.exports = { Media: media, Tools : tools };
