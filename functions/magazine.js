@@ -3,10 +3,10 @@ var functions = {};
 var Media = require('../models/media').Media;
 var Tools = require('../models/media').Tools;
 var Products = require('../models/media').Products;
+var Geography = require('../models/media').Geography;
 
 var toolId;
 var data = [];
-
 
 functions.findMedia = function(ids, callback){
     Media.find({_id: { $in: ids }}, function(err, result){
@@ -37,7 +37,12 @@ functions.getGeographies = function(callback){
             _id : '$geography'
         }
     }, function(error, results){
-        callback(error, results);
+        var ids = [];
+        for(var i =0; i < results.length; i++)
+        ids.push(results[i]._id.toString());
+        Geography.find({_id : {$in : ids}}, function(err, geos){
+            callback(err, geos);
+        });
     });
 };
 

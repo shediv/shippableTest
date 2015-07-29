@@ -45,8 +45,6 @@ router.get("/getFilters", function(req, res){
     });
 });
 
-
-
 /**
 Compare Magazines based on the ID's
 // API link : /magazine/compare
@@ -83,7 +81,6 @@ router.get('/compare', function(req, res, next) {
         res.status(200).json(result);
     });
 });
-
 
 /**
  Find related Media based on Category and urlSlug provided
