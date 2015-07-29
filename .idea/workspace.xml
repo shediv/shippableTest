@@ -2,6 +2,8 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c4c7ce2d-29e6-4fcb-9116-c27d6867d733" name="Default" comment="">
+      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/models/category.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functions/magazine.js" afterPath="$PROJECT_DIR$/functions/magazine.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/magazine.js" afterPath="$PROJECT_DIR$/routes/magazine.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/media.js" afterPath="$PROJECT_DIR$/models/media.js" />
@@ -26,11 +28,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="app.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="app.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.68315303">
-              <caret line="26" column="49" selection-start-line="26" selection-start-column="49" selection-end-line="26" selection-end-column="49" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -46,11 +48,11 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="media.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="media.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/models/media.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="70" selection-start-line="10" selection-start-column="70" selection-end-line="10" selection-end-column="70" />
+            <state vertical-scroll-proportion="0.23647605">
+              <caret line="9" column="70" selection-start-line="9" selection-start-column="70" selection-end-line="9" selection-end-column="70" />
               <folding />
             </state>
           </provider>
@@ -70,15 +72,13 @@
         <entry file="file://$PROJECT_DIR$/routes/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+              <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
               <folding>
-                <element signature="e#279#1095#0" expanded="false" />
-                <element signature="e#1099#1243#0" expanded="false" />
-                <element signature="e#1285#1872#0" expanded="false" />
-                <element signature="e#1877#2085#0" expanded="false" />
-                <element signature="e#2139#6557#0" expanded="false" />
-                <element signature="e#6561#6696#0" expanded="false" />
-                <element signature="e#6739#6875#0" expanded="false" />
+                <element signature="e#1498#2533#0" expanded="false" />
+                <element signature="e#2538#2746#0" expanded="false" />
+                <element signature="e#2800#7218#0" expanded="false" />
+                <element signature="e#7222#7357#0" expanded="false" />
+                <element signature="e#7400#7536#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -88,16 +88,16 @@
         <entry file="file://$PROJECT_DIR$/functions/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="93" column="27" selection-start-line="93" selection-start-column="27" selection-end-line="93" selection-end-column="27" />
+              <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
               <folding>
-                <element signature="e#223#637#0" expanded="false" />
-                <element signature="e#685#951#0" expanded="false" />
-                <element signature="e#997#1289#0" expanded="false" />
-                <element signature="e#1338#1642#0" expanded="false" />
-                <element signature="e#1690#1978#0" expanded="false" />
-                <element signature="e#2027#2311#0" expanded="false" />
-                <element signature="e#2356#2461#0" expanded="false" />
-                <element signature="e#2525#2680#0" expanded="false" />
+                <element signature="e#388#802#0" expanded="false" />
+                <element signature="e#850#1116#0" expanded="false" />
+                <element signature="e#1162#1454#0" expanded="false" />
+                <element signature="e#1503#1807#0" expanded="false" />
+                <element signature="e#1855#2143#0" expanded="false" />
+                <element signature="e#2192#2476#0" expanded="false" />
+                <element signature="e#2521#2626#0" expanded="false" />
+                <element signature="e#2690#2845#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -116,8 +116,8 @@
         <option value="$PROJECT_DIR$/app.js" />
         <option value="$PROJECT_DIR$/routes/parseExcel.js" />
         <option value="$PROJECT_DIR$/routes/magazine.js" />
-        <option value="$PROJECT_DIR$/models/media.js" />
         <option value="$PROJECT_DIR$/functions/magazine.js" />
+        <option value="$PROJECT_DIR$/models/media.js" />
       </list>
     </option>
   </component>
@@ -172,48 +172,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="media-ant-node-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tma-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="media-ant-node-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="routes" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tma-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="media-ant-node-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="models" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="tma-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="media-ant-node-api" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="functions" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -368,51 +326,49 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/models/media.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="70" selection-start-line="10" selection-start-column="70" selection-end-line="10" selection-end-column="70" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/routes/magazine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="64" column="0" selection-start-line="64" selection-start-column="0" selection-end-line="64" selection-end-column="0" />
+          <caret line="87" column="0" selection-start-line="87" selection-start-column="0" selection-end-line="87" selection-end-column="0" />
           <folding>
-            <element signature="e#279#1095#0" expanded="false" />
-            <element signature="e#1099#1243#0" expanded="false" />
-            <element signature="e#1285#1872#0" expanded="false" />
-            <element signature="e#1877#2085#0" expanded="false" />
-            <element signature="e#2139#6557#0" expanded="false" />
-            <element signature="e#6561#6696#0" expanded="false" />
-            <element signature="e#6739#6875#0" expanded="false" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="93" column="27" selection-start-line="93" selection-start-column="27" selection-end-line="93" selection-end-column="27" />
-          <folding>
-            <element signature="e#223#637#0" expanded="false" />
-            <element signature="e#685#951#0" expanded="false" />
-            <element signature="e#997#1289#0" expanded="false" />
-            <element signature="e#1338#1642#0" expanded="false" />
-            <element signature="e#1690#1978#0" expanded="false" />
-            <element signature="e#2027#2311#0" expanded="false" />
-            <element signature="e#2356#2461#0" expanded="false" />
-            <element signature="e#2525#2680#0" expanded="false" />
+            <element signature="e#1498#2533#0" expanded="false" />
+            <element signature="e#2538#2746#0" expanded="false" />
+            <element signature="e#2800#7218#0" expanded="false" />
+            <element signature="e#7222#7357#0" expanded="false" />
+            <element signature="e#7400#7536#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.68315303">
-          <caret line="26" column="49" selection-start-line="26" selection-start-column="49" selection-end-line="26" selection-end-column="49" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="15" column="0" selection-start-line="15" selection-start-column="0" selection-end-line="15" selection-end-column="0" />
+          <folding>
+            <element signature="e#388#802#0" expanded="false" />
+            <element signature="e#850#1116#0" expanded="false" />
+            <element signature="e#1162#1454#0" expanded="false" />
+            <element signature="e#1503#1807#0" expanded="false" />
+            <element signature="e#1855#2143#0" expanded="false" />
+            <element signature="e#2192#2476#0" expanded="false" />
+            <element signature="e#2521#2626#0" expanded="false" />
+            <element signature="e#2690#2845#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/media.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.23647605">
+          <caret line="9" column="70" selection-start-line="9" selection-start-column="70" selection-end-line="9" selection-end-column="70" />
           <folding />
         </state>
       </provider>
