@@ -5,6 +5,7 @@
 var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
+var Category = require('../models/category').Category;
 
 router.get("/", function(req, res){
     Media.find({}, function(err, results){
@@ -21,19 +22,33 @@ Input : List of magazine's ID's
 Output : Details of a Magazine
 **/
 router.get("/compare", function(req, res){
-    var ID = JSON.parse(req.query.params);
-    console.log(ID);
+    var ID = JSON.parse(req.query.params);               
 
     Media.find({_id: { $in: ID }}, function(err, results){
         //res.status(200).json(results);
-        var data = {};
+        var data = [];
         for (var mediaKey in results) {      
             var media = results[mediaKey];
+                      
             var tmp = {};
             tmp['_id'] = media._id;
             tmp['name'] = media.name;
             tmp['urlSlug'] = media.urlSlug;
-            tmp['thumbnail'] = media.thumbnail;            
+            tmp['thumbnail'] = media.thumbnail;
+            tmp['targetGroups'] = media.targetGroups;
+            tmp['categoryId'] = media.categoryId;            
+            //tmp['categoryName'] = getCategoryName(media.categoryId);
+            if('frequency' in media.attributes) {var frequency = media.attributes.frequency.value;}
+            tmp['frequency'] = frequency;            
+            if('circulation' in media.attributes) {var circulation = media.attributes.circulation.value;}
+            tmp['circulation'] = circulation;
+            if('readership' in media.attributes) {var readership = media.attributes.readership.value;}
+            tmp['readership'] = readership;            
+            tmp['fullPage'] = media.mediaOptions.print.fullPage['1-2'];                          
+            if('language' in media.attributes) {var language = media.attributes.language.value;}
+            tmp['language'] = language;
+            
+            tmp['IRSCode'] = media.IRSCode;                                   
             data[mediaKey] = tmp;
         }
 
