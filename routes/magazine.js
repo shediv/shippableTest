@@ -13,14 +13,6 @@ router.get("/", function(req, res){
     });
 });
 
-function findDocs(){
-    console.log("find docs called");
-    Media.find({}, function(err, results){
-        console.log(results);
-        return results;
-    });
-};
-
 /**
  Compare Magazines based on the ID's
  // API link : /magazine/compare
@@ -35,21 +27,17 @@ router.get("/compare", function(req, res){
     Media.find({_id: { $in: ID }}, function(err, results){
         //res.status(200).json(results);
         var data = {};
-        for(key in results) {
-            var tmp = [];
-            tmp['_id'] = results[key].urlSlug;
-            tmp['name'] = results[key].name;
 
-            //data = tmp.slice();;
-            //console.log(tmp);
-            //document.write(results[key]);
-            res.status(200).json(tmp);
+        for (var mediaKey in results) {      
+            var media = results[mediaKey];
+            var tmp = {};
+            tmp['_id'] = media._id;
+            tmp['name'] = media.name;
+            tmp['urlSlug'] = media.urlSlug;
+            tmp['thumbnail'] = media.thumbnail;            
+            data[mediaKey] = tmp;
         }
-
-        //res.status(200).json(results[key]);
-
-        //res.status(200).json(data);
-
+        res.status(200).json({magazines : data});
     });
 });
 
@@ -191,6 +179,5 @@ router.get("/related/:categoryId", function(req, res){
         }
     );
 });
-
 
 module.exports = router;
