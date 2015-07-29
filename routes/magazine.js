@@ -18,7 +18,12 @@ router.get("/getFilters", function(req, res){
         filters:function(callback){
             async.parallel({
                 categories: functions.getCategories,
-                geography : functions.getGeographies
+                geography : functions.getGeographies,
+                languages : functions.getLanguages,
+                targetGroups : functions.getTargetGroups,
+                frequencies : functions.getFrequencies,
+                mediaOptions: functions.getMediaOptions,
+                products : functions.getProducts
             }, function(err, results){
                 callback(err, results);
             });

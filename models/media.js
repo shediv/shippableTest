@@ -7,4 +7,5 @@ var mongoose = require('mongoose');
 
 var media = mongoose.model('medias', new mongoose.Schema({},{strict : false}));
 var tools = mongoose.model('tools', new mongoose.Schema({},{strict : false}));
-module.exports = { Media: media, Tools : tools };
+var products = mongoose.model('products', new mongoose.Schema({},{strict : false}));
+module.exports = { Media: media, Tools : tools, Products : products };
