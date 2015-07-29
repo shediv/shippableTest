@@ -4,14 +4,6 @@ var Media = require('../models/media').Media;
 var Tools = require('../models/media').Tools;
 
 var toolId;
-var data = [];
-
-
-functions.findMedia = function(ids, callback){
-    Media.find({_id: { $in: ids }}, function(err, result){
-        callback(err, result);
-    });
-};
 
 functions.getCategories = function(callback){
     Media.aggregate({$match: {toolId:toolId, isActive : 1}},{
