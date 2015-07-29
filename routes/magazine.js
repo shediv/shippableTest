@@ -5,11 +5,26 @@
 var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
+var functions = require('../functions/magazine');
+var async = require('async');
 
-router.get("/", function(req, res){
-    Media.find({}, function(err, results){
-        var test = findDocs();
-        res.status(200).json({magazines : test});
+router.get("/getFilters", function(req, res){
+    async.series({
+        toolId : function(callback){
+            functions.getToolId("magazine", true, function(err, results){
+                callback(err);
+            });
+        },
+        filters:function(callback){
+            async.parallel({
+                categories: functions.getCategories,
+                geography : functions.getGeographies
+            }, function(err, results){
+                callback(err, results);
+            });
+        }
+    }, function(err, result){
+        res.status(200).json(result);
     });
 });
 
@@ -40,21 +55,6 @@ router.get("/compare", function(req, res){
         res.status(200).json({magazines : data});
     });
 });
-
-
-/**
- Search for a Magazine based on the urlSlug
- // API link : magazine/sony
-
- Input : urlSlug
- Output : Details of a Magazine
- **/
-router.get("/:urlSlug", function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}, function(err, results){
-        res.status(200).json({magazine : results});
-    });
-});
-
 
 
 /**
@@ -178,6 +178,18 @@ router.get("/related/:categoryId", function(req, res){
             });
         }
     );
+});
+
+/**
+ * Search for a Magazine based on the urlSlug
+ * API link : magazine/sony
+ * Input : urlSlug
+ * Output : Details of a Magazine
+ **/
+router.get("/:urlSlug", function(req, res){
+    Media.findOne({urlSlug: req.params.urlSlug}, function(err, results){
+        res.status(200).json({magazine : results});
+    });
 });
 
 module.exports = router;
