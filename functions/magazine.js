@@ -6,7 +6,6 @@ var Products = require('../models/media').Products;
 var Geography = require('../models/media').Geography;
 
 var toolId;
-var data = [];
 
 functions.findMedia = function(ids, callback){
     Media.find({_id: { $in: ids }}, function(err, result){
