@@ -1,6 +1,8 @@
 
 var mongoose = require('mongoose');
 
-var tools = mongoose.model('tools', new mongoose.Schema({},{strict : false}));
+var tools = mongoose.model('tools', new mongoose.Schema({
+    name : {type: String}
+},{strict : false}));
 
 module.exports = {Tools : tools};
