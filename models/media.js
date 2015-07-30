@@ -8,4 +8,6 @@ var media = mongoose.model('medias', new mongoose.Schema({categoryId : {type: St
 var tools = mongoose.model('tools', new mongoose.Schema({},{strict : false}));
 var products = mongoose.model('products', new mongoose.Schema({},{strict : false}));
 var geography = mongoose.model('geography', new mongoose.Schema({},{strict : false}));
-module.exports = { Media: media, Tools : tools, Products : products, Geography : geography };
+var category = mongoose.model('category', new mongoose.Schema({},{strict : false}));
+
+module.exports = { Media: media, Tools : tools, Products : products, Geography : geography, Category : category};
