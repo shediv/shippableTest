@@ -3,7 +3,6 @@
   <component name="ChangeListManager">
     <list default="true" id="c4c7ce2d-29e6-4fcb-9116-c27d6867d733" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functions/magazine.js" afterPath="$PROJECT_DIR$/functions/magazine.js" />
     </list>
     <ignored path="tma-api.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,11 +23,11 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="app.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="app.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/app.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="26" column="66" selection-start-line="26" selection-start-column="66" selection-end-line="26" selection-end-column="66" />
+            <state vertical-scroll-proportion="0.5255023">
+              <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
               <folding />
             </state>
           </provider>
@@ -52,10 +51,10 @@
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/functions/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.7897991">
+            <state vertical-scroll-proportion="0.0">
               <caret line="152" column="58" selection-start-line="152" selection-start-column="58" selection-end-line="152" selection-end-column="58" />
               <folding>
                 <element signature="e#389#1378#0" expanded="false" />
@@ -394,6 +393,25 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="152" column="58" selection-start-line="152" selection-start-column="58" selection-end-line="152" selection-end-column="58" />
+          <folding>
+            <element signature="e#389#1378#0" expanded="false" />
+            <element signature="e#1418#2482#0" expanded="false" />
+            <element signature="e#2529#2962#0" expanded="false" />
+            <element signature="e#3010#3466#0" expanded="false" />
+            <element signature="e#3512#3804#0" expanded="false" />
+            <element signature="e#3853#4157#0" expanded="false" />
+            <element signature="e#4205#4493#0" expanded="false" />
+            <element signature="e#4542#4826#0" expanded="false" />
+            <element signature="e#4871#4976#0" expanded="false" />
+            <element signature="e#5040#5195#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/routes/magazine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
@@ -412,28 +430,9 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/app.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="26" column="66" selection-start-line="26" selection-start-column="66" selection-end-line="26" selection-end-column="66" />
+        <state vertical-scroll-proportion="0.5255023">
+          <caret line="25" column="0" selection-start-line="25" selection-start-column="0" selection-end-line="25" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.7897991">
-          <caret line="152" column="58" selection-start-line="152" selection-start-column="58" selection-end-line="152" selection-end-column="58" />
-          <folding>
-            <element signature="e#389#1378#0" expanded="false" />
-            <element signature="e#1418#2482#0" expanded="false" />
-            <element signature="e#2529#2962#0" expanded="false" />
-            <element signature="e#3010#3466#0" expanded="false" />
-            <element signature="e#3512#3804#0" expanded="false" />
-            <element signature="e#3853#4157#0" expanded="false" />
-            <element signature="e#4205#4493#0" expanded="false" />
-            <element signature="e#4542#4826#0" expanded="false" />
-            <element signature="e#4871#4976#0" expanded="false" />
-            <element signature="e#5040#5195#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
