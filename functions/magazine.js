@@ -5,6 +5,7 @@ var Tools = require('../models/media').Tools;
 var Products = require('../models/media').Products;
 var Geography = require('../models/media').Geography;
 var Category = require('../models/media').Category;
+var async = require('async');
 
 var toolId;
 var query = {};
@@ -39,14 +40,26 @@ functions.buildQuery = function(params, callback){
 };
 
 functions.search = function(callback){
-    switch(query.sortBy) {
-        case 'views': query.sortBy = { 'views' : -1 }; break;
-        case 'circulation': query.sortBy = { 'attributes.circulation.value' : -1}; break;
-        case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
-        case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
-    }
-    Media.aggregate({$match: query.match}, {$sort: query.sortBy},
-        {$skip : query.offset},{$limit: query.limit},{$project: query.projection}, function(err, results){
+    async.parallel({
+        count: function(callbackInner){
+            Media.aggregate({$match : query.match}, {$group: { _id : null, count: {$sum: 1}}}, function(err, result){
+                callbackInner(err, result[0].count);
+            });
+        },
+        magazines : function(callbackInner){
+            switch(query.sortBy) {
+                case 'views': query.sortBy = { 'views' : -1 }; break;
+                case 'circulation': query.sortBy = { 'attributes.circulation.value' : -1}; break;
+                case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
+                case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
+            }
+            Media.aggregate({
+                $match: query.match}, {$sort: query.sortBy}, {$skip : query.offset},{$limit: query.limit},{
+                $project: query.projection}, function(err, results){
+                callbackInner(err, results);
+            });
+        }
+    }, function(err, results){
         callback(err, results);
     });
 };

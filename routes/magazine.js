@@ -28,7 +28,7 @@ router.get("/", function(req, res){
                     callback(err);
                 });
             },
-            magazines: function(callback){
+            search: function(callback){
                 if(params.sortBy == 'top3'){
                     functions.top3(function(err, results){
                         callback(err, results);
@@ -40,7 +40,7 @@ router.get("/", function(req, res){
                 }
             }
         }, function (err, result) {
-            res.status(200).json(result);
+            res.status(200).json(result.search);
         });
     }
 });
