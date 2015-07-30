@@ -5,15 +5,14 @@
 var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
-var Category = require('../models/category').Category;
+var Category = require('../models/media').Category;
 var functions = require('../functions/magazine');
 var async = require('async');
-
-
-
-
+var params;
+var query = {};
 
 router.get("/", function(req, res){
+
     if  (req.query.params) {
         res.status(200).json(functions.top3);
         
@@ -24,8 +23,40 @@ router.get("/", function(req, res){
             });
     }
         
-});
 
+    params = JSON.parse(req.query.params);
+    if(params.tmaRecommended){
+        res.status(200).json("tma recommended");
+        //call tmaRecommended function
+    } else {
+        async.series({
+            setToolId: function(callback){
+                functions.getToolId("magazine", true, function(err, results){
+                    callback(err);
+                });
+            },
+            buildQuery: function(callback){
+                functions.buildQuery(params, function(err, results){
+                    callback(err);
+                });
+            },
+            magazines: function(callback){
+                if(params.sortBy == 'top3'){
+                    functions.top3(function(err, results){
+                        callback(err, results);
+                    });
+                } else {
+                    functions.search(function(err, results){
+                        callback(err, results);
+                    });
+                }
+            }
+        }, function (err, result) {
+            res.status(200).json(result);
+        });
+    }
+>>>>>>> e5f344a8b9a0f544fa1c8f119f9054533b4bddd5
+});
 
 router.get("/getFilters", function(req, res){
     async.series({

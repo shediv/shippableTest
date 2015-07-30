@@ -4,27 +4,67 @@ var Media = require('../models/media').Media;
 var Tools = require('../models/media').Tools;
 var Products = require('../models/media').Products;
 var Geography = require('../models/media').Geography;
+var Category = require('../models/media').Category;
 
 var toolId;
+var query = {};
 
-functions.findMedia = function(ids, callback){
-    Media.find({_id: { $in: ids }}, function(err, result){
-        callback(err, result);
+functions.buildQuery = function(params, callback){
+    query.sortBy = params.sortBy || 'views';
+    query.offset = params.offset || 0;
+    query.limit = params.limit || 9;
+    query.match = {};
+    var filters = {
+        'categories' : 'categoryId',
+        'geography' : 'geography',
+        'languages' : 'attributes.language.value',
+        'frequencies' : 'attributes.frequency.value',
+        'targetGroups' : 'targetGroup'
+    };
+    query.projection = { '_id' : 1, 'attributes' : 1, 'urlSlug' : 1, 'thumbnail' : 1, 'categoryId' : 1, 'name' : 1,
+        'mediaOptions.print.fullPage.1-2' : 1, 'toolId' : 1, 'createdBy' : 1};
+
+    Object.keys(filters).map(function(value) {
+        if(params.filters[value].length) {
+            query.match[filters[value]] = {'$in': params.filters[value]};
+        }
+    });
+
+    params.filters.mediaOptions.forEach(function(value, key){
+        query.match['mediaOptions.'+value] = { $exists : 1};
+    });
+    query.match.isActive = 1;
+    query.match.toolId = toolId;
+    callback(null, query);
+};
+
+functions.search = function(callback){
+    switch(query.sortBy) {
+        case 'views': query.sortBy = { 'views' : -1 }; break;
+        case 'circulation': query.sortBy = { 'attributes.circulation.value' : -1}; break;
+        case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
+        case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
+    }
+    Media.aggregate({$match: query.match}, {$sort: query.sortBy},
+        {$skip : query.offset},{$limit: query.limit},{$project: query.projection}, function(err, results){
+        callback(err, results);
     });
 };
 
 functions.getCategories = function(callback){
     Media.aggregate({$match: {toolId:toolId, isActive : 1}},{
         $group : {
-            _id : { id :'$categoryId', name: '$name'},
+            _id : '$categoryId',
             count : {$sum : 1}
         }
     }, function(error, results){
-        for(var i = 0; i < results.length; i ++){
-            results[i].name = results[i]._id.name;
-            results[i]._id = results[i]._id.id;
-        }
-        callback(error, results);
+        var catIds = [];
+        results.map(function(o){
+            catIds.push(o._id);
+        });
+        Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
+            callback(error, cats);
+        });
     });
 };
 
