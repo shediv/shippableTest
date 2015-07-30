@@ -24,7 +24,7 @@ app.use(cors({
     ]
 }));
 
-mongoose.connect('mongodb://localhost/media_ant');
+mongoose.connect('mongodb://localhost/mediaAnt');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));

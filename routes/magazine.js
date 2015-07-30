@@ -14,9 +14,16 @@ var async = require('async');
 
 
 router.get("/", function(req, res){
-    Media.find({}, function(err, results){
-        res.status(200).json({magazines : results});
-        });
+    if  (req.query.params) {
+        res.status(200).json(functions.top3);
+        
+
+    }else{
+            Media.find({}, function(err, results){
+            res.status(200).json({magazines : results});
+            });
+    }
+        
 });
 
 
@@ -204,6 +211,9 @@ router.get("/related/:categoryId", function(req, res){
         }
     );
 });
+
+
+
 
 /**
  * Search for a Magazine based on the urlSlug

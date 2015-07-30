@@ -53,7 +53,7 @@ functions.getLanguages = function(callback){
         }
     }, function(error, results){
         callback(error, results);
-    });
+    });     
 };
 
 functions.getTargetGroups = function(callback){
@@ -101,6 +101,11 @@ functions.getToolId = function(toolName, setToolId, callback){
         if(setToolId) toolId = result._id.toString();
         callback(err, result);
     });
+};
+
+functions.top3=function(callback){
+            var result="hello";
+        callback(null,"hello");
 };
 
 module.exports = functions;
