@@ -6,18 +6,9 @@ var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
 var Category = require('../models/category').Category;
+var Product = require('../models/product').Product;
 var functions = require('../functions/magazine');
 var async = require('async');
-
-
-
-
-
-router.get("/", function(req, res){
-    Media.find({}, function(err, results){
-        res.status(200).json({magazines : results});
-        });
-});
 
 
 router.get("/getFilters", function(req, res){
@@ -44,10 +35,10 @@ router.get("/getFilters", function(req, res){
 
 /**
 Compare Magazines based on the ID's
-// API link : /magazine/compare
+// API link : /magazine/compare?params=%5B"558a47f675d5fdf3118b4567","5593876575d5fde7058b4568","558a47de75d5fdf2118b4567"%5D
 
 Input : List of magazine's ID's
-Output : Details of a Magazine
+Output : Details of a Magazine with category names
 **/
 router.get('/compare', function(req, res, next) {
     var ids = JSON.parse(req.query.params);
