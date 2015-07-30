@@ -4,6 +4,7 @@
     <list default="true" id="c4c7ce2d-29e6-4fcb-9116-c27d6867d733" name="Default" comment="">
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functions/magazine.js" afterPath="$PROJECT_DIR$/functions/magazine.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/magazine.js" afterPath="$PROJECT_DIR$/routes/magazine.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/media.js" afterPath="$PROJECT_DIR$/models/media.js" />
     </list>
     <ignored path="tma-api.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -24,66 +25,40 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="app.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/app.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="package.json" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/package.json">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="-0.65384614">
-              <caret line="1" column="20" selection-start-line="1" selection-start-column="20" selection-end-line="1" selection-end-column="20" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="media.js" pinned="false" current-in-tab="false">
-        <entry file="file://$PROJECT_DIR$/models/media.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="true">
+      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/routes/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.8423493">
-              <caret line="42" column="48" selection-start-line="42" selection-start-column="48" selection-end-line="42" selection-end-column="48" />
+            <state vertical-scroll-proportion="0.0">
+              <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
               <folding>
-                <element signature="e#2301#2440#0" expanded="false" />
-                <element signature="e#3528#3736#0" expanded="false" />
-                <element signature="e#8212#8347#0" expanded="false" />
-                <element signature="e#8390#8526#0" expanded="false" />
+                <element signature="e#1484#2300#0" expanded="false" />
+                <element signature="e#2304#2443#0" expanded="false" />
+                <element signature="e#2492#3527#0" expanded="false" />
+                <element signature="e#3531#3739#0" expanded="false" />
+                <element signature="e#3793#8211#0" expanded="false" />
+                <element signature="e#8215#8350#0" expanded="false" />
+                <element signature="e#8393#8529#0" expanded="false" />
               </folding>
             </state>
           </provider>
         </entry>
       </file>
-      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="false">
+      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/functions/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.0">
-              <caret line="62" column="29" selection-start-line="62" selection-start-column="29" selection-end-line="62" selection-end-column="29" />
+            <state vertical-scroll-proportion="0.07882535">
+              <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
               <folding>
-                <element signature="e#380#1369#0" expanded="false" />
-                <element signature="e#2520#2953#0" expanded="false" />
-                <element signature="e#3001#3457#0" expanded="false" />
-                <element signature="e#3503#3795#0" expanded="false" />
-                <element signature="e#3844#4148#0" expanded="false" />
-                <element signature="e#4196#4484#0" expanded="false" />
-                <element signature="e#4533#4817#0" expanded="false" />
-                <element signature="e#4862#4967#0" expanded="false" />
-                <element signature="e#5031#5186#0" expanded="false" />
+                <element signature="e#389#1378#0" expanded="false" />
+                <element signature="e#1418#2482#0" expanded="false" />
+                <element signature="e#2529#2962#0" expanded="false" />
+                <element signature="e#3010#3466#0" expanded="false" />
+                <element signature="e#3512#3804#0" expanded="false" />
+                <element signature="e#3853#4157#0" expanded="false" />
+                <element signature="e#4205#4493#0" expanded="false" />
+                <element signature="e#4542#4826#0" expanded="false" />
+                <element signature="e#4871#4976#0" expanded="false" />
+                <element signature="e#5040#5195#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -100,10 +75,14 @@
         <option value="$PROJECT_DIR$/models/magazine.js" />
         <option value="$PROJECT_DIR$/package.json" />
         <option value="$PROJECT_DIR$/routes/parseExcel.js" />
-        <option value="$PROJECT_DIR$/models/media.js" />
         <option value="$PROJECT_DIR$/app.js" />
-        <option value="$PROJECT_DIR$/functions/magazine.js" />
+        <option value="$PROJECT_DIR$/models/tool.js" />
+        <option value="$PROJECT_DIR$/models/product.js" />
+        <option value="$PROJECT_DIR$/models/geography.js" />
+        <option value="$PROJECT_DIR$/models/category.js" />
+        <option value="$PROJECT_DIR$/models/media.js" />
         <option value="$PROJECT_DIR$/routes/magazine.js" />
+        <option value="$PROJECT_DIR$/functions/magazine.js" />
       </list>
     </option>
   </component>
@@ -158,6 +137,20 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="media-ant-node-api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tma-api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="media-ant-node-api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="routes" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -336,8 +329,48 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/package.json">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="-0.65384614">
+        <state vertical-scroll-proportion="0.0273752">
           <caret line="1" column="20" selection-start-line="1" selection-start-column="20" selection-end-line="1" selection-end-column="20" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.5780525">
+          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/tool.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.10510046">
+          <caret line="4" column="0" selection-start-line="4" selection-start-column="0" selection-end-line="4" selection-end-column="0" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/product.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.07882535">
+          <caret line="3" column="84" selection-start-line="3" selection-start-column="84" selection-end-line="3" selection-end-column="84" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/geography.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.13137558">
+          <caret line="5" column="40" selection-start-line="5" selection-start-column="40" selection-end-line="5" selection-end-column="40" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/models/category.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.13137558">
+          <caret line="5" column="41" selection-start-line="5" selection-start-column="41" selection-end-line="5" selection-end-column="41" />
           <folding />
         </state>
       </provider>
@@ -345,46 +378,42 @@
     <entry file="file://$PROJECT_DIR$/models/media.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="0" selection-start-line="6" selection-start-column="0" selection-end-line="6" selection-end-column="0" />
+          <caret line="0" column="0" selection-start-line="0" selection-start-column="0" selection-end-line="0" selection-end-column="0" />
           <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="27" column="0" selection-start-line="27" selection-start-column="0" selection-end-line="27" selection-end-column="0" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="62" column="29" selection-start-line="62" selection-start-column="29" selection-end-line="62" selection-end-column="29" />
-          <folding>
-            <element signature="e#380#1369#0" expanded="false" />
-            <element signature="e#2520#2953#0" expanded="false" />
-            <element signature="e#3001#3457#0" expanded="false" />
-            <element signature="e#3503#3795#0" expanded="false" />
-            <element signature="e#3844#4148#0" expanded="false" />
-            <element signature="e#4196#4484#0" expanded="false" />
-            <element signature="e#4533#4817#0" expanded="false" />
-            <element signature="e#4862#4967#0" expanded="false" />
-            <element signature="e#5031#5186#0" expanded="false" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/routes/magazine.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.8423493">
-          <caret line="42" column="48" selection-start-line="42" selection-start-column="48" selection-end-line="42" selection-end-column="48" />
+        <state vertical-scroll-proportion="0.0">
+          <caret line="9" column="0" selection-start-line="9" selection-start-column="0" selection-end-line="9" selection-end-column="0" />
           <folding>
-            <element signature="e#2301#2440#0" expanded="false" />
-            <element signature="e#3528#3736#0" expanded="false" />
-            <element signature="e#8212#8347#0" expanded="false" />
-            <element signature="e#8390#8526#0" expanded="false" />
+            <element signature="e#1484#2300#0" expanded="false" />
+            <element signature="e#2304#2443#0" expanded="false" />
+            <element signature="e#2492#3527#0" expanded="false" />
+            <element signature="e#3531#3739#0" expanded="false" />
+            <element signature="e#3793#8211#0" expanded="false" />
+            <element signature="e#8215#8350#0" expanded="false" />
+            <element signature="e#8393#8529#0" expanded="false" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/functions/magazine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.07882535">
+          <caret line="3" column="0" selection-start-line="3" selection-start-column="0" selection-end-line="3" selection-end-column="0" />
+          <folding>
+            <element signature="e#389#1378#0" expanded="false" />
+            <element signature="e#1418#2482#0" expanded="false" />
+            <element signature="e#2529#2962#0" expanded="false" />
+            <element signature="e#3010#3466#0" expanded="false" />
+            <element signature="e#3512#3804#0" expanded="false" />
+            <element signature="e#3853#4157#0" expanded="false" />
+            <element signature="e#4205#4493#0" expanded="false" />
+            <element signature="e#4542#4826#0" expanded="false" />
+            <element signature="e#4871#4976#0" expanded="false" />
+            <element signature="e#5040#5195#0" expanded="false" />
           </folding>
         </state>
       </provider>

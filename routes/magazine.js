@@ -5,7 +5,7 @@
 var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
-var Category = require('../models/media').Category;
+var Category = require('../models/category').Category;
 var functions = require('../functions/magazine');
 var async = require('async');
 var params;

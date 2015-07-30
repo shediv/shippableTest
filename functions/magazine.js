@@ -1,11 +1,12 @@
 
 var functions = {};
-var Media = require('../models/media').Media;
-var Tools = require('../models/media').Tools;
-var Products = require('../models/media').Products;
-var Geography = require('../models/media').Geography;
-var Category = require('../models/media').Category;
 var async = require('async');
+
+var Media = require('../models/media').Media;
+var Tools = require('../models/tool').Tools;
+var Products = require('../models/product').Products;
+var Geography = require('../models/geography').Geography;
+var Category = require('../models/category').Category;
 
 var toolId;
 var query = {};
