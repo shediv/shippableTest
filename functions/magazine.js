@@ -152,7 +152,6 @@ functions.getProducts = function(callback){
 
 functions.getToolId = function(toolName, setToolId, callback){
     Tools.findOne({name: toolName}, function(err, result){
-        console.log(result);
         if(setToolId) toolId = result._id.toString();
         callback(err, result);
     });
