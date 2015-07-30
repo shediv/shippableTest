@@ -5,8 +5,20 @@
 var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
+var Category = require('../models/category').Category;
 var functions = require('../functions/magazine');
 var async = require('async');
+
+
+
+
+
+router.get("/", function(req, res){
+    Media.find({}, function(err, results){
+        res.status(200).json({magazines : results});
+        });
+});
+
 
 router.get("/getFilters", function(req, res){
     async.series({
@@ -18,7 +30,12 @@ router.get("/getFilters", function(req, res){
         filters:function(callback){
             async.parallel({
                 categories: functions.getCategories,
-                geography : functions.getGeographies
+                geography : functions.getGeographies,
+                languages : functions.getLanguages,
+                targetGroups : functions.getTargetGroups,
+                frequencies : functions.getFrequencies,
+                mediaOptions: functions.getMediaOptions,
+                products : functions.getProducts
             }, function(err, results){
                 callback(err, results);
             });
@@ -29,33 +46,41 @@ router.get("/getFilters", function(req, res){
 });
 
 /**
- Compare Magazines based on the ID's
- // API link : /magazine/compare
+Compare Magazines based on the ID's
+// API link : /magazine/compare
 
- Input : List of magazine's ID's
- Output : Details of a Magazine
- **/
-router.get("/compare", function(req, res){
-    var ID = JSON.parse(req.query.params);
-    console.log(ID);
-
-    Media.find({_id: { $in: ID }}, function(err, results){
-        //res.status(200).json(results);
-        var data = {};
-
-        for (var mediaKey in results) {      
-            var media = results[mediaKey];
-            var tmp = {};
-            tmp['_id'] = media._id;
-            tmp['name'] = media.name;
-            tmp['urlSlug'] = media.urlSlug;
-            tmp['thumbnail'] = media.thumbnail;            
-            data[mediaKey] = tmp;
+Input : List of magazine's ID's
+Output : Details of a Magazine
+**/
+router.get('/compare', function(req, res, next) {
+    var ids = JSON.parse(req.query.params);
+    var catIds = [];
+    async.series({
+        medias : function(callback){
+            Media.find({_id: { $in: ids }}, function(err, results){
+                var medias = results.map(function(m){
+                    catIds.push(m.categoryId);
+                    return m.toObject();
+                });
+                callback(err, medias);
+            });
+        },
+        categories : function(callback){
+            Category.find({_id : {$in : catIds}}, function(err, results){
+                var categoryNames = {};
+                for(var i= 0; i < results.length; i++){
+                    categoryNames[results[i]._id] = results[i].name;
+                }
+                callback(err, categoryNames);
+            });
         }
-        res.status(200).json({magazines : data});
+    }, function(err, result){
+        for(var i =0; i < result.medias.length; i++) {
+            result.medias[i].categoryName = result.categories[result.medias[i].categoryId];            
+        }
+        res.status(200).json(result);
     });
 });
-
 
 /**
  Find related Media based on Category and urlSlug provided
