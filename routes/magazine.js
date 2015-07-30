@@ -12,18 +12,6 @@ var params;
 var query = {};
 
 router.get("/", function(req, res){
-
-    if  (req.query.params) {
-        res.status(200).json(functions.top3);
-        
-
-    }else{
-            Media.find({}, function(err, results){
-            res.status(200).json({magazines : results});
-            });
-    }
-        
-
     params = JSON.parse(req.query.params);
     if(params.tmaRecommended){
         res.status(200).json("tma recommended");
@@ -55,7 +43,6 @@ router.get("/", function(req, res){
             res.status(200).json(result);
         });
     }
->>>>>>> e5f344a8b9a0f544fa1c8f119f9054533b4bddd5
 });
 
 router.get("/getFilters", function(req, res){
@@ -242,8 +229,6 @@ router.get("/related/:categoryId", function(req, res){
         }
     );
 });
-
-
 
 
 /**
