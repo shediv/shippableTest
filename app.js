@@ -24,7 +24,8 @@ app.use(cors({
     ]
 }));
 
-mongoose.connect('mongodb://root:goosebumps@139.162.29.37:27017/media_ant?authSource=admin');
+//mongoose.connect('mongodb://root:goosebumps@139.162.29.37:27017/media_ant?authSource=admin');
+mongoose.connect('mongodb://localhost/media_ant');
 
 // uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));

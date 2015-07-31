@@ -6,7 +6,8 @@ var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
 var Category = require('../models/category').Category;
-var functions = require('../functions/magazine');
+var MagCtrl = new (require('../controllers/magazine')).Mag();
+
 var async = require('async');
 var params;
 var query = {};
@@ -18,23 +19,18 @@ router.get("/", function(req, res){
         //call tmaRecommended function
     } else {
         async.series({
-            setToolId: function(callback){
-                functions.getToolId("magazine", true, function(err, results){
-                    callback(err);
-                });
-            },
             buildQuery: function(callback){
-                functions.buildQuery(params, function(err, results){
+                MagCtrl.buildQuery(params, function(err, results){
                     callback(err);
                 });
             },
             search: function(callback){
                 if(params.sortBy == 'top3'){
-                    functions.top3(function(err, results){
+                    MagCtrl.top3(function(err, results){
                         callback(err, results);
                     });
                 } else {
-                    functions.search(function(err, results){
+                    MagCtrl.search(function(err, results){
                         callback(err, results);
                     });
                 }
@@ -46,27 +42,8 @@ router.get("/", function(req, res){
 });
 
 router.get("/getFilters", function(req, res){
-    async.series({
-        toolId : function(callback){
-            functions.getToolId("magazine", true, function(err, results){
-                callback(err);
-            });
-        },
-        filters:function(callback){
-            async.parallel({
-                categories: functions.getCategories,
-                geography : functions.getGeographies,
-                languages : functions.getLanguages,
-                targetGroups : functions.getTargetGroups,
-                frequencies : functions.getFrequencies,
-                mediaOptions: functions.getMediaOptions,
-                products : functions.getProducts
-            }, function(err, results){
-                callback(err, results);
-            });
-        }
-    }, function(err, result){
-        res.status(200).json(result);
+    MagCtrl.getFilters(function(err, results){
+        return res.status(200).json({filters: results});
     });
 });
 
@@ -120,7 +97,7 @@ router.get("/related/:categoryId", function(req, res){
         {
             $match : {
                 categoryId : req.params.categoryId,
-                toolId : "5575381acffc83080bb594f0",
+                toolId : "55755d6c66579f76671b1a1d",
                 isActive: 1
             }
         },
@@ -142,7 +119,7 @@ router.get("/related/:categoryId", function(req, res){
             var match = {
                 "$match" : {
                     "categoryId" : req.params.categoryId,
-                    "toolId" : "5575381acffc83080bb594f0",
+                    "toolId" : "55755d6c66579f76671b1a1d",
                     "isActive": 1,
                     "urlSlug" : { $ne : req.query.urlSlug}
                 }
@@ -150,81 +127,35 @@ router.get("/related/:categoryId", function(req, res){
 
             //All the project conditions for related Media
             var project = {
-                "$project" : {
-                    "urlSlug" : 1,
-                    "thumbnail" : 1,
-                    "attributes" : 1,
+                "$project" : {"urlSlug" : 1, "name": 1, "thumbnail" : 1, "attributes" : 1,
                     // Y formulae calculation
                     "yValue" : {
-                        "$add" : [
+                        "$add" : [{"$multiply" : [
                             {
-                                "$multiply" : [
-                                    {
-                                        "$divide" : [
-                                            {
-                                                "$multiply" : [
-                                                    "$attributes.noOfPages.value",
-                                                    10
-                                                ]
-                                            },
-                                            maxNoOfPages
-                                        ]
-                                    },
-                                    0.6
-                                ]
-                            },
-
+                                "$divide" : [{"$multiply" : ["$attributes.noOfPages.value", 10]}, maxNoOfPages]
+                            }, 0.6]
+                        }, {"$multiply" : [
                             {
-                                "$multiply" : [
-                                    {
-                                        "$divide" : [
-                                            {
-                                                "$multiply" : [
-                                                    "$attributes.readership.value",
-                                                    10
-                                                ]
-                                            },
-                                            maxReadership
-                                        ]
-                                    },
-                                    0.3
-                                ]
-                            },
-
+                                "$divide" : [{"$multiply" : ["$attributes.readership.value", 10]}, maxReadership]
+                            }, 0.3]
+                        }, {"$multiply" : [
                             {
-                                "$multiply" : [
-                                    {
-                                        "$divide" : [
-                                            {
-                                                "$multiply" : [
-                                                    "$mediaOptions.print.fullPage.1-2",
-                                                    10
-                                                ]
-                                            },
-                                            minFullPage
-                                        ]
-                                    },
-                                    0.1
-                                ]
-                            }
-                        ]
+                                "$divide" : [{"$multiply" : ["$mediaOptions.print.fullPage.1-2", 10]}, minFullPage]
+                            }, 0.1]
+                        }]
                     }
                 }
             };
 
             //All the sort conditions for related Media
-            var sort = {
-                "$sort" : { yValue : -1}
-            };
+            var sort = {"$sort" : { yValue : -1}};
 
             //All the limit conditions for related Media
-            var limit = {
-                "$limit" : 3
-            };
+            var limit = {"$limit" : 3};
 
             // Main Query to find related Media based on Category and urlSlug provided
             Media.aggregate([match, project, sort, limit], function(err, results){
-                res.status(200).json(results);
+                res.status(200).json({magazines: results});
             });
         }
     );
