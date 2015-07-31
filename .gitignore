@@ -4,3 +4,5 @@ node_modules/mongoose/node_modules/bson/node_modules/bson-ext/node_modules/node-
 node_modules/mongoose/node_modules/bson/node_modules/bson-ext/node_modules/node-pre-gyp/node_modules/request/node_modules/har-validator/node_modules/is-my-json-valid/node_modules/generate-object-property/node_modules/is-property/README.md
 node_modules/mongoose/node_modules/bson/node_modules/bson-ext/node_modules/node-pre-gyp/node_modules/request/node_modules/har-validator/node_modules/is-my-json-valid/node_modules/generate-object-property/node_modules/is-property/is-property.js
 node_modules/mongoose/node_modules/bson/node_modules/bson-ext/node_modules/node-pre-gyp/node_modules/request/node_modules/har-validator/node_modules/is-my-json-valid/node_modules/generate-object-property/node_modules/is-property/package.json
+config.js
+.idea/
