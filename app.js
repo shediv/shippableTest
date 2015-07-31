@@ -7,6 +7,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 
+var config = require('./config.js');
 var routes = require('./routes/index');
 var users = require('./routes/users');
 var magazine = require('./routes/magazine');
@@ -24,10 +25,9 @@ app.use(cors({
     ]
 }));
 
-//mongoose.connect('mongodb://root:goosebumps@139.162.29.37:27017/media_ant?authSource=admin');
-mongoose.connect('mongodb://root:goosebumps@127.0.0.1/media_ant?authSource=admin');
+mongoose.connect(config.mongoUrl);
 
-// uncomment after placing your favicon in /public
+//uncomment after placing your favicon in /public
 //app.use(favicon(__dirname + '/public/favicon.ico'));
 app.use(logger('dev'));
 app.use(bodyParser.json());
