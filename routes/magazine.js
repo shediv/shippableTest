@@ -10,7 +10,6 @@ var MagCtrl = new (require('../controllers/magazine')).Mag();
 
 var async = require('async');
 var params;
-var query = {};
 
 router.get("/", function(req, res){
     params = JSON.parse(req.query.params);
