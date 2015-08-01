@@ -130,7 +130,7 @@ var Magazine = function()
         console.log(err); 
         res.status(200).json({err:err});  
       }
-      res.status(200).json({results});
+      res.status(200).json(results);
     });
   };
 
