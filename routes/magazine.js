@@ -11,40 +11,11 @@ var MagCtrl = new (require('../controllers/magazine')).Mag();
 var async = require('async');
 var params;
 
-router.get("/", function(req, res){
-    params = JSON.parse(req.query.params);
-    if(params.tmaRecommended){
-        res.status(200).json("tma recommended");
-        //call tmaRecommended function
-    } else {
-        async.series({
-            buildQuery: function(callback){
-                MagCtrl.buildQuery(params, function(err, results){
-                    callback(err);
-                });
-            },
-            search: function(callback){
-                if(params.sortBy == 'top3'){
-                    MagCtrl.top3(function(err, results){
-                        callback(err, results);
-                    });
-                } else {
-                    MagCtrl.search(function(err, results){
-                        callback(err, results);
-                    });
-                }
-            }
-        }, function (err, result) {
-            res.status(200).json(result.search);
-        });
-    }
-});
+router.get("/", function(req, res){  MagCtrl.getMagazines(req, res); });
+router.get("/getFilters", function(req, res){ MagCtrl.getFilters(req, res); });
+router.get("/:urlSlug", function(req, res){ MagCtrl.show(req, res); });
 
-router.get("/getFilters", function(req, res){
-    MagCtrl.getFilters(function(err, results){
-        return res.status(200).json({filters: results});
-    });
-});
+
 
 /**
 Compare Magazines based on the ID's
@@ -166,10 +137,6 @@ router.get("/related/:categoryId", function(req, res){
  * Input : urlSlug
  * Output : Details of a Magazine
  **/
-router.get("/:urlSlug", function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}, function(err, results){
-        res.status(200).json({magazine : results});
-    });
-});
+
 
 module.exports = router;
