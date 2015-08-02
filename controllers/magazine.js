@@ -1,6 +1,7 @@
 var Magazine = function()
 {
   var async = require('async');
+  var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
@@ -9,8 +10,8 @@ var Magazine = function()
 
   this.params = {};
   this.toolName = "magazine";
-  this.toolId;
   var scope = this;
+  
   Tools.findOne({name: this.toolName}, function(err, result){
     scope.toolId = result._id.toString();
   });
@@ -30,6 +31,8 @@ var Magazine = function()
     ],
     function (err, result) 
     {
+      for(key in result.magazines)
+        result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
       res.status(200).json(result);
     });
   }
@@ -216,12 +219,138 @@ var Magazine = function()
     };
 
   this.show = function(req, res){
-    Media.findOne(
-      {urlSlug: req.params.urlSlug}, 
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({magazine : results});
+        results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
+        res.status(200).json({magazine : results});  
+      }
+    );
+  }
+
+  this.compare = function(req, res){
+    var ids = JSON.parse(req.query.params);
+    var catIds = [];
+    var project = {
+      '_id' : 1,
+      'name' : 1,
+      'urlSlug' : 1,
+      'thumbnail' : 1,
+      'targetGroup' : 1,
+      'categoryId' : 1,
+      'attributes.frequency.value' : 1,
+      'attributes.language.value' : 1,
+      'attributes.targetGroup' : 1,
+      'attributes.readership.value' : 1,
+      'attributes.circulation.value' : 1,
+      'print.mediaOptions.fullPage.1-2' : 1,
+      'IRS' : 1,
+      'digital' : 1
+    };
+    async.series({
+      medias :  function(callback){
+                  Media.find({_id: { $in: ids }}, project,function(err, results){
+                    var medias = results.map(function(m){
+                      catIds.push(m.categoryId);
+                      return m.toObject();
+                    });
+                    callback(err, medias);
+                  });
+                },
+      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+    }, 
+    function(err, result)
+    {
+      for(var i = 0; i < result.medias.length; i++)
+      {
+        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+        result.medias[i].frequency = result.medias[i].attributes.frequency.value;
+        result.medias[i].language = result.medias[i].attributes.language.value;
+        result.medias[i].circulation = result.medias[i].attributes.frequency.circulation;
+        result.medias[i].readership = result.medias[i].attributes.frequency.readership;
+        result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage['1-2'];
+        result.medias[i].website = result.medias[i].digital;
+        delete result.medias[i].digital;
+        delete result.medias[i].attributes;
+        delete result.medias[i].print;
+      }
+      res.status(200).json({magazines:result.medias});
+    });
+  };
+
+  this.relatedMedia = function(req, res){
+    //Query for maxReadership, maxNoOfPages, minFullPage
+    Media.aggregate(
+      {
+        $match : {
+          categoryId : req.params.categoryId,
+            toolId : scope.toolId,
+            isActive: 1
+        }
+      },
+      {
+        $group: {
+          _id: "$categoryId",
+          maxReadership: { $max: "$attributes.readership.value" },
+          maxNoOfPages: { $max: "$attributes.noOfPages.value" },
+          minFullPage: { $min: "$mediaOptions.print.fullPage.1-2" }
+        }
+      }, 
+      function(err, results)
+      {
+        // Assign maxReadership, maxNoOfPages, minFullPage
+        var maxReadership = results[0].maxReadership;
+        var maxNoOfPages = results[0].maxNoOfPages;
+        var minFullPage = results[0].minFullPage;
+
+        //All the match conditions for related Media
+        var match = {
+          "$match" : {
+            "categoryId" : req.params.categoryId,
+            "toolId" : scope.toolId,
+            "isActive": 1,
+            "urlSlug" : { $ne : req.query.urlSlug}
+          }
+        };
+
+        //All the project conditions for related Media
+        var project = {
+          "$project" : {
+            "urlSlug" : 1, "name": 1, "thumbnail" : 1, "attributes" : 1,
+            // Y formula calculation
+            "yValue" : {
+              "$add" : [
+                {"$multiply" : [
+                  {
+                    "$divide" : [{"$multiply" : ["$attributes.noOfPages.value", 10]}, maxNoOfPages]
+                  }, 0.6]
+                }, 
+                {"$multiply" : [
+                  {
+                    "$divide" : [{"$multiply" : ["$attributes.readership.value", 10]}, maxReadership]
+                  }, 0.3]
+                }, 
+                {"$multiply" : [
+                  {
+                    "$divide" : [{"$multiply" : ["$mediaOptions.print.fullPage.1-2", 10]}, minFullPage]
+                  }, 0.1]
+                }
+              ]
+            }
+          }
+        };
+
+        //All the sort conditions for related Media
+        var sort = {"$sort" : { yValue : -1}};
+
+        //All the limit conditions for related Media
+        var limit = {"$limit" : 3};
+
+        // Main Query to find related Media based on Category and urlSlug provided
+        Media.aggregate([match, project, sort, limit], function(err, results){
+          res.status(200).json({magazines: results});
+        });
       }
     );
   }
