@@ -4,8 +4,6 @@
 
 var express = require('express');
 var router = express.Router();
-var Media = require('../models/media').Media;
-var Category = require('../models/category').Category;
 var MagCtrl = new (require('../controllers/magazine')).Mag();
 
 //API :- http://localhost:3000/magazine?params=%7B%22offset%22:0,%22limit%22:9,%22filters%22:%7B%22categories%22:%5B%5D,%22geography%22:%5B%5D,%22languages%22:%5B%5D,%22frequencies%22:%5B%5D,%22targetGroups%22:%5B%5D,%22mediaOptions%22:%5B%5D%7D,%22sortBy%22:%22views%22,%22tmaRecommended%22:false%7D

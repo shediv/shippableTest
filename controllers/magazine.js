@@ -812,8 +812,8 @@ function calculateY(mediaCategoryBuckets_nonGeo) {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
         result.medias[i].frequency = result.medias[i].attributes.frequency.value;
         result.medias[i].language = result.medias[i].attributes.language.value;
-        result.medias[i].circulation = result.medias[i].attributes.frequency.circulation;
-        result.medias[i].readership = result.medias[i].attributes.frequency.readership;
+        result.medias[i].circulation = result.medias[i].attributes.circulation.value;
+        result.medias[i].readership = result.medias[i].attributes.readership.value;
         result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage['1-2'];
         result.medias[i].website = result.medias[i].digital;
         delete result.medias[i].digital;
@@ -830,75 +830,74 @@ function calculateY(mediaCategoryBuckets_nonGeo) {
       {
         $match : {
           categoryId : req.params.categoryId,
-            toolId : scope.toolId,
-            isActive: 1
+          toolId : scope.toolId,
+          isActive: 1,
+          urlSlug : { $ne : req.query.urlSlug }
         }
       },
       {
-        $group: {
-          _id: "$categoryId",
-          maxReadership: { $max: "$attributes.readership.value" },
-          maxNoOfPages: { $max: "$attributes.noOfPages.value" },
-          minFullPage: { $min: "$mediaOptions.print.fullPage.1-2" }
+        $project : {
+          urlSlug : 1, 
+          name: 1, 
+          thumbnail : 1, 
+          attributes : 1, 
+          categoryId : 1, 
+          _id : 1, 
+          'print.mediaOptions.fullPage.1-2' : 1
         }
-      }, 
+      },
       function(err, results)
       {
-        // Assign maxReadership, maxNoOfPages, minFullPage
-        var maxReadership = results[0].maxReadership;
-        var maxNoOfPages = results[0].maxNoOfPages;
-        var minFullPage = results[0].minFullPage;
-
-        //All the match conditions for related Media
-        var match = {
-          "$match" : {
-            "categoryId" : req.params.categoryId,
-            "toolId" : scope.toolId,
-            "isActive": 1,
-            "urlSlug" : { $ne : req.query.urlSlug}
-          }
-        };
-
-        //All the project conditions for related Media
-        var project = {
-          "$project" : {
-            "urlSlug" : 1, "name": 1, "thumbnail" : 1, "attributes" : 1,
-            // Y formula calculation
-            "yValue" : {
-              "$add" : [
-                {"$multiply" : [
-                  {
-                    "$divide" : [{"$multiply" : ["$attributes.noOfPages.value", 10]}, maxNoOfPages]
-                  }, 0.6]
-                }, 
-                {"$multiply" : [
-                  {
-                    "$divide" : [{"$multiply" : ["$attributes.readership.value", 10]}, maxReadership]
-                  }, 0.3]
-                }, 
-                {"$multiply" : [
-                  {
-                    "$divide" : [{"$multiply" : ["$mediaOptions.print.fullPage.1-2", 10]}, minFullPage]
-                  }, 0.1]
-                }
-              ]
-            }
-          }
-        };
-
-        //All the sort conditions for related Media
-        var sort = {"$sort" : { yValue : -1}};
-
-        //All the limit conditions for related Media
-        var limit = {"$limit" : 3};
-
-        // Main Query to find related Media based on Category and urlSlug provided
-        Media.aggregate([match, project, sort, limit], function(err, results){
+        scope.yForumala(results, function(err, results){
           res.status(200).json({magazines: results});
         });
       }
     );
   }
+
+    scope.yForumala = function(medias, callback){
+      //Query for maxReadership, maxNoOfPages, minFullPage
+      console.log(medias[0]);
+      Media.aggregate(
+        {
+          $match : {
+            categoryId : medias[0].categoryId,
+            toolId : scope.toolId,
+            isActive: 1
+          }
+        },  
+        {
+          $group: {
+            _id: "$categoryId",
+            maxReadership: { $max: "$attributes.readership.value" },
+            maxNoOfPages: { $max: "$attributes.noOfPages.value" },
+            minFullPage: { $min: "$print.mediaOptions.fullPage.1-2" }
+          }
+        }, 
+        function(err, results)
+        {
+          // Assign maxReadership, maxNoOfPages, minFullPage
+          var maxReadership = results[0].maxReadership;
+          var maxNoOfPages = results[0].maxNoOfPages;
+          var minFullPage = results[0].minFullPage;
+
+          medias.map(function(o){ 
+            x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.6;
+            y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.3;
+            z = ( (o.print.mediaOptions.fullPage['1-2'] * 10)/minFullPage ) * 0.1;
+            o.yValue = x + y + z;
+          });
+
+          medias.sort(function(mediaA, mediaB){
+            return mediaB.yValue - mediaA.yValue;
+          })
+
+          medias = [medias[0],medias[1],medias[2]];
+          
+          callback(err, medias);
+        }
+      );
+    }
 
 };
 
