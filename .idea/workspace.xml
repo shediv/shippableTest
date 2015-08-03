@@ -2,14 +2,10 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="c4c7ce2d-29e6-4fcb-9116-c27d6867d733" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.gitignore" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/libraries/common.js" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/controllers/magazine.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/app.js" afterPath="$PROJECT_DIR$/app.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/geography.js" afterPath="$PROJECT_DIR$/models/geography.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/routes/magazine.js" afterPath="$PROJECT_DIR$/routes/magazine.js" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/models/tool.js" afterPath="$PROJECT_DIR$/models/tool.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/controllers/magazine.js" afterPath="$PROJECT_DIR$/controllers/magazine.js" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/functions/magazine.js" afterPath="$PROJECT_DIR$/functions/magazine.js" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/bin/www" afterPath="$PROJECT_DIR$/bin/www" />
     </list>
     <ignored path="tma-api.iws" />
     <ignored path=".idea/workspace.xml" />
@@ -34,17 +30,7 @@
         <entry file="file://$PROJECT_DIR$/routes/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="10" column="72" selection-start-line="10" selection-start-column="72" selection-end-line="10" selection-end-column="72" />
-              <folding />
-            </state>
-          </provider>
-        </entry>
-      </file>
-      <file leaf-file-name="app.js" pinned="false" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/app.js">
-          <provider selected="true" editor-type-id="text-editor">
-            <state vertical-scroll-proportion="0.53744495">
-              <caret line="58" column="5" selection-start-line="58" selection-start-column="5" selection-end-line="58" selection-end-column="5" />
+              <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
               <folding />
             </state>
           </provider>
@@ -54,7 +40,7 @@
         <entry file="file://$PROJECT_DIR$/functions/magazine.js">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="57" selection-start-line="6" selection-start-column="57" selection-end-line="6" selection-end-column="57" />
+              <caret line="165" column="13" selection-start-line="163" selection-start-column="28" selection-end-line="165" selection-end-column="13" />
               <folding>
                 <element signature="e#388#1377#0" expanded="false" />
                 <element signature="e#1417#2481#0" expanded="false" />
@@ -66,7 +52,28 @@
                 <element signature="e#4546#4830#0" expanded="false" />
                 <element signature="e#4875#4980#0" expanded="false" />
                 <element signature="e#5044#5199#0" expanded="false" />
-                <element signature="e#5202#6339#0" expanded="false" />
+              </folding>
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="magazine.js" pinned="false" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/controllers/magazine.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.5553822">
+              <caret line="237" column="4" selection-start-line="237" selection-start-column="4" selection-end-line="237" selection-end-column="4" />
+              <folding>
+                <element signature="e#4303#4736#0" expanded="false" />
+                <element signature="e#4784#5278#0" expanded="false" />
+                <element signature="e#5324#5630#0" expanded="false" />
+                <element signature="e#5679#5992#0" expanded="false" />
+                <element signature="e#6040#6342#0" expanded="false" />
+                <element signature="e#6391#6687#0" expanded="false" />
+                <element signature="e#6732#6845#0" expanded="false" />
+                <element signature="e#7320#7652#0" expanded="false" />
+                <element signature="e#7689#9548#0" expanded="false" />
+                <element signature="e#9591#11993#0" expanded="false" />
+                <element signature="e#10133#11982#0" expanded="false" />
               </folding>
             </state>
           </provider>
@@ -76,7 +83,17 @@
         <entry file="file://$PROJECT_DIR$/bin/www">
           <provider selected="true" editor-type-id="text-editor">
             <state vertical-scroll-proportion="0.0">
-              <caret line="6" column="25" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="25" />
+              <caret line="14" column="47" selection-start-line="14" selection-start-column="47" selection-end-line="14" selection-end-column="47" />
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="app.js" pinned="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/app.js">
+          <provider selected="true" editor-type-id="text-editor">
+            <state vertical-scroll-proportion="0.0">
+              <caret line="42" column="35" selection-start-line="42" selection-start-column="35" selection-end-line="42" selection-end-column="35" />
               <folding />
             </state>
           </provider>
@@ -98,9 +115,11 @@
         <option value="$PROJECT_DIR$/models/geography.js" />
         <option value="$PROJECT_DIR$/models/category.js" />
         <option value="$PROJECT_DIR$/models/media.js" />
-        <option value="$PROJECT_DIR$/functions/magazine.js" />
         <option value="$PROJECT_DIR$/routes/magazine.js" />
         <option value="$PROJECT_DIR$/app.js" />
+        <option value="$PROJECT_DIR$/bin/www" />
+        <option value="$PROJECT_DIR$/functions/magazine.js" />
+        <option value="$PROJECT_DIR$/controllers/magazine.js" />
       </list>
     </option>
   </component>
@@ -112,10 +131,9 @@
     <order />
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="1" />
-    <option name="y" value="52" />
-    <option name="width" value="1382" />
-    <option name="height" value="784" />
+    <option name="y" value="24" />
+    <option name="width" value="1366" />
+    <option name="height" value="744" />
   </component>
   <component name="ProjectLevelVcsManager" settingsEditedManually="false">
     <OptionsSetting value="true" id="Add" />
@@ -196,7 +214,21 @@
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
             <PATH_ELEMENT>
-              <option name="myItemId" value="functions" />
+              <option name="myItemId" value="libraries" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="tma-api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="media-ant-node-api" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="controllers" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -288,19 +320,19 @@
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="1" y="52" width="1382" height="784" extended-state="0" />
+    <frame x="0" y="24" width="1366" height="744" extended-state="6" />
     <editor active="true" />
     <layout>
       <window_info id="Terminal" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.24819103" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
+      <window_info id="Application Servers" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.2510981" sideWeight="0.5" order="0" side_tool="false" content_ui="combo" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="true" content_ui="tabs" />
-      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="true" content_ui="tabs" />
-      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="7" side_tool="false" content_ui="tabs" />
+      <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="8" side_tool="true" content_ui="tabs" />
+      <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
@@ -323,7 +355,7 @@
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
-      <option name="time" value="1" />
+      <option name="time" value="4" />
     </breakpoint-manager>
     <watches-manager />
   </component>
@@ -351,7 +383,6 @@
             <element signature="e#4546#4830#0" expanded="false" />
             <element signature="e#4875#4980#0" expanded="false" />
             <element signature="e#5044#5199#0" expanded="false" />
-            <element signature="e#5202#6339#0" expanded="false" />
           </folding>
         </state>
       </provider>
@@ -428,10 +459,26 @@
         </state>
       </provider>
     </entry>
+    <entry file="file://$PROJECT_DIR$/app.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="42" column="35" selection-start-line="42" selection-start-column="35" selection-end-line="42" selection-end-column="35" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/bin/www">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="25" selection-start-line="6" selection-start-column="22" selection-end-line="6" selection-end-column="25" />
+          <caret line="14" column="47" selection-start-line="14" selection-start-column="47" selection-end-line="14" selection-end-column="47" />
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/routes/magazine.js">
+      <provider selected="true" editor-type-id="text-editor">
+        <state vertical-scroll-proportion="0.0">
+          <caret line="10" column="13" selection-start-line="10" selection-start-column="13" selection-end-line="10" selection-end-column="13" />
           <folding />
         </state>
       </provider>
@@ -439,7 +486,7 @@
     <entry file="file://$PROJECT_DIR$/functions/magazine.js">
       <provider selected="true" editor-type-id="text-editor">
         <state vertical-scroll-proportion="0.0">
-          <caret line="6" column="57" selection-start-line="6" selection-start-column="57" selection-end-line="6" selection-end-column="57" />
+          <caret line="165" column="13" selection-start-line="163" selection-start-column="28" selection-end-line="165" selection-end-column="13" />
           <folding>
             <element signature="e#388#1377#0" expanded="false" />
             <element signature="e#1417#2481#0" expanded="false" />
@@ -451,24 +498,27 @@
             <element signature="e#4546#4830#0" expanded="false" />
             <element signature="e#4875#4980#0" expanded="false" />
             <element signature="e#5044#5199#0" expanded="false" />
-            <element signature="e#5202#6339#0" expanded="false" />
           </folding>
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/routes/magazine.js">
+    <entry file="file://$PROJECT_DIR$/controllers/magazine.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.0">
-          <caret line="10" column="72" selection-start-line="10" selection-start-column="72" selection-end-line="10" selection-end-column="72" />
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/app.js">
-      <provider selected="true" editor-type-id="text-editor">
-        <state vertical-scroll-proportion="0.53744495">
-          <caret line="58" column="5" selection-start-line="58" selection-start-column="5" selection-end-line="58" selection-end-column="5" />
-          <folding />
+        <state vertical-scroll-proportion="0.5553822">
+          <caret line="237" column="4" selection-start-line="237" selection-start-column="4" selection-end-line="237" selection-end-column="4" />
+          <folding>
+            <element signature="e#4303#4736#0" expanded="false" />
+            <element signature="e#4784#5278#0" expanded="false" />
+            <element signature="e#5324#5630#0" expanded="false" />
+            <element signature="e#5679#5992#0" expanded="false" />
+            <element signature="e#6040#6342#0" expanded="false" />
+            <element signature="e#6391#6687#0" expanded="false" />
+            <element signature="e#6732#6845#0" expanded="false" />
+            <element signature="e#7320#7652#0" expanded="false" />
+            <element signature="e#7689#9548#0" expanded="false" />
+            <element signature="e#9591#11993#0" expanded="false" />
+            <element signature="e#10133#11982#0" expanded="false" />
+          </folding>
         </state>
       </provider>
     </entry>

@@ -26,7 +26,9 @@ var Magazine = function()
       },
       function(query, callback)
       {
-        scope.sortFilteredMedia(query, callback);
+        if(scope.params.sortBy=='top3') scope.top3(query, callback);
+
+          scope.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result) 
@@ -116,7 +118,7 @@ var Magazine = function()
       });
     };
 
-  this.getFilters = function(req, res){
+    scope.getFilters = function(req, res){
     async.parallel({
       categories: scope.getCategories,
       geography : scope.getGeographies,
@@ -215,6 +217,23 @@ var Magazine = function()
     scope.getProducts = function(callback){
       Products.find({}, '_id name', function(error, results){
         callback(error, results);
+      });
+    };
+
+    scope.top3 =function(query, callback){
+      var media=[];
+      Media.aggregate({$match: query.match},{$project: query.projection},{
+        $group: {_id: '$categoryId', medias: {$push : '$$ROOT'}}}, function(err, results){
+            //console.log(results[0]._id)
+            results.forEach(function(value, key){
+
+              media.push(scope.yFormula(value));
+
+
+            });
+
+
+        callback(err,results);
       });
     };
 
@@ -354,6 +373,12 @@ var Magazine = function()
       }
     );
   }
+
+  this.yFormula=function(key)
+  {
+    console.log(key);
+    //callback(err, results);
+  };
 
 };
 

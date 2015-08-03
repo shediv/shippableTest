@@ -156,24 +156,24 @@ functions.getToolId = function(toolName, setToolId, callback){
     });
 };
 
-/*functions.top3=function(callback){
+functions.top3=function(callback){
     Media.aggregate({$match: query.match},{$project: query.projection},{
         $group: {_id: '$categoryId', medias: {$push : '$$ROOT'}}}, function(err, results){
-        
-            var medias =[]; 
-            var stale = ["Emil", "Tobias", "Linus"];
+
+            var medias =[];
             results.forEach(function(value, key){
-                medias= medias.concat(yFormula());   
+                medias= medias.concat(yFormula());
             });
                 var value= yFormula();
                 console.log(value);
-            /!*console.log(medias);
-            foreach ($grouped as $group) 
+
+            /*console.log(medias);
+            foreach ($grouped as $group)
             {
                 $medias = array_merge($medias, $this->yFormula();
-            }*!/
+            }*/
 
-            /!*$data = array();
+            /*$data = array();
             $data['count'] = sizeof($medias);
             $data['magazines'] = array();
             $limit = $this->params->offset + $this->params->limit;
@@ -181,11 +181,11 @@ functions.getToolId = function(toolName, setToolId, callback){
             for($i = $this->params->offset; $i < $limit; $i++) $data['magazines'][] = $medias[$i];
             print_r($data);
             die();
-            return $data;*!/
+            return $data;*/
 
         callback(err, results);
     });
-};*/
+};
 
 
 module.exports = functions;
