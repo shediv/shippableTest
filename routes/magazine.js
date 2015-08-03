@@ -4,8 +4,6 @@
 
 var express = require('express');
 var router = express.Router();
-var Media = require('../models/media').Media;
-var Category = require('../models/category').Category;
 var MagCtrl = new (require('../controllers/magazine')).Mag();
 
 router.get("/", function(req, res){  MagCtrl.getMagazines(req, res); });
