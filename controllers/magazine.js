@@ -267,8 +267,8 @@ var Magazine = function()
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
         result.medias[i].frequency = result.medias[i].attributes.frequency.value;
         result.medias[i].language = result.medias[i].attributes.language.value;
-        result.medias[i].circulation = result.medias[i].attributes.frequency.circulation;
-        result.medias[i].readership = result.medias[i].attributes.frequency.readership;
+        result.medias[i].circulation = result.medias[i].attributes.circulation.value;
+        result.medias[i].readership = result.medias[i].attributes.readership.value;
         result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage['1-2'];
         result.medias[i].website = result.medias[i].digital;
         delete result.medias[i].digital;
