@@ -20,7 +20,7 @@ router.get("/", function(req, res){
         async.series({
             setToolId: function(callback){
                 functions.getToolId("magazine", true, function(err, results){
-                    callback(err);
+                    callback(err,results);
                 });
             },
             buildQuery: function(callback){
@@ -230,6 +230,28 @@ router.get("/related/:categoryId", function(req, res){
     );
 });
 
+router.get('/demo',function(req,res){   
+
+        async.series({
+
+            medias : function(callback){
+                Media.find({},function(err,results){
+                    callback(err);
+
+                });
+            },
+
+            videsh : function(callback){
+                Media.find({toolId:"55755d6c66579f76671b1a1d"},function(err,results){
+                    callback(err,results);
+                });
+            }},
+            function(err,results){
+            res.status(200).json(results.videsh);
+            
+        });
+
+});
 
 /**
  * Search for a Magazine based on the urlSlug
