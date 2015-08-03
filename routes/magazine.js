@@ -6,7 +6,7 @@ var express = require('express');
 var router = express.Router();
 var Media = require('../models/media').Media;
 
-var Product = require('../models/product').Product;
+var Products = require('../models/media').Products;
 var Category = require('../models/media').Category;
 var functions = require('../functions/magazine');
 var async = require('async');
@@ -16,8 +16,109 @@ var query = {};
 router.get("/", function(req, res){
     params = JSON.parse(req.query.params);
     if(params.tmaRecommended){
-        res.status(200).json("tma recommended");
+        //res.status(200).json("tma recommended");
         //call tmaRecommended function
+        //....................................................................
+        var params = JSON.parse(req.query.params);
+        //res.status(200).json(params.productId);
+        var ProductInfo = [];
+        var CS = [];
+        var FinalData = [];
+        var mediacategorybuckets = [];
+        var noncategorybuckets = [];
+
+        async.series({
+        product : function(callback){
+            Products.findOne({_id: params.productId}, function(err, result){
+                ProductInfo.push(result.toObject());
+                callback(err, result);
+            });
+        },
+        medias : function(callback){
+            var categoryNames = {};         
+
+            //All the eliminators from product with Media
+            var match = {
+                "$match" : {
+                    $or: [ 
+                    {"eliminators.gender" : ProductInfo[0].eliminators.gender},
+                    {"eliminators.income" : ProductInfo[0].eliminators.income},
+                    {"eliminators.age" : { $in: ProductInfo[0].eliminators.age }},
+                    {"eliminators.consumption" : { $in: ProductInfo[0].eliminators.consumption }}
+                    ]
+                }
+            };
+
+            var project = {
+                "$project" : {
+                "urlSlug" : 1,
+                "categoryId" : 1,
+                "attributes" : 1,
+                "geography"  : 1,
+                "thumbnail" : 1,
+                "keywords" : 1,
+                "createdBy": 1
+                }
+            }
+
+            Media.aggregate([match, project], function(err, media){
+                //console.log(media);
+                callback(err, media);
+            });
+        }
+    }, function(err, result){
+
+        //Match the keywords 
+        for(var i= 0; i < result.medias.length; i++){
+            //console.log(result.medias[i].keywords);
+            var check = getMatch(ProductInfo[0].keywords, result.medias[i].keywords);
+            if(check.length > 0){
+              CS.push(result.medias[i]);
+            } 
+        }
+        
+        //Sort CS based on the readership
+        CS = CS.sort(function(a,b){ 
+             //console.log(a.attributes.readership.value);   
+            var x = a.attributes.readership.value < b.attributes.readership.value? -1:1; 
+            return x; 
+        });
+
+        //Add the last data i.e highest readership to the Finaldata
+        FinalData[0] = CS[CS.length - 1];
+
+        //Pop up the last element which is added to the Finaldata
+        CS.pop();
+
+        //Create Buckets Based on Category 
+        for(var i= 0; i < ProductInfo[0].magazineCategory.length; i++){
+            mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazineCategory[i], i)); 
+        }
+
+        mediacategorybuckets = mediacategorybuckets.filter(function(mediacategorybuckets) {`
+                return Object.keys(mediacategorybuckets).length > 0
+        });
+
+        if(Object.keys(mediacategorybuckets[0]).length > 0){
+            Object.keys(mediacategorybuckets[0]).forEach(function (key, i){
+                console.log(key, mediacategorybuckets[0][key].geography);
+
+               });
+        }
+
+
+        // // //.... For Bucket 1   params.productId
+        // // if(Object.keys(mediacategorybuckets[0]).length > 0){
+           
+        // //         //mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazineCategory[i], i)); 
+        // //     }
+     
+
+        res.status(200).json(mediacategorybuckets);
+        //res.status(200).json(CS); mediacategorybuckets[2]).length
+    });
+
+        //....................................................................
     } else {
         async.series({
             setToolId: function(callback){
@@ -46,7 +147,50 @@ router.get("/", function(req, res){
         });
     }
 });
->>>>>>> e5f344a8b9a0f544fa1c8f119f9054533b4bddd5
+
+
+
+function getMatch(a, b) {
+    var matches = [];
+
+    for ( var i = 0; i < a.length; i++ ) {
+        for ( var e = 0; e < b.length; e++ ) {
+            if ( a[i] === b[e] ) matches.push( a[i] );
+        }
+    }
+    return matches;
+    //console.log(matches);
+}
+
+
+function createbucket(CS, ProductMagazineCategory) {
+
+    var MCB = {};
+    var i = 0;
+    for (var newcsKey in CS) {       
+         var newcs = CS[newcsKey];
+         var tmp = {};
+            if(newcs.categoryId == ProductMagazineCategory){
+                tmp = newcs;                
+                //Object.keys(a).length;
+                if(Object.keys(tmp).length > 0){
+                    //console.log(tmp._id);
+                    MCB[i] = tmp;
+                    
+                }
+                var i = i + 1;
+            }         
+        }
+
+        //console.log(MCB);
+        return MCB;
+}
+
+
+
+
+
+
 
 router.get("/getFilters", function(req, res){
     async.series({
@@ -72,6 +216,7 @@ router.get("/getFilters", function(req, res){
         res.status(200).json(result);
     });
 });
+
 
 /**
 Compare Magazines based on the ID's
