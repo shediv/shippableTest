@@ -13,7 +13,7 @@ var Magazine = function()
   var scope = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){
-    console.log(result);
+    //console.log();
     scope.toolId = result._id.toString();
   });
 
