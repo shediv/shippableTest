@@ -4,11 +4,9 @@
 
 var express = require('express');
 var router = express.Router();
-var Media = require('../models/media').Media;
-var Category = require('../models/category').Category;
 var MagCtrl = new (require('../controllers/magazine')).Mag();
 
-router.get("/", function(req, res){  MagCtrl.getMagazines(req, res); });
+router.get("/", function(req, res){MagCtrl.getMagazines(req, res);});
 router.get("/getFilters", function(req, res){ MagCtrl.getFilters(req, res); });
 router.get("/compare", function(req, res){ MagCtrl.compare(req, res); });
 router.get("/related/:categoryId", function(req, res){ MagCtrl.relatedMedia(req, res) });
