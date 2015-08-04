@@ -312,7 +312,6 @@ var Magazine = function()
 
     scope.yForumala = function(medias, callback){
       //Query for maxReadership, maxNoOfPages, minFullPage
-      console.log(medias[0]);
       Media.aggregate(
         {
           $match : {
@@ -337,9 +336,9 @@ var Magazine = function()
           var minFullPage = results[0].minFullPage;
 
           medias.map(function(o){ 
-            x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.6;
-            y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.3;
-            z = ( (o.print.mediaOptions.fullPage['1-2'] * 10)/minFullPage ) * 0.1;
+            x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.3;
+            y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.1;
+            z = ( (minFullPage * 10)/o.print.mediaOptions.fullPage['1-2'] ) * 0.6;
             o.yValue = x + y + z;
           });
 
