@@ -162,7 +162,7 @@ functions.top3=function(callback){
 
             var medias =[];
             results.forEach(function(value, key){
-                medias= medias.concat(yFormula());
+                medias= medias.concat(yFormula(value));
             });
                 var value= yFormula();
                 console.log(value);
