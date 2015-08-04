@@ -1,4 +1,3 @@
-
 var mongoose = require('mongoose');
 
 var products = mongoose.model('products', new mongoose.Schema({},{strict : false}));
