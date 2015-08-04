@@ -565,23 +565,6 @@ function calculateY(mediaCategoryBuckets_nonGeo) {
 
 //................................ test ......................//
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
     scope.applyFilters = function(){
       var query = {};
       query.sortBy = scope.params.sortBy || 'views';
