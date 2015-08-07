@@ -906,7 +906,7 @@ scope.applyFilters = function(){
                 for(var i=query.offset; i<query.limit;i++){
                         magazine.push(magazines[i]);
                 }
-                callback(null, {magazines: magazine,count:magazine.length});
+                callback(null, {magazines: magazine,count:magazines.length});
             });
         });
     };
