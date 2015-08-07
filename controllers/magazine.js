@@ -64,7 +64,7 @@ var Magazine = function()
                   "urlSlug" : 1,
                   "categoryId" : 1,
                   "attributes" : 1,
-                  "print" : 1,
+                  "print.mediaOptions.fullPage.1-2" : 1,
                   "geography"  : 1,
                   "thumbnail" : 1,
                   "keywords" : 1,
@@ -615,7 +615,7 @@ scope.applyFilters = function(){
     'thumbnail' : 1, 
     'categoryId' : 1, 
     'name' : 1,
-    'mediaOptions.print.fullPage.1-2' : 1, 
+    'print.mediaOptions.fullPage.1-2' : 1, 
     'toolId' : 1, 
     'createdBy' : 1
   };
