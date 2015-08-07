@@ -21,7 +21,7 @@ var Magazine = function()
         scope.params = JSON.parse(req.query.params);
         if(scope.params.tmaRecommended) {
 
-            //res.status(200).json("tma recommended");
+            //res.status(200).json("tma recommended");  
             //....................................................................
             var params = JSON.parse(req.query.params);
             //res.status(200).json(params.productId);
