@@ -7,7 +7,7 @@ var Magazine = function()
     var Products = require('../models/product').Products;
     var Geography = require('../models/geography').Geography;
     var Category = require('../models/category').Category;
-
+    var yData=[];
     this.params = {};
     this.toolName = "magazine";
     var scope = this;
@@ -450,17 +450,17 @@ var Magazine = function()
                     if(scope.params.sortBy=="top3"){
                         scope.top3(query, callback);
 
+                    } else {
+                        scope.sortFilteredMedia(query, callback);
                     }
-                    scope.sortFilteredMedia(query, callback);
                 }
             ],
-            function (err, result)
-            {
+            function (err, result) {
                 for(key in result.magazines)
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
-    }
+    };
 
 
 //................................ test ......................//
@@ -565,7 +565,6 @@ var Magazine = function()
 
 
 //................................ test ......................//
-
 
     scope.applyFilters = function(){
         var query = {};
@@ -842,7 +841,7 @@ var Magazine = function()
 
     scope.yForumala = function(medias, callback){
         //Query for maxReadership, maxNoOfPages, minFullPage
-         Media.aggregate(
+        Media.aggregate(
             {
                 $match : {
                     categoryId : medias[0].categoryId,
@@ -866,57 +865,53 @@ var Magazine = function()
                 var minFullPage = results[0].minFullPage;
 
                 medias.map(function(o){
-                    x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.6;
-                    y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.3;
-                    z = ( (o.print.mediaOptions.fullPage['1-2'] * 10)/minFullPage ) * 0.1;
+                    x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.3;
+                    y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.1;
+                    z = ( (minFullPage * 10)/o.print.mediaOptions.fullPage['1-2'] ) * 0.6;
                     o.yValue = x + y + z;
                 });
 
                 medias.sort(function(mediaA, mediaB){
                     return mediaB.yValue - mediaA.yValue;
-                });
-                console.log(medias);
-                process.exit();
-                medias = [medias[0],medias[1],medias[2]];
-                callback(err, medias);
+                })
+
+                var topMedias = [];
+                for(var i=0; i< 3; i++){
+                    if(medias[i] != undefined){
+                        topMedias.push(medias[i]);
+                    }
+                }
+                callback(err, topMedias);
             }
         );
-    }
+    };
 
     scope.top3= function(query,callback){
+        var magazines = [];
+        var magzine=[];
+        Media.aggregate({$match: query.match},{$project: query.projection},{
+            $group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, function(err, results){
+            async.each(results, function (group ,callback_each){
 
-
-        Media.aggregate({
-                $match: query.match},{$project: query.projection},{
-                $group: {_id: '$categoryId', medias: {$push : '$$ROOT'}}}, function(err, results){
-            var medias=[];
-            results.forEach(function(value){
-                    medias.push(scope.yForumala(value.medias,callback));
-                      /* console.log(medias);
-                        process.exit();*/
-
+                    scope.yForumala(group.medias, function (err, res){
+                        for(var i=0; i < res.length; i++){
+                            magazines.push(res[i]);
+                        }
+                        callback_each(err);
+                });
+            },function(err){
+                //console.log(magazines[0]);
+                for(var i=query.offset; i<(query.limit);i++){
+                        magzine.push(magazines[i]);
+                }
+                callback(null, {magazines: magzine,count:magzine.length});
             });
-
-            /*console.log(medias);
-             foreach ($grouped as $group)
-             {
-             $medias = array_merge($medias, $this->yFormula();
-             }*/
-
-            /*$data = array();
-             $data['count'] = sizeof($medias);
-             $data['magazines'] = array();
-             $limit = $this->params->offset + $this->params->limit;
-             if($limit > sizeof($medias)) $limit = sizeof($medias);
-             for($i = $this->params->offset; $i < $limit; $i++) $data['magazines'][] = $medias[$i];
-             print_r($data);
-             die();
-             return $data;*/
-
-            callback(err, results);
         });
-    }
-
+    };
 };
+
+
+
+
 
 module.exports.Mag = Magazine;
