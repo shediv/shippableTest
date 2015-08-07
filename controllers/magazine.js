@@ -888,7 +888,7 @@ var Magazine = function()
 
     scope.top3= function(query,callback){
         var magazines = [];
-        var magzine=[];
+        var magazine=[];
         Media.aggregate({$match: query.match},{$project: query.projection},{
             $group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, function(err, results){
             async.each(results, function (group ,callback_each){
@@ -902,9 +902,9 @@ var Magazine = function()
             },function(err){
                 //console.log(magazines[0]);
                 for(var i=query.offset; i<(query.limit);i++){
-                        magzine.push(magazines[i]);
+                        magazine.push(magazines[i]);
                 }
-                callback(null, {magazines: magzine,count:magzine.length});
+                callback(null, {magazines: magazine,count:magazine.length});
             });
         });
     };
