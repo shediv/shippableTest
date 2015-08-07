@@ -7,7 +7,6 @@ var Magazine = function()
     var Products = require('../models/product').Products;
     var Geography = require('../models/geography').Geography;
     var Category = require('../models/category').Category;
-    var yData=[];
     this.params = {};
     this.toolName = "magazine";
     var scope = this;
@@ -72,6 +71,7 @@ var Magazine = function()
                         }
                     }
 
+
                     Media.aggregate([match, project], function(err, media){
                         //console.log(media);
                         callback(err, media);
@@ -93,6 +93,7 @@ var Magazine = function()
                     //console.log(a.attributes.readership.value);
                     var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
                     return x;
+
                 });
 
                 //Add the last data i.e highest readership to the Finaldata
@@ -463,7 +464,7 @@ var Magazine = function()
     };
 
 
-//................................ test ......................//
+/*//................................ test ......................//*/
 
     function getMatch(a, b) {
         var matches = [];
@@ -566,43 +567,44 @@ var Magazine = function()
 
 //................................ test ......................//
 
-    scope.applyFilters = function(){
-        var query = {};
-        query.sortBy = scope.params.sortBy || 'views';
-        query.offset = scope.params.offset || 0;
-        query.limit = scope.params.limit || 9;
-        query.match = {};
-        var filters = {
-            'categories' : 'categoryId',
-            'geography' : 'geography',
-            'languages' : 'attributes.language.value',
-            'frequencies' : 'attributes.frequency.value',
-            'targetGroups' : 'targetGroup'
-        };
-        query.projection = {
-            '_id' : 1,
-            'attributes' : 1,
-            'urlSlug' : 1,
-            'thumbnail' : 1,
-            'categoryId' : 1,
-            'name' : 1,
-            'print.mediaOptions.fullPage.1-2' : 1,
-            'toolId' : 1,
-            'createdBy' : 1
-        };
 
-        Object.keys(filters).map(function(value){
-            if(scope.params.filters[value].length)
-                query.match[filters[value]] = {'$in': scope.params.filters[value]};
-        });
+scope.applyFilters = function(){
+  var query = {};
+  query.sortBy = scope.params.sortBy || 'views';
+  query.offset = scope.params.offset || 0;
+  query.limit = scope.params.limit || 9;
+  query.match = {};
+  var filters = {
+    'categories' : 'categoryId',
+    'geography' : 'geography',
+    'languages' : 'attributes.language.value',
+    'frequencies' : 'attributes.frequency.value',
+    'targetGroups' : 'targetGroup'
+  };
+  query.projection = {
+    '_id' : 1,
+    'attributes' : 1,
+    'urlSlug' : 1,
+    'thumbnail' : 1,
+    'categoryId' : 1,
+    'name' : 1,
+    'print.mediaOptions.fullPage.1-2' : 1,
+    'toolId' : 1,
+    'createdBy' : 1
+  };
 
-        scope.params.filters.mediaOptions.forEach(function(value, key){
-            query.match['mediaOptions.'+value] = { $exists : 1};
-        });
-        query.match.isActive = 1;
-        query.match.toolId = scope.toolId;
-        return query;
-    };
+  Object.keys(filters).map(function(value){
+    if(scope.params.filters[value].length)
+      query.match[filters[value]] = {'$in': scope.params.filters[value]};
+  });
+
+  scope.params.filters.mediaOptions.forEach(function(value, key){
+    query.match['mediaOptions.'+value] = { $exists : 1};
+  });
+  query.match.isActive = 1;
+  query.match.toolId = scope.toolId;
+  return query;
+};
 
     scope.sortFilteredMedia = function(query, callback){
         async.parallel({
@@ -837,7 +839,7 @@ var Magazine = function()
                 });
             }
         );
-    }
+    };
 
     scope.yForumala = function(medias, callback){
         //Query for maxReadership, maxNoOfPages, minFullPage
@@ -901,7 +903,7 @@ var Magazine = function()
                 });
             },function(err){
                 //console.log(magazines[0]);
-                for(var i=query.offset; i<(query.limit);i++){
+                for(var i=query.offset; i<query.limit;i++){
                         magazine.push(magazines[i]);
                 }
                 callback(null, {magazines: magazine,count:magazine.length});
