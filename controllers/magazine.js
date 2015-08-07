@@ -903,7 +903,7 @@ scope.applyFilters = function(){
                 });
             },function(err){
                 //console.log(magazines[0]);
-                for(var i=query.offset; i<query.limit;i++){
+                for(var i=query.offset; i<(query.offset+query.limit);i++){
                         magazine.push(magazines[i]);
                 }
                 callback(null, {magazines: magazine,count:magazines.length});
