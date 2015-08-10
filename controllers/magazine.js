@@ -371,29 +371,32 @@ var Magazine = function()
 
             while (CountOfMedia < 9 && NonGeoMediaCount > 0) {
 
-              if(YdataMediaCategoryBuckets1_nonGeo.length > 0){       
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
+              if(YdataMediaCategoryBuckets1_nonGeo.length > 0){ 
+                FinalData.push(YdataMediaCategoryBuckets1_nonGeo[0]);                      
                 CountOfMedia = CountOfMedia + 1;
                 NonGeoMediaCount = NonGeoMediaCount - 1;
                 YdataMediaCategoryBuckets1_nonGeo.shift();            
               }
 
-              if(YdataMediaCategoryBuckets2_nonGeo.length > 0){       
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
+              if(YdataMediaCategoryBuckets2_nonGeo.length > 0){
+                FinalData.push(YdataMediaCategoryBuckets2_nonGeo[0]);         
+                //FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
                 CountOfMedia = CountOfMedia + 1;
                 NonGeoMediaCount = NonGeoMediaCount - 1;
                 YdataMediaCategoryBuckets2_nonGeo.shift();            
               }
 
-              if(YdataMediaCategoryBuckets3_nonGeo.length > 0){       
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
+              if(YdataMediaCategoryBuckets3_nonGeo.length > 0){ 
+                FinalData.push(YdataMediaCategoryBuckets3_nonGeo[0]);      
+                //FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
                 CountOfMedia = CountOfMedia + 1;
                 NonGeoMediaCount = NonGeoMediaCount - 1;
                 YdataMediaCategoryBuckets3_nonGeo.shift();            
               }
 
-              if(YdataMediaCategoryBuckets4_nonGeo.length > 0){       
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
+              if(YdataMediaCategoryBuckets4_nonGeo.length > 0){
+                FinalData.push(YdataMediaCategoryBuckets4_nonGeo[0]);       
+                //FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
                 CountOfMedia = CountOfMedia + 1;
                 NonGeoMediaCount = NonGeoMediaCount - 1;
                 YdataMediaCategoryBuckets4_nonGeo.shift();            
@@ -460,7 +463,7 @@ var Magazine = function()
 
            //FinalData.push(formatData(FinalData));
 
-            console.log(FinalData);
+            //console.log(FinalData);
 
             res.status(200).json(FinalData);
 
