@@ -457,7 +457,6 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
-                     //console.log(result.magazines[key].categoryId);
                      //var categoryId = [];                     
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
@@ -641,7 +640,7 @@ scope.applyFilters = function(){
                             for ( var i = 0; i < results.length; i++ ) {
                                catIds.push(results[i].categoryId); 
                             }
-                            
+
                             CommonLib.getCategoryName(catIds, function(err, catNames){
                                 for(var i=0; i<results.length;i++){
                                     results[i].categoryName = catNames[results[i].categoryId];
