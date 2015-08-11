@@ -32,8 +32,7 @@ var Magazine = function()
             var media = [];
             var GeoMediaCount = 0;
             var NonGeoMediaCount = 0;
-            var CountOfMedia = 0;
-
+            var CountOfMedia = 0
             async.series({
                 product : function(callback){
                     Products.findOne({_id: params.productId}, function(err, result){
@@ -911,7 +910,6 @@ scope.applyFilters = function(){
         });
     };
 };
-
 
 
 
