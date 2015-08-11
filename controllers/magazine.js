@@ -252,7 +252,6 @@ var Magazine = function()
                     }
                 }
 
-
                 //Calculte Y value for the mediaCategoryBuckets1_Geo
                 var YdataMediaCategoryBuckets1_Geo = [];
                 if(mediaCategoryBuckets1_Geo.length > 0) {
@@ -457,6 +456,8 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
+                     //console.log(result.magazines[key].categoryId);
+                     //var categoryId = [];                     
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
@@ -563,7 +564,6 @@ var Magazine = function()
 
     }
 
-
 //................................ test ......................//
 
 
@@ -635,7 +635,18 @@ scope.applyFilters = function(){
                         {$project: query.projection},
                         function(err, results)
                         {
-                            callbackInner(err, results);
+                            var catIds = [];
+
+                            for ( var i = 0; i < results.length; i++ ) {
+                               catIds.push(results[i].categoryId); 
+                            }
+                            
+                            CommonLib.getCategoryName(catIds, function(err, catNames){
+                                for(var i=0; i<results.length;i++){
+                                    results[i].categoryName = catNames[results[i].categoryId];
+                                }
+                                callbackInner(err, results);
+                            });
                         }
                     );
                 }
