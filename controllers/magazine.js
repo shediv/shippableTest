@@ -94,7 +94,7 @@ var Magazine = function()
                     var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
                     return x;
 
-                });
+                });                
 
                 //Add the last data i.e highest readership to the Finaldata
                 FinalData[0] = CS[CS.length - 1];
@@ -108,30 +108,23 @@ var Magazine = function()
                     mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazineCategory[i], i));
                 }
 
-                //remove an empty magazine category
-                mediacategorybuckets = mediacategorybuckets.filter(function(mediacategorybuckets) {
-                    return Object.keys(mediacategorybuckets).length > 0
-                });
-
-                //console.log(mediacategorybuckets);
-
-
                 //Find Medias that does not belong to any category with category 1
                 var NonCatCS0 = [];
 
                 for (var i = 0; i < CS.length; i++) {
                     var match = false; // we haven't found it yet
-
-                    for (var j = 0; j < Object.keys(mediacategorybuckets[0]).length; j++) {
-                        if (CS[i].categoryId !== mediacategorybuckets[0][j].categoryId) {
-                            // we have found a[i] in b, so we can stop searching
-                            match = true;
-                            //break;
+                    if(mediacategorybuckets[0]){
+                        for (var j = 0; j < Object.keys(mediacategorybuckets[0]).length; j++) {
+                            if (CS[i].categoryId !== mediacategorybuckets[0][j].categoryId) {
+                                // we have found a[i] in b, so we can stop searching
+                                match = true;
+                                //break;
+                            }
                         }
-                    }
-                    //add a[i] to newArray only if we didn't find a match.
-                    if (match) {
-                        NonCatCS0.push(CS[i]);
+                        //add a[i] to newArray only if we didn't find a match.
+                        if (match) {
+                            NonCatCS0.push(CS[i]);
+                        }
                     }
                 }
 
@@ -141,17 +134,18 @@ var Magazine = function()
 
                 for (var i = 0; i < NonCatCS0.length; i++) {
                     var match = false; // we haven't found it yet
-
-                    for (var j = 0; j < Object.keys(mediacategorybuckets[1]).length; j++) {
-                        if (NonCatCS0[i].categoryId !== mediacategorybuckets[1][j].categoryId) {
-                            // we have found a[i] in b, so we can stop searching
-                            match = true;
-                            //break;
+                    if(mediacategorybuckets[1]){
+                        for (var j = 0; j < Object.keys(mediacategorybuckets[1]).length; j++) {
+                            if (NonCatCS0[i].categoryId !== mediacategorybuckets[1][j].categoryId) {
+                                // we have found a[i] in b, so we can stop searching
+                                match = true;
+                                //break;
+                            }
                         }
-                    }
-                    //add a[i] to newArray only if we didn't find a match.
-                    if (match) {
-                        NonCatCS1.push(CS[i]);
+                        //add a[i] to newArray only if we didn't find a match.
+                        if (match) {
+                            NonCatCS1.push(CS[i]);
+                        }
                     }
                 }
 
@@ -160,18 +154,19 @@ var Magazine = function()
 
                 for (var i = 0; i < NonCatCS1.length; i++) {
                     var match = false; // we haven't found it yet
-
-                    for (var j = 0; j < Object.keys(mediacategorybuckets[2]).length; j++) {
-                        if (NonCatCS1[i].categoryId !== mediacategorybuckets[2][j].categoryId) {
-                            // we have found a[i] in b, so we can stop searching
-                            match = true;
-                            //break;
+                    if(mediacategorybuckets[2]){
+                        for (var j = 0; j < Object.keys(mediacategorybuckets[2]).length; j++) {
+                            if (NonCatCS1[i].categoryId !== mediacategorybuckets[2][j].categoryId) {
+                                // we have found a[i] in b, so we can stop searching
+                                match = true;
+                                //break;
+                            }
                         }
-                    }
-                    //add a[i] to newArray only if we didn't find a match.
-                    if (match) {
-                        NonCatCS2.push(CS[i]);
-                    }
+                        //add a[i] to newArray only if we didn't find a match.
+                        if (match) {
+                            NonCatCS2.push(CS[i]);
+                        }
+                   } 
                 }
 
 
@@ -181,26 +176,30 @@ var Magazine = function()
                 for (var i = 0; i < NonCatCS2.length; i++) {
                     var match = false; // we haven't found it yet
 
+                    if(mediacategorybuckets[3]){
                     for (var j = 0; j < Object.keys(mediacategorybuckets[3]).length; j++) {
                         if (NonCatCS2[i].categoryId !== mediacategorybuckets[3][j].categoryId) {
                             // we have found a[i] in b, so we can stop searching
                             match = true;
+                            console.log(match);  
                             //break;
                         }
-                    }
+                    }                    
                     //add a[i] to newArray only if we didn't find a match.
                     if (match) {
                         NonCatCS.push(CS[i]);
                     }
+                }else{
+                    NonCatCS.push(NonCatCS2[i]);
                 }
-
+                }               
 
                 //Divide  Category 1 Buckets Based on Geography
                 var mediaCategoryBuckets1_Geo = [];
                 var mediaCategoryBuckets1_nonGeo = [];
                 if(mediacategorybuckets[0]){
                     for(var i= 0; i < Object.keys(mediacategorybuckets[0]).length; i++){
-                        if(mediacategorybuckets[0][i].geography == params.productId){
+                        if(mediacategorybuckets[0][i].geography == params.geography){
                             mediaCategoryBuckets1_Geo.push(mediacategorybuckets[0][i]);
                         }
                         else{
@@ -215,7 +214,7 @@ var Magazine = function()
                 var mediaCategoryBuckets2_nonGeo = [];
                 if(mediacategorybuckets[1]){
                     for(var i= 0; i < Object.keys(mediacategorybuckets[1]).length; i++){
-                        if(mediacategorybuckets[1][i].geography == params.productId){
+                        if(mediacategorybuckets[1][i].geography == params.geography){
                             mediaCategoryBuckets2_Geo.push(mediacategorybuckets[1][i]);
                         }
                         else{
@@ -230,7 +229,7 @@ var Magazine = function()
                 var mediaCategoryBuckets3_nonGeo = [];
                 if(mediacategorybuckets[2]){
                     for(var i= 0; i < Object.keys(mediacategorybuckets[2]).length; i++){
-                        if(mediacategorybuckets[2][i].geography == params.productId){
+                        if(mediacategorybuckets[2][i].geography == params.geography){
                             mediaCategoryBuckets3_Geo.push(mediacategorybuckets[2][i]);
                         }
                         else{
@@ -244,7 +243,7 @@ var Magazine = function()
                 var mediaCategoryBuckets4_nonGeo = [];
                 if(mediacategorybuckets[3]){
                     for(var i= 0; i < Object.keys(mediacategorybuckets[3]).length; i++){
-                        if(mediacategorybuckets[3][i].geography == params.productId){
+                        if(mediacategorybuckets[3][i].geography == params.geography){
                             mediaCategoryBuckets4_Geo.push(mediacategorybuckets[3][i]);
                         }
                         else{
@@ -280,6 +279,7 @@ var Magazine = function()
                     YdataMediaCategoryBuckets4_Geo.push(calculateY(mediaCategoryBuckets4_Geo));
                     GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets4_Geo.length);
                 }
+ 
 
                 // Push the medias with to final data
                 while (CountOfMedia < 9 && GeoMediaCount > 0) {
@@ -323,21 +323,24 @@ var Magazine = function()
                 //Calculte Y value for the mediaCategoryBuckets1_nonGeo
                 var YdataMediaCategoryBuckets1_nonGeo = [];
                 if(mediaCategoryBuckets1_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets1_nonGeo.push(calculateY(mediaCategoryBuckets1_nonGeo));
+                    YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);
+                    //YdataMediaCategoryBuckets1_nonGeo.push(calculateY(mediaCategoryBuckets1_nonGeo));
                     NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);
                 }
 
                 //Calculte Y value for the mediaCategoryBuckets2_nonGeo
                 var YdataMediaCategoryBuckets2_nonGeo = [];
                 if(mediaCategoryBuckets2_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets2_nonGeo.push(calculateY(mediaCategoryBuckets2_nonGeo));
+                    YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);
+                    //YdataMediaCategoryBuckets2_nonGeo.push(calculateY(mediaCategoryBuckets2_nonGeo));
                     NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);
                 }
 
                 //Calculte Y value for the mediaCategoryBuckets3_nonGeo
                 var YdataMediaCategoryBuckets3_nonGeo = [];
                 if(mediaCategoryBuckets3_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets3_nonGeo.push(calculateY(mediaCategoryBuckets3_nonGeo));
+                    YdataMediaCategoryBuckets3_nonGeo = YdataMediaCategoryBuckets3_nonGeo.concat(mediaCategoryBuckets3_nonGeo);
+                   // YdataMediaCategoryBuckets3_nonGeo.push(calculateY(mediaCategoryBuckets3_nonGeo));
                     NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets3_nonGeo.length);
                 }
 
@@ -347,8 +350,6 @@ var Magazine = function()
                     YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
                     NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
                 }
-
-                //console.log(YdataMediaCategoryBuckets1_nonGeo[0].IRS);
 
                 while (CountOfMedia < 9 && NonGeoMediaCount > 0) {
 
@@ -383,7 +384,8 @@ var Magazine = function()
                 }
 
                 if(CountOfMedia == 8){
-                    console.log(FinalData);
+                    //console.log(FinalData);
+                    res.status(200).json(FinalData);
                 }
 
                 //Divide  Non Category Buckets Based on All India and others
@@ -428,11 +430,15 @@ var Magazine = function()
                             CountOfMedia = CountOfMedia + 1;
                         }
                         else{
-                            console.log(FinalData);
+                            //console.log(FinalData);
+                            res.status(200).json(FinalData);
                         }
                     }
 
                 }
+
+                //console.log(FinalData);
+                res.status(200).json({magazine:FinalData});
 
             });
 
@@ -457,8 +463,6 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
-                    //console.log(result.magazines[key].categoryId);
-                    //var categoryId = [];
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
@@ -568,44 +572,43 @@ var Magazine = function()
 //................................ test ......................//
 
 
-    scope.applyFilters = function(){
-        var query = {};
-        query.sortBy = scope.params.sortBy || 'views';
-        query.offset = scope.params.offset || 0;
-        query.limit = scope.params.limit || 9;
-        query.limit = query.offset+query.limit;
-        query.match = {};
-        var filters = {
-            'categories' : 'categoryId',
-            'geography' : 'geography',
-            'languages' : 'attributes.language.value',
-            'frequencies' : 'attributes.frequency.value',
-            'targetGroups' : 'targetGroup'
-        };
-        query.projection = {
-            '_id' : 1,
-            'attributes' : 1,
-            'urlSlug' : 1,
-            'thumbnail' : 1,
-            'categoryId' : 1,
-            'name' : 1,
-            'print.mediaOptions.fullPage.1-2' : 1,
-            'toolId' : 1,
-            'createdBy' : 1
-        };
+scope.applyFilters = function(){
+  var query = {};
+  query.sortBy = scope.params.sortBy || 'views';
+  query.offset = scope.params.offset || 0;
+  query.limit = scope.params.limit || 9;
+  query.match = {};
+  var filters = {
+    'categories' : 'categoryId',
+    'geography' : 'geography',
+    'languages' : 'attributes.language.value',
+    'frequencies' : 'attributes.frequency.value',
+    'targetGroups' : 'targetGroup'
+  };
+  query.projection = {
+    '_id' : 1,
+    'attributes' : 1,
+    'urlSlug' : 1,
+    'thumbnail' : 1,
+    'categoryId' : 1,
+    'name' : 1,
+    'print.mediaOptions.fullPage.1-2' : 1,
+    'toolId' : 1,
+    'createdBy' : 1
+  };
 
-        Object.keys(filters).map(function(value){
-            if(scope.params.filters[value].length)
-                query.match[filters[value]] = {'$in': scope.params.filters[value]};
-        });
+  Object.keys(filters).map(function(value){
+    if(scope.params.filters[value].length)
+      query.match[filters[value]] = {'$in': scope.params.filters[value]};
+  });
 
-        scope.params.filters.mediaOptions.forEach(function(value, key){
-            query.match['mediaOptions.'+value] = { $exists : 1};
-        });
-        query.match.isActive = 1;
-        query.match.toolId = scope.toolId;
-        return query;
-    };
+  scope.params.filters.mediaOptions.forEach(function(value, key){
+    query.match['mediaOptions.'+value] = { $exists : 1};
+  });
+  query.match.isActive = 1;
+  query.match.toolId = scope.toolId;
+  return query;
+};
 
     scope.sortFilteredMedia = function(query, callback){
         async.parallel({
@@ -629,20 +632,24 @@ var Magazine = function()
                         case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
                         case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
                     }
-                    console.log(query.sortBy);
+
                     query.sortBy._id = 1;
+
                     Media.aggregate(
                         {$match: query.match},
                         {$sort: query.sortBy},
                         {$skip : query.offset},
-                        {$limit:  query.limit},
+
+                        {$limit: query.limit},
                         {$project: query.projection},
                         function(err, results)
                         {
                             var catIds = [];
 
                             for ( var i = 0; i < results.length; i++ ) {
+
                                 catIds.push(results[i].categoryId);
+
                             }
 
                             CommonLib.getCategoryName(catIds, function(err, catNames){
@@ -925,5 +932,9 @@ var Magazine = function()
         });
     };
 };
+
+
+
+
 
 module.exports.Mag = Magazine;
