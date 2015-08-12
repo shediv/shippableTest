@@ -457,15 +457,15 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
-                     //console.log(result.magazines[key].categoryId);
-                     //var categoryId = [];
+                    //console.log(result.magazines[key].categoryId);
+                    //var categoryId = [];
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
     };
 
 
-/*//................................ test ......................//*/
+    /*//................................ test ......................//*/
 
     function getMatch(a, b) {
         var matches = [];
@@ -569,43 +569,43 @@ var Magazine = function()
 
 
     scope.applyFilters = function(){
-  var query = {};
-  query.sortBy = scope.params.sortBy || 'views';
+        var query = {};
+        query.sortBy = scope.params.sortBy || 'views';
         query.offset = scope.params.offset || 0;
         query.limit = scope.params.limit || 9;
         query.limit = query.offset+query.limit;
-  query.match = {};
-  var filters = {
-    'categories' : 'categoryId',
-    'geography' : 'geography',
-    'languages' : 'attributes.language.value',
-    'frequencies' : 'attributes.frequency.value',
-    'targetGroups' : 'targetGroup'
-  };
-  query.projection = {
-    '_id' : 1,
-    'attributes' : 1,
-    'urlSlug' : 1,
-    'thumbnail' : 1,
-    'categoryId' : 1,
-    'name' : 1,
-    'print.mediaOptions.fullPage.1-2' : 1,
-    'toolId' : 1,
-    'createdBy' : 1
-  };
+        query.match = {};
+        var filters = {
+            'categories' : 'categoryId',
+            'geography' : 'geography',
+            'languages' : 'attributes.language.value',
+            'frequencies' : 'attributes.frequency.value',
+            'targetGroups' : 'targetGroup'
+        };
+        query.projection = {
+            '_id' : 1,
+            'attributes' : 1,
+            'urlSlug' : 1,
+            'thumbnail' : 1,
+            'categoryId' : 1,
+            'name' : 1,
+            'print.mediaOptions.fullPage.1-2' : 1,
+            'toolId' : 1,
+            'createdBy' : 1
+        };
 
-  Object.keys(filters).map(function(value){
-    if(scope.params.filters[value].length)
-      query.match[filters[value]] = {'$in': scope.params.filters[value]};
-  });
+        Object.keys(filters).map(function(value){
+            if(scope.params.filters[value].length)
+                query.match[filters[value]] = {'$in': scope.params.filters[value]};
+        });
 
-  scope.params.filters.mediaOptions.forEach(function(value, key){
-    query.match['mediaOptions.'+value] = { $exists : 1};
-  });
-  query.match.isActive = 1;
-  query.match.toolId = scope.toolId;
-  return query;
-};
+        scope.params.filters.mediaOptions.forEach(function(value, key){
+            query.match['mediaOptions.'+value] = { $exists : 1};
+        });
+        query.match.isActive = 1;
+        query.match.toolId = scope.toolId;
+        return query;
+    };
 
     scope.sortFilteredMedia = function(query, callback){
         async.parallel({
@@ -629,19 +629,20 @@ var Magazine = function()
                         case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
                         case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
                     }
-                    console.log(query.limit+" "+query.offset);
+                    console.log(query.sortBy);
+                    query.sortBy._id = 1;
                     Media.aggregate(
                         {$match: query.match},
-                        {$limit:  query.limit},
-                        {$skip : query.offset},
                         {$sort: query.sortBy},
+                        {$skip : query.offset},
+                        {$limit:  query.limit},
                         {$project: query.projection},
                         function(err, results)
                         {
                             var catIds = [];
 
                             for ( var i = 0; i < results.length; i++ ) {
-                               catIds.push(results[i].categoryId);
+                                catIds.push(results[i].categoryId);
                             }
 
                             CommonLib.getCategoryName(catIds, function(err, catNames){
@@ -908,16 +909,16 @@ var Magazine = function()
             $group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, function(err, results){
             async.each(results, function (group ,callback_each){
 
-                    scope.yForumala(group.medias, function (err, res){
-                        for(var i=0; i < res.length; i++){
-                            magazines.push(res[i]);
-                        }
-                        callback_each(err);
+                scope.yForumala(group.medias, function (err, res){
+                    for(var i=0; i < res.length; i++){
+                        magazines.push(res[i]);
+                    }
+                    callback_each(err);
                 });
             },function(err){
                 //console.log(magazines[0]);
                 for(var i=query.offset; i<(query.offset+query.limit);i++){
-                        magazine.push(magazines[i]);
+                    magazine.push(magazines[i]);
                 }
                 callback(null, {magazines: magazine,count:magazines.length});
             });
