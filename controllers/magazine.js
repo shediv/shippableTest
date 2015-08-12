@@ -463,7 +463,8 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
-                     //var categoryId = [];                     
+                     //console.log(result.magazines[key].categoryId);
+                     //var categoryId = [];
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
@@ -573,11 +574,12 @@ var Magazine = function()
 //................................ test ......................//
 
 
-scope.applyFilters = function(){
+    scope.applyFilters = function(){
   var query = {};
   query.sortBy = scope.params.sortBy || 'views';
-  query.offset = scope.params.offset || 0;
-  query.limit = scope.params.limit || 9;
+        query.offset = scope.params.offset || 0;
+        query.limit = scope.params.limit || 9;
+        query.limit = query.offset+query.limit;
   query.match = {};
   var filters = {
     'categories' : 'categoryId',
@@ -633,18 +635,19 @@ scope.applyFilters = function(){
                         case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
                         case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
                     }
+                    console.log(query.limit+" "+query.offset);
                     Media.aggregate(
                         {$match: query.match},
-                        {$sort: query.sortBy},
+                        {$limit:  query.limit},
                         {$skip : query.offset},
-                        {$limit: query.limit},
+                        {$sort: query.sortBy},
                         {$project: query.projection},
                         function(err, results)
                         {
                             var catIds = [];
 
                             for ( var i = 0; i < results.length; i++ ) {
-                               catIds.push(results[i].categoryId); 
+                               catIds.push(results[i].categoryId);
                             }
 
                             CommonLib.getCategoryName(catIds, function(err, catNames){
@@ -927,9 +930,5 @@ scope.applyFilters = function(){
         });
     };
 };
-
-
-
-
 
 module.exports.Mag = Magazine;
