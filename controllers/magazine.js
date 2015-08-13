@@ -462,14 +462,13 @@ var Magazine = function()
             ],
             function (err, result) {
                 for(key in result.magazines)
-                     //var categoryId = [];                     
                     result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
                 res.status(200).json(result);
             });
     };
 
 
-/*//................................ test ......................//*/
+    /*//................................ test ......................//*/
 
     function getMatch(a, b) {
         var matches = [];
@@ -632,20 +631,15 @@ scope.applyFilters = function(){
                         case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
                         case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
                     }
+                    query.sortBy._id = -1;
                     Media.aggregate(
-                        {$match: query.match},
-                        {$sort: query.sortBy},
-                        {$skip : query.offset},
-                        {$limit: query.limit},
-                        {$project: query.projection},
-                        function(err, results)
-                        {
+                        {$match: query.match}, {$sort: query.sortBy},
+                        {$skip : query.offset}, {$limit: query.limit},
+                        {$project: query.projection}, function(err, results) {
                             var catIds = [];
-
                             for ( var i = 0; i < results.length; i++ ) {
-                               catIds.push(results[i].categoryId); 
+                                catIds.push(results[i].categoryId);
                             }
-
                             CommonLib.getCategoryName(catIds, function(err, catNames){
                                 for(var i=0; i<results.length;i++){
                                     results[i].categoryName = catNames[results[i].categoryId];
@@ -656,8 +650,7 @@ scope.applyFilters = function(){
                     );
                 }
             },
-            function(err, results)
-            {
+            function(err, results) {
                 callback(err, results);
             });
     };
@@ -672,10 +665,8 @@ scope.applyFilters = function(){
                 mediaOptions: scope.getMediaOptions,
                 products : scope.getProducts
             },
-            function(err, results)
-            {
-                if(err)
-                {
+            function(err, results) {
+                if(err) {
                     console.log(err);
                     res.status(200).json({err:err});
                 }
@@ -687,8 +678,7 @@ scope.applyFilters = function(){
         Media.aggregate(
             {$match: {toolId:scope.toolId, isActive : 1}},
             {$group : { _id : '$categoryId', count : {$sum : 1}}},
-            function(error, results)
-            {
+            function(error, results) {
                 var catIds = [];
                 results.map(function(o){ catIds.push(o._id); });
                 Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
@@ -703,8 +693,7 @@ scope.applyFilters = function(){
             {$match: {toolId:scope.toolId, geography: { $exists: 1}, isActive : 1}},
             {$unwind: '$geography'},
             {$group : { _id : '$geography', count : {$sum : 1}}},
-            function(error, results)
-            {
+            function(error, results) {
                 var geoIds = [];
                 results.map(function(o){ geoIds.push(o._id); });
                 Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
@@ -718,8 +707,7 @@ scope.applyFilters = function(){
         Media.aggregate(
             {$match: {toolId:scope.toolId, "attributes.language.value": { $exists: 1}, isActive : 1}},
             {$group : { _id : '$attributes.language.value', count : {$sum : 1}}},
-            function(error, results)
-            {
+            function(error, results) {
                 callback(error, results);
             }
         );
@@ -730,8 +718,7 @@ scope.applyFilters = function(){
             {$match: {toolId:scope.toolId, targetGroup: { $exists: 1}, isActive : 1}},
             {$unwind: '$targetGroup'},
             {$group : { _id : '$targetGroup', count : {$sum : 1}}},
-            function(error, results)
-            {
+            function(error, results) {
                 callback(error, results);
             }
         );
@@ -910,16 +897,16 @@ scope.applyFilters = function(){
             $group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, function(err, results){
             async.each(results, function (group ,callback_each){
 
-                    scope.yForumala(group.medias, function (err, res){
-                        for(var i=0; i < res.length; i++){
-                            magazines.push(res[i]);
-                        }
-                        callback_each(err);
+                scope.yForumala(group.medias, function (err, res){
+                    for(var i=0; i < res.length; i++){
+                        magazines.push(res[i]);
+                    }
+                    callback_each(err);
                 });
             },function(err){
                 //console.log(magazines[0]);
                 for(var i=query.offset; i<(query.offset+query.limit);i++){
-                        magazine.push(magazines[i]);
+                    magazine.push(magazines[i]);
                 }
                 callback(null, {magazines: magazine,count:magazines.length});
             });

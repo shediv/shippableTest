@@ -22,7 +22,7 @@ app.set('view engine', 'jade');
 
 app.use(cors({
     allowedOrigins: [
-        'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost'
+        'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost', 'http://dev1.themediaant.com'
     ]
 }));
 
