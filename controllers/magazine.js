@@ -448,34 +448,35 @@ var Magazine = function()
                 }
 
                 //console.log(FinalData);
-                res.status(200).json({count:FinalData.length, magazine:FinalData});
+                res.status(200).json({count:FinalData.length, magazines:FinalData});
 
             });
 
-        }
+        } else {
 
         //....................................................................
 
-        async.waterfall([
-                function(callback)
-                {
-                    callback(null, scope.applyFilters());
-                },
-                function(query, callback)
-                {
-                    if(scope.params.sortBy=="top3"){
-                        scope.top3(query, callback);
+            async.waterfall([
+                    function(callback)
+                    {
+                        callback(null, scope.applyFilters());
+                    },
+                    function(query, callback)
+                    {
+                        if(scope.params.sortBy=="top3"){
+                            scope.top3(query, callback);
 
-                    } else {
-                        scope.sortFilteredMedia(query, callback);
+                        } else {
+                            scope.sortFilteredMedia(query, callback);
+                        }
                     }
-                }
-            ],
-            function (err, result) {
-                for(key in result.magazines)
-                    result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
-                res.status(200).json(result);
-            });
+                ],
+                function (err, result) {
+                    for(key in result.magazines)
+                        result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
+                    res.status(200).json(result);
+                });
+        }
     };
 
 
