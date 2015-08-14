@@ -19,9 +19,8 @@ var Magazine = function()
 
     this.getMagazines = function(req, res){
         scope.params = JSON.parse(req.query.params);
-        if(scope.params.tmaRecommended) {
-
-            //res.status(200).json("tma recommended");
+        if(scope.params.recommend === 'tma') {            
+            //res.status(200).json(mainSortBy);                        
             //....................................................................
             var params = JSON.parse(req.query.params);
             //res.status(200).json(params.productId);
@@ -325,7 +324,41 @@ var Magazine = function()
                 }
 
                 if(CountOfMedia == 8){
-                    //console.log(FinalData);
+                    //Sort final data base on sort by option
+                    switch (scope.params.sortBy)
+                    {
+                       case 'views': 
+                        //mainSortBy = 'views';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.views > b.views ? -1:1;
+                            return x;
+                        }); 
+                       break;
+                    
+                       case 'price': 
+                        //mainSortBy = 'print.mediaOptions.fullPage[1-2]';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
+                            return x;
+                        });                
+                       break;
+                    
+                       case 'category': 
+                        //mainSortBy = 'categoryName';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.categoryName < b.categoryName ? -1:1;
+                            return x;
+                        });
+                       break;
+                    
+                       case 'circulation': 
+                        //mainSortBy = 'attributes.circulation.value';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
+                            return x;
+                        });
+                       break;
+                    }
                     res.status(200).json({count:FinalData.length, magazine:FinalData});
                 }
 
@@ -396,6 +429,41 @@ var Magazine = function()
 
                 if(CountOfMedia == 8){
                     //console.log(FinalData);
+                    //Sort final data base on sort by option
+                    switch (scope.params.sortBy)
+                    {
+                       case 'views': 
+                        //mainSortBy = 'views';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.views > b.views ? -1:1;
+                            return x;
+                        }); 
+                       break;
+                    
+                       case 'price': 
+                        //mainSortBy = 'print.mediaOptions.fullPage[1-2]';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
+                            return x;
+                        });                
+                       break;
+                    
+                       case 'category': 
+                        //mainSortBy = 'categoryName';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.categoryName < b.categoryName ? -1:1;
+                            return x;
+                        });
+                       break;
+                    
+                       case 'circulation': 
+                        //mainSortBy = 'attributes.circulation.value';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
+                            return x;
+                        });
+                       break;
+                    }
                     res.status(200).json({count:FinalData.length, magazine:FinalData});
                 }
 
@@ -448,7 +516,42 @@ var Magazine = function()
 
                 }
 
-                //console.log(FinalData);
+                    //Sort final data base on sort by option
+                    switch (scope.params.sortBy)
+                    {
+                       case 'views': 
+                        //mainSortBy = 'views';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.views > b.views ? -1:1;
+                            return x;
+                        }); 
+                       break;
+                    
+                       case 'price': 
+                        //mainSortBy = 'print.mediaOptions.fullPage[1-2]';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
+                            return x;
+                        });                
+                       break;
+                    
+                       case 'category': 
+                        //mainSortBy = 'categoryName';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.categoryName < b.categoryName ? -1:1;
+                            return x;
+                        });
+                       break;
+                    
+                       case 'circulation': 
+                        //mainSortBy = 'attributes.circulation.value';
+                        FinalData = FinalData.sort(function(a,b){                
+                            var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
+                            return x;
+                        });
+                       break;
+                    }
+    
                 res.status(200).json({count:FinalData.length, magazines:FinalData});
 
             });
@@ -464,7 +567,7 @@ var Magazine = function()
                     },
                     function(query, callback)
                     {
-                        if(scope.params.sortBy=="top3"){
+                        if(scope.params.recommend=="top3"){
                             scope.top3(query, callback);
 
                         } else {
