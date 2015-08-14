@@ -10,6 +10,7 @@ var Magazine = function()
     this.params = {};
     this.toolName = "magazine";
     var scope = this;
+    var underscore = require('underscore');
 
     Tools.findOne({name: this.toolName}, function(err, result){
         //console.log();
@@ -26,6 +27,7 @@ var Magazine = function()
             //res.status(200).json(params.productId);
             var ProductInfo = [];
             var CS = [];
+            var NoCS = [];
             var FinalData = [];
             var mediacategorybuckets = [];
             var noncategorybuckets = [];
@@ -87,24 +89,32 @@ var Magazine = function()
                     }
                 }
 
-                //Sort CS based on the readership
-                CS = CS.sort(function(a,b){
-                    //console.log(a.attributes.readership.value);
-                    var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
-                    return x;
+                //console.log(CS);
 
-                });                
+                if(CS.length > 0){
 
-                //Add the last data i.e highest readership to the Finaldata
-                FinalData[0] = CS[CS.length - 1];
-                CountOfMedia = CountOfMedia + 1;
+                    //Sort CS based on the readership
+                    CS = CS.sort(function(a,b){
+                        //console.log(a.attributes.readership.value);
+                        var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
+                        return x;
 
-                //Pop up the last element which is added to the Finaldata
-                CS.pop();
+                    });                
+
+                    //Add the last data i.e highest readership to the Finaldata
+                    FinalData[0] = CS[CS.length - 1];
+                    CountOfMedia = CountOfMedia + 1;
+
+                    //Pop up the last element which is added to the Finaldata
+                    CS.pop();
+                }
+                else{
+                    CS = result.medias; 
+                }
 
                 //Create Buckets Based on Category
-                for(var i= 0; i < ProductInfo[0].magazineCategory.length; i++){
-                    mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazineCategory[i], i));
+                for(var i= 0; i < ProductInfo[0].categoryIds.length; i++){
+                    mediacategorybuckets.push(createbucket(CS, ProductInfo[0].categoryIds[i], i));
                 }
 
                 //Find Medias that does not belong to any category with category 1
@@ -314,7 +324,8 @@ var Magazine = function()
                 }
 
                 if(CountOfMedia == 8){
-                    console.log(FinalData);
+                    //console.log(FinalData);
+                    res.status(200).json({count:FinalData.length, magazine:FinalData});
                 }
 
 
@@ -384,7 +395,7 @@ var Magazine = function()
 
                 if(CountOfMedia == 8){
                     //console.log(FinalData);
-                    res.status(200).json(FinalData);
+                    res.status(200).json({count:FinalData.length, magazine:FinalData});
                 }
 
                 //Divide  Non Category Buckets Based on All India and others
@@ -437,7 +448,7 @@ var Magazine = function()
                 }
 
                 //console.log(FinalData);
-                res.status(200).json({magazine:FinalData});
+                res.status(200).json({count:FinalData.length, magazine:FinalData});
 
             });
 
