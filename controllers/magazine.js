@@ -950,7 +950,7 @@ scope.applyFilters = function(){
                     attributes : 1,
                     categoryId : 1,
                     _id : 1,
-                    logo: 1
+                    logo: 1,
                     'print.mediaOptions.fullPage.1-2' : 1
                 }
             },
