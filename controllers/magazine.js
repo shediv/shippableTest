@@ -750,7 +750,7 @@ scope.applyFilters = function(){
                         case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
                         case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
                     }
-                    query.sortBy._id = -1;
+                    query.sortBy._id = 1;
                     Media.aggregate(
                         {$match: query.match}, {$sort: query.sortBy},
                         {$skip : query.offset}, {$limit: query.limit},
