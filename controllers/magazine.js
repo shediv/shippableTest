@@ -68,7 +68,8 @@ var Magazine = function()
                             "thumbnail" : 1,
                             "keywords" : 1,
                             "IRS" : 1,
-                            "createdBy": 1
+                            "createdBy": 1,
+                            "logo": 1
                         }
                     }
 
@@ -663,7 +664,8 @@ var Magazine = function()
             tmp['urlSlug'] = mediaCategoryBuckets_nonGeo[i].urlSlug;
             tmp['thumbnail'] = mediaCategoryBuckets_nonGeo[i].thumbnail;
             tmp['IRS'] = mediaCategoryBuckets_nonGeo[i].IRS;
-
+            tmp['logo'] = mediaCategoryBuckets_nonGeo[i].logo;
+            
             yValue = (0.6 * ((mediaCategoryBuckets_nonGeo[i].attributes.noOfPages.value * 10)/maxNoOfPages)) + (0.3 * ((mediaCategoryBuckets_nonGeo[i].attributes.readership.value * 10)/maxReadership)) + (0.1 * ((mediaCategoryBuckets_nonGeo[i].print.mediaOptions.fullPage['1-2'] * 10)/minFullPage));
 
             tmp['yValue'] = yValue;
@@ -709,7 +711,8 @@ scope.applyFilters = function(){
     'name' : 1,
     'print.mediaOptions.fullPage.1-2' : 1,
     'toolId' : 1,
-    'createdBy' : 1
+    'createdBy' : 1,
+    'logo' : 1
   };
 
   Object.keys(filters).map(function(value){
@@ -947,6 +950,7 @@ scope.applyFilters = function(){
                     attributes : 1,
                     categoryId : 1,
                     _id : 1,
+                    logo: 1
                     'print.mediaOptions.fullPage.1-2' : 1
                 }
             },
