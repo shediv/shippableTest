@@ -8,7 +8,7 @@ var cors = require('express-cors');
 
 var config = require('./config.js');
 var routes = require('./routes/index');
-var user = require('./routes/users');
+var user = require('./routes/user');
 var magazine = require('./routes/magazine');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
