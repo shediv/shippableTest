@@ -4,9 +4,9 @@
 
 var express = require('express');
 var router = express.Router();
-var MediaCtrl = new (require('../controllers/media')).Media();
+var MedCtrl = new (require('../controllers/media')).Med();
 
 //API :- http://localhost:3000/media
-router.post("/store", function(req, res){MediaCtrl.store(req, res);});
+router.post("/signup", function(req, res){MedCtrl.store(req, res);});
 
 module.exports = router;
