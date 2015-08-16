@@ -9,7 +9,7 @@ var User = function()
   var self = this;
   
   self.store = function(req, res){
-    var user = req.body; 
+    var user = req.body.user; 
     console.log(user);
     User.findOne(
       {email: user.email},
