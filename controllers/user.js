@@ -39,9 +39,8 @@ var User = function()
   self.authenticate = function(req, res){
     var user = req.body.user; 
     User.findOne(
-      {email: user.email},
+      {email: user.username},
       function(err, result){
-        console.log(result);
         if (err) throw err;
         if(!result) res.status(404).json("User Does Not Exist");
         else
