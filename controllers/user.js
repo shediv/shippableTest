@@ -11,10 +11,10 @@ var User = function()
   self.store = function(req, res){
     var user = req.body.user; 
     console.log(user);
-    User.findOne(
+    User.count(
       {email: user.email},
       function(err, result){
-        if(result.length) res.status(500).json("Email Already Exists");
+        if(result) res.status(500).json("Email Already Exists");
 
         //Hash Password
         user.password = self.passwordHash.generate(user.password);
