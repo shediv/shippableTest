@@ -4,7 +4,7 @@
 
 var express = require('express');
 var router = express.Router();
-var MedCtrl = new (require('../controllers/media')).Med();
+var MedCtrl = new (require('../controllers/media')).Media();
 
 //API :- http://localhost:3000/media
 router.post("/signup", function(req, res){MedCtrl.store(req, res);});
