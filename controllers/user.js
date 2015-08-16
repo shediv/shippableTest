@@ -10,6 +10,7 @@ var User = function()
   
   self.store = function(req, res){
     var user = req.body; 
+    console.log(user);
     User.findOne(
       {email: user.email},
       function(err, result){
