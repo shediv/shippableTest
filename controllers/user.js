@@ -6,7 +6,7 @@ var User = function()
   var jwt = require('jsonwebtoken');
 
   this.passwordHash = require('password-hash');
-  this.config = require('./config.js');
+  this.config = require('../config.js');
 
   this.params = {};
   var self = this;
