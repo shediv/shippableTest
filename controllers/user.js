@@ -41,6 +41,7 @@ var User = function()
     User.findOne(
       {email: user.email},
       function(err, result){
+        console.log(result.password);
         if (err) throw err;
         if(!result) res.status(404).json("User Does Not Exist");
         else
