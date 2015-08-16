@@ -9,16 +9,17 @@ var User = function()
   var self = this;
   
   self.store = function(req, res){
+    var user = req.body; 
     User.findOne(
-      {email: req.body.email},
+      {email: user.email},
       function(err, result){
         if(result.length) res.status(500).json("Email Already Exists");
 
         //Hash Password
-        req.body.password = self.passwordHash.generate(req.body.password);
+        user.password = self.passwordHash.generate(user.password);
 
         // create a new Media
-        var newUser = User(req.body);
+        var newUser = User(user);
 
         // save the Media
         newUser.save(function(err) {
