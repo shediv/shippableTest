@@ -708,7 +708,8 @@ scope.applyFilters = function(){
     'name' : 1,
     'print.mediaOptions.fullPage.1-2' : 1,
     'toolId' : 1,
-    'createdBy' : 1
+    'createdBy' : 1,
+      'views':1,
   };
 
   Object.keys(filters).map(function(value){
@@ -1006,10 +1007,13 @@ scope.applyFilters = function(){
     };
 
     scope.top3= function(query,callback){
+        /*console.log(query);*/
+
         var magazines = [];
         var magazine=[];
         Media.aggregate({$match: query.match},{$project: query.projection},{
             $group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, function(err, results){
+
             async.each(results, function (group ,callback_each){
 
                 scope.yForumala(group.medias, function (err, res){
@@ -1019,11 +1023,50 @@ scope.applyFilters = function(){
                     callback_each(err);
                 });
             },function(err){
-                //console.log(magazines[0]);
-                for(var i=query.offset; i<(query.offset+query.limit);i++){
-                    magazine.push(magazines[i]);
-                }
-                callback(null, {magazines: magazine,count:magazines.length});
+                var categoryIds=[];
+                //console.log(magazines[1].categoryId);
+                for(var i=0 ;i<magazines.length ; i++){
+                    categoryIds.push(magazines[i].categoryId);
+                };
+                //console.log(categoryIds.length);
+
+                CommonLib.getCategoryName(categoryIds, function(err, catNames){
+
+                    for(var i=0; i<magazines.length;i++){
+                        magazines[i].categoryName = catNames[magazines[i].categoryId];
+                    }
+                    /*switch(query.sortBy){
+                        case "views":
+                            magazines.sort(function(a ,b){
+                                return a.views > b.views;
+                            });
+                            break;
+                        case "price":
+                            magazines.sort(function(a ,b){
+                                return a.print.mediaOptions.fullPage['1-2'] < b.print.mediaOptions.fullPage['1-2'];
+                            });
+                            break;
+                        case "circulation":
+                            magazines.sort(function(a ,b){
+                                return a.attributes.circulation.value > b.attributes.circulation.value;
+                            });
+                            break;
+
+                        case"category":
+                            magazines.sort(function(a ,b){
+                                return a.attributes.circulation.value < b.attributes.circulation.value;
+                            });
+                            break;
+
+                    }*/
+
+
+                   /* for(var i=query.offset; i<(query.offset+query.limit);i++){
+                        magazine.push(magazines[i]);
+                    }*/
+                    callback(null, {magazines: magazines,count:magazines.length});
+                });
+
             });
         });
     };
