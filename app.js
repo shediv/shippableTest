@@ -8,7 +8,7 @@ var cors = require('express-cors');
 
 var config = require('./config.js');
 var routes = require('./routes/index');
-var users = require('./routes/users');
+var user = require('./routes/user');
 var magazine = require('./routes/magazine');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
@@ -35,12 +35,11 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', routes);
-app.use('/users', users);
+app.use('/user', user);
 app.use('/magazine', magazine);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/parseExcel', parseExcel);
-
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
