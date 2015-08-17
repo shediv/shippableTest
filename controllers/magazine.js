@@ -1038,9 +1038,12 @@ scope.applyFilters = function(){
                 CommonLib.getCategoryName(categoryIds, function(err, catNames){
 
                     for(var i=0; i<magazines.length;i++){
+                        if(catNames[magazines[i].categoryId] == undefined){
+                            console.log(magazines[i].categoryId);
+                        }
                         magazines[i].categoryName = catNames[magazines[i].categoryId];
                     }
-                    /*switch(query.sortBy){
+                    switch(query.sortBy){
                         case "views":
                             magazines.sort(function(a ,b){
                                 return a.views > b.views;
@@ -1059,16 +1062,16 @@ scope.applyFilters = function(){
 
                         case"category":
                             magazines.sort(function(a ,b){
-                                return a.attributes.circulation.value < b.attributes.circulation.value;
+                                return a.categoryName < b.categoryName;
                             });
                             break;
 
-                    }*/
+                    }
 
 
-                   /* for(var i=query.offset; i<(query.offset+query.limit);i++){
+                    for(var i=query.offset; i<(query.offset+query.limit);i++){
                         magazine.push(magazines[i]);
-                    }*/
+                    }
                     callback(null, {magazines: magazines,count:magazines.length});
                 });
 
