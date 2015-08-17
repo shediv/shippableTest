@@ -20,6 +20,7 @@
     "multer": "^1.0.1",
     "node-xlsx": "^0.6.0",
     "password-hash": "^1.2.2",
-    "serve-favicon": "~2.2.1"
+    "serve-favicon": "~2.2.1",
+    "underscore": "^1.8.3"
   }
 }

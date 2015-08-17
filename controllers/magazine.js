@@ -583,7 +583,6 @@ var Magazine = function()
         }
     };
 
-
     /*//................................ test ......................//*/
 
     function getMatch(a, b) {
@@ -597,7 +596,6 @@ var Magazine = function()
         return matches;
         //console.log(matches);
     }
-
 
     function createbucket(CS, ProductMagazineCategory) {
 
@@ -621,7 +619,6 @@ var Magazine = function()
         //console.log(MCB);
         return MCB;
     }
-
 
     function calculateY(mediaCategoryBuckets_nonGeo) {
 
@@ -685,10 +682,9 @@ var Magazine = function()
 
     }
 
-//................................ test ......................//
+    //................................ test ......................//
 
-
-scope.applyFilters = function(){
+    scope.applyFilters = function(){
   var query = {};
   query.sortBy = scope.params.sortBy || 'views';
   query.offset = scope.params.offset || 0;
