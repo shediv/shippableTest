@@ -5,6 +5,7 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
+var multer = require('multer');
 
 var config = require('./config.js');
 var routes = require('./routes/index');
@@ -33,6 +34,27 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.use(multer({
+  dest: './public/profile/img/',
+  /*limits: {
+    fieldNameSize: 50,
+    files: 1,
+    fields: 5,
+    fileSize: 1024 * 1024
+  },*/
+  rename: function(fieldname, filename) {
+    return filename;
+  },
+  onFileUploadStart: function(file) {
+    console.log('Starting file upload process.');
+    if(file.mimetype !== 'image/jpg' && file.mimetype !== 'image/jpeg' && file.mimetype !== 'image/png') 
+    {
+      return false;
+    }
+  },
+  inMemory: true //This is important. It's what populates the buffer.
+}));
 
 app.use('/', routes);
 app.use('/user', user);
