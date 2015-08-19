@@ -4,6 +4,7 @@ var User = function()
   var CommonLib = require('../libraries/common').Common;
   var User = require('../models/user').User;
   var jwt = require('jsonwebtoken');
+  var fs = require('fs');
 
   this.passwordHash = require('password-hash');
   this.config = require('../config.js');
@@ -30,6 +31,7 @@ var User = function()
           newUser.save(function(err) {
             if (err) throw err;
             res.status(200).json({user:newUser});
+            fs.mkdirSync('../public/images/users/'+newUser._id);
           });
         }
       }
@@ -41,6 +43,21 @@ var User = function()
     User.update({_id : user._id}, user, function(err, result){
       res.status(200).json({user:result});
     })
+  }
+
+  self.uploadProfilePic = function(req, res){
+    var source = fs.createReadStream(req.file.ppic);
+    var dest = fs.createWriteStream('../public/images/users/'+user._id+'/'+user._id+'_ppic.jpg');
+    var user = req.body.user;
+
+    source.pipe(dest);
+    source.on('end', function(){
+      user.ppic = '/images/users/'+user._id+'/'+user._id+'.jpg';
+      User.update({_id : user._id}, user, function(err, result){
+        res.status(200).json({user:result});
+        fs.unlink(req.file.ppic);
+      })  
+    });
   }
 
   self.authenticate = function(req, res){
