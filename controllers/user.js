@@ -12,7 +12,7 @@ var User = function()
   var self = this;
   
   self.store = function(req, res){
-    var user = req.body.user; 
+    var user = req.body.user;
     User.count(
       {email: user.email},
       function(err, result){
@@ -29,12 +29,19 @@ var User = function()
           // save the Media
           newUser.save(function(err) {
             if (err) throw err;
-            res.status(201).json("User Created Successfully");
+            res.status(200).json({user:newUser});
           });
         }
       }
     );
   };
+
+  self.update = function(req, res){
+    var user = req.body.user;
+    User.update({_id : user._id}, user, function(err, result){
+      res.status(200).json({user:result});
+    })
+  }
 
   self.authenticate = function(req, res){
     var user = req.body.user; 
@@ -68,9 +75,9 @@ var User = function()
     }
   };
 
-    self.logout = function(req, res){
-        res.status(200).json("success");
-    };
+  self.logout = function(req, res){
+      res.status(200).json("success");
+  };
 }
 
 module.exports.User = User;
