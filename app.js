@@ -35,7 +35,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-/*app.use(multer({
+app.use(multer({
   dest: './public/temp/',
   limits: {
     fieldNameSize: 50,
@@ -54,7 +54,7 @@ app.use(express.static(path.join(__dirname, 'public')));
     }
   },
   inMemory: true //This is important. It's what populates the buffer.
-}));*/
+}).single('file'));
 
 app.use('/', routes);
 app.use('/user', user);
