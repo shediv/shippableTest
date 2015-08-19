@@ -67,6 +67,10 @@ var User = function()
       })
     }
   };
-}    
+
+    self.logout = function(req, res){
+        res.status(200).json("success");
+    };
+}
 
 module.exports.User = User;
