@@ -14,7 +14,7 @@ var Magazine = function()
   var scope = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
-    self.toolId = result._id.toString();
+    scope.toolId = result._id.toString();
   });
 
   this.getMagazines = function(req, res){
@@ -49,7 +49,7 @@ var Magazine = function()
                 {"eliminators.gender" : ProductInfo[0].eliminators.gender},
                 {"eliminators.income" : ProductInfo[0].eliminators.income},
                 {"eliminators.age" : { $in: ProductInfo[0].eliminators.age }},
-                {"eliminators.consumption" : { $in: ProductInfo[0].eliminators.consumption }}
+                {"eliminators.consumption" : ProductInfo[0].eliminators.consumption }
               ]
             }
           };
@@ -335,233 +335,229 @@ var Magazine = function()
               break;
             case 'circulation': 
               FinalData = FinalData.sort(function(a,b){                
-                            return b.attributes.circulation.value - b.attributes.circulation.value;
+                            return b.attributes.circulation.value - a.attributes.circulation.value;
                           });
               break;
             }
             res.status(200).json({count:FinalData.length, magazine:FinalData});
           }
+          //Calculte Y value for the mediaCategoryBuckets1_nonGeo
+          var YdataMediaCategoryBuckets1_nonGeo = [];
+          if(mediaCategoryBuckets1_nonGeo.length > 0) 
+          {
+            YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);
+            //YdataMediaCategoryBuckets1_nonGeo.push(calculateY(mediaCategoryBuckets1_nonGeo));
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);
+          }
 
+          //Calculte Y value for the mediaCategoryBuckets2_nonGeo
+          var YdataMediaCategoryBuckets2_nonGeo = [];
+          if(mediaCategoryBuckets2_nonGeo.length > 0) 
+          {
+            YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);
+            //YdataMediaCategoryBuckets2_nonGeo.push(calculateY(mediaCategoryBuckets2_nonGeo));
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);
+          }
 
-                //...............................................................
-                //Calculte Y value for the mediaCategoryBuckets1_nonGeo
-                var YdataMediaCategoryBuckets1_nonGeo = [];
-                if(mediaCategoryBuckets1_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);
-                    //YdataMediaCategoryBuckets1_nonGeo.push(calculateY(mediaCategoryBuckets1_nonGeo));
-                    NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);
-                }
+          //Calculte Y value for the mediaCategoryBuckets3_nonGeo
+          var YdataMediaCategoryBuckets3_nonGeo = [];
+          if(mediaCategoryBuckets3_nonGeo.length > 0) 
+          {
+            YdataMediaCategoryBuckets3_nonGeo = YdataMediaCategoryBuckets3_nonGeo.concat(mediaCategoryBuckets3_nonGeo);
+            //YdataMediaCategoryBuckets3_nonGeo.push(calculateY(mediaCategoryBuckets3_nonGeo));
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets3_nonGeo.length);
+          }
 
-                //Calculte Y value for the mediaCategoryBuckets2_nonGeo
-                var YdataMediaCategoryBuckets2_nonGeo = [];
-                if(mediaCategoryBuckets2_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);
-                    //YdataMediaCategoryBuckets2_nonGeo.push(calculateY(mediaCategoryBuckets2_nonGeo));
-                    NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);
-                }
+          //Calculte Y value for the mediaCategoryBuckets4_nonGeo
+          var YdataMediaCategoryBuckets4_nonGeo = [];
+          if(mediaCategoryBuckets4_nonGeo.length > 0) 
+          {
+            YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
+          }
 
-                //Calculte Y value for the mediaCategoryBuckets3_nonGeo
-                var YdataMediaCategoryBuckets3_nonGeo = [];
-                if(mediaCategoryBuckets3_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets3_nonGeo = YdataMediaCategoryBuckets3_nonGeo.concat(mediaCategoryBuckets3_nonGeo);
-                   // YdataMediaCategoryBuckets3_nonGeo.push(calculateY(mediaCategoryBuckets3_nonGeo));
-                    NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets3_nonGeo.length);
-                }
+          while (CountOfMedia < 9 && NonGeoMediaCount > 0) 
+          {
+            if(YdataMediaCategoryBuckets1_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets1_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets2_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets2_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets3_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets3_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets4_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets4_nonGeo.shift();
+            }
+          }
 
-                //Calculte Y value for the mediaCategoryBuckets4_nonGeo
-                var YdataMediaCategoryBuckets4_nonGeo = [];
-                if(mediaCategoryBuckets4_nonGeo.length > 0) {
-                    YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
-                    NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
-                }
-
-                while (CountOfMedia < 9 && NonGeoMediaCount > 0) {
-
-                    if(YdataMediaCategoryBuckets1_nonGeo.length > 0){
-                        FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
-                        CountOfMedia = CountOfMedia + 1;
-                        NonGeoMediaCount = NonGeoMediaCount - 1;
-                        YdataMediaCategoryBuckets1_nonGeo.shift();
-                    }
-
-                    if(YdataMediaCategoryBuckets2_nonGeo.length > 0){
-                        FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
-                        CountOfMedia = CountOfMedia + 1;
-                        NonGeoMediaCount = NonGeoMediaCount - 1;
-                        YdataMediaCategoryBuckets2_nonGeo.shift();
-                    }
-
-                    if(YdataMediaCategoryBuckets3_nonGeo.length > 0){
-                        FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
-                        CountOfMedia = CountOfMedia + 1;
-                        NonGeoMediaCount = NonGeoMediaCount - 1;
-                        YdataMediaCategoryBuckets3_nonGeo.shift();
-                    }
-
-                    if(YdataMediaCategoryBuckets4_nonGeo.length > 0){
-                        FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
-                        CountOfMedia = CountOfMedia + 1;
-                        NonGeoMediaCount = NonGeoMediaCount - 1;
-                        YdataMediaCategoryBuckets4_nonGeo.shift();
-                    }
-
-                }
-
-                if(CountOfMedia == 8){
-                    //console.log(FinalData);
-                    //Sort final data base on sort by option
-                    switch (scope.params.sortBy)
-                    {
-                       case 'views': 
-                        //mainSortBy = 'views';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.views > b.views ? -1:1;
-                            return x;
-                        }); 
-                       break;
-                    
-                       case 'price': 
-                        //mainSortBy = 'print.mediaOptions.fullPage[1-2]';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
-                            return x;
-                        });                
-                       break;
-                    
-                       case 'category': 
-                        //mainSortBy = 'categoryName';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.categoryName < b.categoryName ? -1:1;
-                            return x;
-                        });
-                       break;
-                    
-                       case 'circulation': 
-                        //mainSortBy = 'attributes.circulation.value';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
-                            return x;
-                        });
-                       break;
-                    }
-                    res.status(200).json({count:FinalData.length, magazine:FinalData});
-                }
-
-                //Divide  Non Category Buckets Based on All India and others
-                var mediaNonCategoryBuckets_GeoAllIndia = [];
-                var mediaNonCategoryBuckets_nonGeoRest = [];
-                if(NonCatCS){
-                    for(var i= 0; i < NonCatCS.length; i++){
-                        if(NonCatCS[i].geography == "All India"){
-                            mediaNonCategoryBuckets_GeoAllIndia.push(NonCatCS[i]);
-                        }
-                        else{
-                            mediaNonCategoryBuckets_nonGeoRest.push(NonCatCS[i]);
-                        }
-                    }
-                }
-
-                var IRSCode = [];
-                var NonIRSCode = [];
-                if(mediaNonCategoryBuckets_GeoAllIndia.length > 0){
-                    for(var i= 0; i < mediaNonCategoryBuckets_GeoAllIndia.length; i++){
-                        if(mediaNonCategoryBuckets_GeoAllIndia[i].IRSCode == 'Yes'){
-                            IRSCode.push(mediaNonCategoryBuckets_GeoAllIndia[i]);
-                        }
-                        else{
-                            NonIRSCode.push(mediaNonCategoryBuckets_GeoAllIndia[i]);
-                        }
-                    }
-                }
-
-                //Sort CS based on the readership
-                IRSCode = IRSCode.sort(function(a,b){
-                    //console.log(a.attributes.readership.value);
-                    var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
+          if(CountOfMedia == 8)
+          {
+            //Sort final data base on sort by option
+            switch (scope.params.sortBy)
+            {
+              case 'views':          
+                FinalData = FinalData.sort(function(a,b){                
+                    var x = a.views > b.views ? -1:1;
                     return x;
+                }); 
+                break;      
+              case 'price': 
+                FinalData = FinalData.sort(function(a,b){                
+                  var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
+                  return x;
+                });                
+                break;      
+              case 'category': 
+                FinalData = FinalData.sort(function(a,b){                
+                  var x = a.categoryName < b.categoryName ? -1:1;
+                  return x;
                 });
-
-                //Add Sorted Magazines with IRS Code based on Readership to Finaldata
-                if(IRSCode.length > 0){
-                    for(var i= 0; i < IRSCode.length; i++){
-                        if(CountOfMedia < 9) {
-                            FinalData[CountOfMedia] = IRSCode[0];
-                            CountOfMedia = CountOfMedia + 1;
-                        }
-                        else{
-                            //console.log(FinalData);
-                            res.status(200).json(FinalData);
-                        }
-                    }
-
-                }
-
-                    //Sort final data base on sort by option
-                    switch (scope.params.sortBy)
-                    {
-                       case 'views': 
-                        //mainSortBy = 'views';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.views > b.views ? -1:1;
-                            return x;
-                        }); 
-                       break;
-                    
-                       case 'price': 
-                        //mainSortBy = 'print.mediaOptions.fullPage[1-2]';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
-                            return x;
-                        });                
-                       break;
-                    
-                       case 'category': 
-                        //mainSortBy = 'categoryName';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.categoryName < b.categoryName ? -1:1;
-                            return x;
-                        });
-                       break;
-                    
-                       case 'circulation': 
-                        //mainSortBy = 'attributes.circulation.value';
-                        FinalData = FinalData.sort(function(a,b){                
-                            var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
-                            return x;
-                        });
-                       break;
-                    }
-    
-                res.status(200).json({count:FinalData.length, magazines:FinalData});
-
-            });
-
-        } else {
-
-        //....................................................................
-
-            async.waterfall([
-                    function(callback)
-                    {
-                        callback(null, scope.applyFilters());
-                    },
-                    function(query, callback)
-                    {
-                        if(scope.params.recommended=="top3"){
-                            scope.top3(query, callback);
-
-                        } else {
-                            scope.sortFilteredMedia(query, callback);
-                        }
-                    }
-                ],
-                function (err, result) {
-                    for(key in result.magazines)
-                        result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
-                    res.status(200).json(result);
+                break;
+              case 'circulation': 
+                FinalData = FinalData.sort(function(a,b){                
+                  var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
+                  return x;
                 });
+                break;
+            }
+            res.status(200).json({count:FinalData.length, magazine:FinalData});
+          }
+
+          //Divide  Non Category Buckets Based on All India and others
+          var mediaNonCategoryBuckets_GeoAllIndia = [];
+          var mediaNonCategoryBuckets_nonGeoRest = [];
+          if(NonCatCS)
+          {
+            for(var i= 0; i < NonCatCS.length; i++)
+            {
+              if(NonCatCS[i].geography == "All India")
+              {
+                mediaNonCategoryBuckets_GeoAllIndia.push(NonCatCS[i]);
+              }
+              else
+              {
+                mediaNonCategoryBuckets_nonGeoRest.push(NonCatCS[i]);
+              }
+            }
+          }
+
+          var IRSCode = [];
+          var NonIRSCode = [];
+          if(mediaNonCategoryBuckets_GeoAllIndia.length > 0)
+          {
+            for(var i= 0; i < mediaNonCategoryBuckets_GeoAllIndia.length; i++)
+            {
+              if(mediaNonCategoryBuckets_GeoAllIndia[i].IRSCode == 'Yes')
+              {
+                IRSCode.push(mediaNonCategoryBuckets_GeoAllIndia[i]);
+              }
+              else
+              {
+                NonIRSCode.push(mediaNonCategoryBuckets_GeoAllIndia[i]);
+              }
+            }
+          }
+          
+          //Sort CS based on the readership
+          IRSCode = IRSCode.sort(function(a,b){
+            var x = a.attributes.readership.value < b.attributes.readership.value? -1:1;
+            return x;
+          });
+
+          //Add Sorted Magazines with IRS Code based on Readership to Finaldata
+          if(IRSCode.length > 0)
+          {
+            for(var i= 0; i < IRSCode.length; i++)
+            {
+              if(CountOfMedia < 9) 
+              {
+                FinalData[CountOfMedia] = IRSCode[0];
+                CountOfMedia = CountOfMedia + 1;
+              }
+              else
+              {
+                res.status(200).json(FinalData);
+              }
+            }
+          }
+
+          //Sort final data base on sort by option
+          switch (scope.params.sortBy)
+          {
+            case 'views': 
+              FinalData = FinalData.sort(function(a,b){                
+                var x = a.views > b.views ? -1:1;
+                return x;
+              }); 
+              break;
+            case 'price': 
+              FinalData = FinalData.sort(function(a,b){                
+                var x = a.print.mediaOptions.fullPage['1-2'] > b.print.mediaOptions.fullPage['1-2'] ? -1:1;
+                return x;
+              });                
+              break;
+            case 'category': 
+              FinalData = FinalData.sort(function(a,b){                
+                var x = a.categoryName < b.categoryName ? -1:1;
+                return x;
+              });
+              break;   
+            case 'circulation': 
+              FinalData = FinalData.sort(function(a,b){                
+                var x = a.attributes.circulation.value > b.attributes.circulation.value ? -1:1;
+                return x;
+              });
+              break;
+          }
+          res.status(200).json({count:FinalData.length, magazines:FinalData});
         }
-    };
+      );
+    } 
+    else 
+    {
+      async.waterfall([
+        function(callback)
+        {
+          callback(null, scope.applyFilters());
+        },
+        function(query, callback)
+        {
+          if(scope.params.recommended =="top3")
+          {
+            scope.top3(query, callback);
+          } 
+          else 
+          {
+            scope.sortFilteredMedia(query, callback);
+          }
+        }
+      ],
+      function (err, result) 
+      {
+        for(key in result.magazines)
+          result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
+        res.status(200).json(result);
+      });
+    }
+  };
 
     /*//................................ test ......................//*/
 
@@ -981,7 +977,7 @@ var Magazine = function()
       );
     };
 
-    scope.top3 = function(query,callback){
+    scope.top3= function(query,callback){
       var magazines = [];
       var magazine=[];
       Media.aggregate(
@@ -993,25 +989,18 @@ var Magazine = function()
           async.each(results, function (group ,callback_each){
             scope.yForumala(group.medias, function (err, res){
               for(var i=0; i < res.length; i++)
-                magazines.push(res[i]);
+                magazines.push(res[i]);    
               callback_each(err);
             });
           },
           function(err)
           {
             var categoryIds=[];
-            for(var i=0 ;i<magazines.length ; i++){
+            for(var i=0 ;i<magazines.length ; i++)
               categoryIds.push(magazines[i].categoryId);
-            };
             CommonLib.getCategoryName(categoryIds, function(err, catNames){
               for(var i=0; i<magazines.length;i++)
-              {
-                if(catNames[magazines[i].categoryId] == undefined)
-                {
-                  console.log(magazines[i].categoryId);
-                }
                 magazines[i].categoryName = catNames[magazines[i].categoryId];
-              }
               switch(query.sortBy)
               {
                 case "views":
@@ -1029,7 +1018,7 @@ var Magazine = function()
                     return a.attributes.circulation.value > b.attributes.circulation.value;
                   });
                   break;
-                case"category":
+                case "category":
                   magazines.sort(function(a ,b){
                     return a.categoryName < b.categoryName;
                   });
@@ -1039,7 +1028,7 @@ var Magazine = function()
                 magazine.push(magazines[i]);
               callback(null, {magazines: magazines,count:magazines.length});
             });
-          }
+          });
         }
       );
     };
