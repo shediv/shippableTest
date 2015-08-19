@@ -35,10 +35,18 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(multer({
-  dest: './public/temp/',
-  inMemory: true //This is important. It's what populates the buffer.
-}).single());
+app.use(multer({ dest: './public/temp/',
+ rename: function (fieldname, filename) {
+    return filename+Date.now();
+  },
+onFileUploadStart: function (file) {
+  console.log(file.originalname + ' is starting ...')
+},
+onFileUploadComplete: function (file) {
+  console.log(file.fieldname + ' uploaded to  ' + file.path)
+  done=true;
+}
+}));
 
 app.use('/', routes);
 app.use('/user', user);
