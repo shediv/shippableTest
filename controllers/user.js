@@ -46,15 +46,14 @@ var User = function()
   }
 
   self.uploadProfilePic = function(req, res){
-    var source = req.files;
-    console.log(source)
-    //var dest = '../public/images/users/'+user._id+'/'+user._id+'_ppic.jpg';
+    var source = req.files.file;
+    var dest = '../public/images/users/'+user._id+'/'+user._id+'_ppic.jpg';
     //var user = req.body.user;
 
-    //var buffer = source.buffer; //Note: buffer only populates if you set inMemory: true.
-    //var fileName = source.name;
+    var buffer = source.buffer; //Note: buffer only populates if you set inMemory: true.
+    var fileName = source.name;
 
-    /*var stream = fs.createWriteStream(dest);
+    var stream = fs.createWriteStream(dest);
     stream.write(buffer);
     stream.on('finish', function() {
         console.log('File saved successfully.');
@@ -63,7 +62,7 @@ var User = function()
         };
         res.jsonp(data);
     });
-    stream.end();*/
+    stream.end();
     
     //user.ppic = '/images/users/'+user._id+'/'+user._id+'.jpg';
     //User.update({_id : user._id}, user, function(err, result){
