@@ -46,6 +46,7 @@ var User = function()
   }
 
   self.uploadProfilePic = function(req, res){
+    console.log(req);
     var source = req.files.file;
     var dest = '../public/images/users/'+user._id+'/'+user._id+'_ppic.jpg';
     //var user = req.body.user;
