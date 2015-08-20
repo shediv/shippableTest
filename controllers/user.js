@@ -46,13 +46,25 @@ var User = function()
   }
 
   self.uploadProfilePic = function(req, res){
-    var source = fs.createReadStream(req.file.ppic);
-    var dest = fs.createWriteStream('../public/images/users/'+user._id+'/'+user._id+'_ppic.jpg');
-    var user = req.body.user;
+
+      var userId = req.body.userId;
+      console.log(userId);
+        return res.status(200).json(req.file.originalname);
+      var sourcePath = req.file.path;
+      var destPath = "/images/users/"+userId+"/"+userId+"_"+req.file.originalName;
+/*
+      var src = fs.createReadStream(tmp_path);
+      var dest = fs.createWriteStream(target_path);
+      src.pipe(dest);
+      src.on('end', function() { res.render('complete'); });
+      src.on('error', function(err) { res.render('error'); });*/
+
+    var source = fs.createReadStream(sourcePath);
+    var dest = fs.createWriteStream('./public'+destPath);
 
     source.pipe(dest);
     source.on('end', function(){
-      user.ppic = '/images/users/'+user._id+'/'+user._id+'.jpg';
+      user.ppic = destPath;
       User.update({_id : user._id}, user, function(err, result){
         res.status(200).json({user:result});
         fs.unlink(req.file.ppic);
