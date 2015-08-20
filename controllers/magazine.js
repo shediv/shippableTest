@@ -1032,6 +1032,101 @@ var Magazine = function()
         }
       );
     };
+
+  this.getBestrates = function(req, res){
+    var medias = {};
+    var mediaIds = [];
+
+    for(key in req.body.medias)
+    {
+      var mediaId = req.body.medias[key]._id;
+      var type = req.body.medias[key].type;
+      var mediaOption = req.body.medias[key].mediaOption;
+      if(medias[req.body.medias[key]._id] === undefined)
+      {
+        mediaIds.push(mediaId);
+        medias[mediaId] = {};
+        medias[mediaId]['name'] = req.body.medias[key].name;
+        medias[mediaId]['urlSlug'] = req.body.medias[key].urlSlug;
+        medias[mediaId]['thumbnail'] = req.body.medias[key].thumbnail;
+        medias[mediaId]['logo'] = req.body.medias[key].logo;
+
+        medias[mediaId].mediaOptions = {};
+        medias[mediaId].mediaOptions[type] = {};
+        medias[mediaId].mediaOptions[type][mediaOption] = {};
+        medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
+      }
+      else
+      {
+        if(medias[mediaId].mediaOptions[type][mediaOption] === undefined)
+        {
+          medias[mediaId].mediaOptions[type][mediaOption] = {};
+          medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
+        }
+        else
+          medias[mediaId].mediaOptions[type][mediaOption].qty++;
+      }
+    }
+
+    Media.find({_id : {$in : mediaIds}}, function(err, result){
+      result.map(function(media){ 
+        for(key in medias[media._id].mediaOptions)
+        {
+          pricing[media._id][key] = {};
+          switch(key)
+          {
+            case 'print':
+              for(mo in medias[media._id].mediaOptions.print)
+              {
+                medias[media._id][key][mo] = {};
+                medias[media._id][key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
+
+                switch(true)
+                {
+                  case medias[media._id].mediaOptions.print[mo].qty <= 2:
+                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty <= 6:
+                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty > 6:
+                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
+                    break;
+                }
+                
+                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
+                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+              }
+              break;
+            case 'website':
+              for(mo in medias[media._id].mediaOptions[key])
+              {
+                medias[media._id][key][mo] = {};
+                medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
+                medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
+                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
+                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+              }
+              break;
+            case 'email':
+              medias[media._id][key][mo] = {};
+              medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
+              medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
+              medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+              medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
+              medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
+              medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+              break;
+          }
+        }
+      });
+      res.send(200).json(medias);
+    });
+  };
 };
 
 
