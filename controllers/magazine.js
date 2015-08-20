@@ -702,7 +702,7 @@ var Magazine = function()
             {
               if(result) count = result[0].count;
               else count = 0;
-              callbackInner(err, count;
+              callbackInner(err, count);
             }
           );
         },
