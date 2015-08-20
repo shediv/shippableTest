@@ -902,35 +902,54 @@ var Magazine = function()
   };
 
   this.relatedMedia = function(req, res){
-    //Query for maxReadership, maxNoOfPages, minFullPage
-    Media.aggregate(
-      {
-        $match : {
-          categoryId : req.params.categoryId,
-          toolId : scope.toolId,
-          isActive: 1,
-          urlSlug : { $ne : req.query.urlSlug }
-        }
+    var catIds = [];
+
+    async.series({
+      medias : function(callback){
+        Media.aggregate(
+          {
+            $match : {
+              categoryId : req.params.categoryId,
+              toolId : scope.toolId,
+              isActive: 1,
+              urlSlug : { $ne : req.query.urlSlug }
+            }
+          },
+          {
+            $project : {
+              urlSlug : 1,
+              name: 1,
+              thumbnail : 1,
+              attributes : 1,
+              categoryId : 1,
+              _id : 1,
+              logo: 1,
+              'print.mediaOptions.fullPage.1-2' : 1
+            }
+          },
+          function(err, results)
+          {
+            scope.yForumala(results, function(err, results){
+              results.map(function(m){
+                catIds.push(m.categoryId);
+              });
+              callback(err, results)       
+            });
+          }
+        );
       },
+      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+    },
+    function(err, result)
+    {
+      for(var i = 0; i < result.medias.length; i++)
       {
-        $project : {
-          urlSlug : 1,
-          name: 1,
-          thumbnail : 1,
-          attributes : 1,
-          categoryId : 1,
-          _id : 1,
-          logo: 1,
-          'print.mediaOptions.fullPage.1-2' : 1
-        }
-      },
-      function(err, results)
-      {
-        scope.yForumala(results, function(err, results){
-          res.status(200).json({magazines: results});
-        });
+        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
       }
-    );
+      res.status(200).json({magazines:result.medias});
+    });
+
+    
   };
 
     scope.yForumala = function(medias, callback){
