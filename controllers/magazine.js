@@ -700,7 +700,7 @@ var Magazine = function()
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
             {
-                callbackInner(err, result[0].count);
+              callbackInner(err, result[0].count || 0);
             }
           );
         },
