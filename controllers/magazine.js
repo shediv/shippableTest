@@ -700,7 +700,7 @@ var Magazine = function()
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
             {
-              if(result) count = result[0].count;
+              if(result[0].count !== undefined) count = result[0].count;
               else count = 0;
               callbackInner(err, count);
             }
