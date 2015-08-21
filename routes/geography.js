@@ -7,8 +7,6 @@ var router = express.Router();
 var GeoCtrl = new (require('../controllers/geography')).Geo();
 
 //API :- http://localhost:3000/media
-router.post("/", function(req, res){GeoCtrl.createGeography(req, res);});
-
-router.get("/underscore", function(req, res){MedCtrl.underscore(req, res);});
+router.post("/store", function(req, res){GeoCtrl.createGeography(req, res);});
 
 module.exports = router;
