@@ -39,7 +39,7 @@ var User = function()
 		);
 	};
 
-	self.socialSignin = function(req, res){
+	self.facebookSignin = function(req, res){
 		var user = req.body.user;
 		User.findOne(
 			{email: user.email},
@@ -49,10 +49,59 @@ var User = function()
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
+					if(result.fbid === undefined)
+					{
+						result.fbid = user.id;
+						result.save(err);
+					}
 				}
 				else
 				{
 					user.verified = 1;
+					user.fname = user.first_name; delete user.first_name;
+					user.lname = user.last_name; delete user.last_name;
+					user.fbid = user.id; delete user.id;
+					user.thumbnail = user.ppic = user.picture; delete user.picture;
+					// create a new Media
+					var newUser = User(user);
+
+					// save the Media
+					newUser.save(function(err) {
+						if (err) throw err;
+						var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
+						res.status(200).json({userId:newUser._id,token:token});
+						fs.mkdirSync('../public/images/users/'+newUser._id);
+					});
+				}
+			}
+		);
+	}
+
+	self.googleSignin = function(req, res){
+		var user = req.body.user;
+		User.findOne(
+			{email: user.email},
+			function(err, result){
+				if(err) throw err;
+				if(result) 
+				{
+					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
+					res.status(200).json({token:token});
+					if(result.gid === undefined)
+					{
+						result.gid = user.id;
+						result.save(err);
+					}
+				}
+				else
+				{
+					delete user.result;
+					user.verified = 1; delete user.verified_email;
+					user.fname = user.given_name; delete user.given_name;
+					user.lname = user.family_name; delete user.family_name;
+					user.gid = user.id; delete user.id;
+					user.fname = user.given_name; delete user.given_name;
+					user.thumbnail = user.ppic = user.picture; delete user.picture;
 					// create a new Media
 					var newUser = User(user);
 
