@@ -10,8 +10,8 @@ router.post("/signup", function(req, res){UserCtrl.store(req, res);});
 router.put("/", function(req, res){UserCtrl.update(req, res);});
 router.put("/uploadProfilePic", function(req, res){UserCtrl.uploadProfilePic(req, res);});
 router.post("/signin", function(req, res){UserCtrl.authenticate(req, res);});
-router.post("/facebookSignin", function(req, res){UserCtrl.socialSignin(req, res);});
-router.post("/googleSignin", function(req, res){UserCtrl.socialSignin(req, res);});
+router.post("/facebookSignin", function(req, res){UserCtrl.facebookSigninSignin(req, res);});
+router.post("/googleSignin", function(req, res){UserCtrl.googleSignin(req, res);});
 router.post("/current", function(req, res){UserCtrl.getSession(req, res);});
 router.post("/logout", function(req, res){UserCtrl.logout(req, res);});
 
