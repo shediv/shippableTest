@@ -133,13 +133,12 @@ var User = function()
 
 	self.getSession = function(req, res){
 		var token = req.body.token || req.query.token || req.headers['x-access-token'];
-		if(token)
-		{
-			jwt.verify(token, self.config.secret, function(err, decoded){
-				if(err) res.status(401).json("Invalid Token");
-				else res.status(200).json({user:decoded});
-			})
-		}
+		if(!token)
+			return res.status(401).json("Token not found");
+		jwt.verify(token, self.config.secret, function(err, decoded){
+			if(err) res.status(401).json("Invalid Token");
+			else res.status(200).json({user:decoded});
+		})
 	};
 
 	self.logout = function(req, res){

@@ -1145,7 +1145,7 @@ var Magazine = function()
           }
         }
       });
-      res.send(200).json(medias);
+      res.status(200).json(medias);
     });
   };
 };
