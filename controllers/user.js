@@ -6,7 +6,7 @@ var User = function()
 	var jwt = require('jsonwebtoken');
 	var fs = require('fs');
 	var imagick = require('imagemagick');
-	var mkdirp = require('mkdirp';)
+	var mkdirp = require('mkdirp');
 
 	this.passwordHash = require('password-hash');
 	this.config = require('../config.js');
