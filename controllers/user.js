@@ -6,6 +6,7 @@ var User = function()
 	var jwt = require('jsonwebtoken');
 	var fs = require('fs');
 	var imagick = require('imagemagick');
+	var mkdirp = require('mkdirp';)
 
 	this.passwordHash = require('password-hash');
 	this.config = require('../config.js');
@@ -72,7 +73,7 @@ var User = function()
 						if (err) throw err;
 						var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 						res.status(200).json({userId:newUser._id,token:token});
-						fs.mkdirSync('../public/images/users/'+newUser._id);
+						mkdirp('../public/images/users/'+newUser._id);
 					});
 				}
 			}
