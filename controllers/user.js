@@ -147,8 +147,9 @@ var User = function()
 			}, 
 			function(err, stdout, stderr)
 			{
-				console.log(err);
 			  if(err) throw err;
+			  if (err) throw err
+  			fs.writeFileSync("./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension, stdout, 'binary');
 			  console.log('resized image to fit within 200x200px');
 			  fs.unlinkSync(sourcePath);
 			  var images = {
