@@ -849,6 +849,7 @@ var Magazine = function()
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
         Category.findOne({ _id : results.categoryId }, function(err, category){
+          console.log(category);
           results.categoryName = category.name;
           res.status(200).json({magazine : results});
         });
