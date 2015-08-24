@@ -1144,10 +1144,79 @@ var Magazine = function()
               break;
           }
         }
+        medias[media._id].dates = scope.getTenDates(media.timeline.dates, media.attributes.frequency.value);
       });
       res.status(200).json(medias);
     });
   };
+
+    scope.getTenDates = function(dates, frequency){
+      var pubDates = [];
+      var dateObj = new Date();
+      var currMonth = dateObj.getMonth();
+      var currYear = dateObj.getFullYear();
+      
+      return scope.formDates(pubDates, dates, currMonth, currYear)
+    }
+
+    scope.formDates = function(pubDates, dates, currMonth, currYear)
+    {
+      for(key in dates)
+      {
+        if(months.indexOf(key) < currMonth) continue;
+        for(eachDate in dates[key])
+        {
+          dates[key][eachDate] = trim(dates[key][eachDate]);
+          switch(true)
+          {
+            case dates[key][eachDate] == 'Everyday':
+              var dateObj = new Date();
+              for(i = 1; i <= 10; i++) pubDates.push( dateObj.setDate( dateObj.getDate() + i ).format("dd-m-yy") );
+              break;
+            case CommonLib.isNumber(dates[key][eachDate]) == true:
+              var dateObj = new Date();
+              var cMonth = dateObj.getMonth();
+              var cDate = dateObj.getDate();
+              var cYear = dateObj.getFullYear();
+              dateObj.setMonth(currMonth);
+              dateObj.setFullYear(currYear);
+              dateObj.setDate( parseInt(dates[key][eachDate]) );
+              if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
+              else pubDates.push(dateObj.format("dd-m-yy"));
+              break;
+            case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
+              var dateObj = new Date();
+              if(dateObj.getFullYear != currYear) dateObj.setDate(1);
+              while(dateObj.getDay() !== 1) dateObj.setDate(dateObj.getDate() + 1);
+              while(dateObj.getMonth() === currMonth) 
+              {
+                pubDates.push(new Date(dateObj.getTime()).format("dd-mm-yy"));
+                dateObj.setDate(dateObj.getDate() + 7);
+              }
+              break;
+            default:
+              var pubDays = dates[key][eachDate].split(' ');
+              var week = ['','first','second','third','fourth'];
+              var weekDay = days.indexOf(pubDays[1]);
+              var dateObj = new Date();
+              var cMonth = dateObj.getMonth();
+              var cDate = dateObj.getDate();
+              var cYear = dateObj.getFullYear();
+              dateObj.setMonth(currMonth);
+              dateObj.setFullYear(currYear);
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              dateObj.setDate(dateObj.getDate() + (7 * days.indexOf(pubDays[0])) )
+              if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
+              else pubDates.push(dateObj.format("dd-m-yy"));
+          }
+          if(currMonth == 12) {currMonth++; currYear++;}
+          else currMonth++;
+        }
+      }
+      if(pubDates.length < 10) pubDates = scope.formDates(pubDates, dates, currMonth, currYear);
+      return pubDates;
+    }
 };
 
 
