@@ -744,22 +744,22 @@ var Magazine = function()
       });
     };
 
-    this.getFilters = function(req, res){
-      async.parallel({
-        categories: scope.getCategories,
-        geography : scope.getGeographies,
-        languages : scope.getLanguages,
-        targetGroups : scope.getTargetGroups,
-        frequencies : scope.getFrequencies,
-        mediaOptions: scope.getMediaOptions,
-        products : scope.getProducts
-      },
-      function(err, results) 
-      {
-        if(err) res.status(500).json({err:err});
-        res.status(200).json({filters:results});
-      });
-    };
+  this.getFilters = function(req, res){
+    async.parallel({
+      categories: scope.getCategories,
+      geography : scope.getGeographies,
+      languages : scope.getLanguages,
+      targetGroups : scope.getTargetGroups,
+      frequencies : scope.getFrequencies,
+      mediaOptions: scope.getMediaOptions,
+      products : scope.getProducts
+    },
+    function(err, results) 
+    {
+      if(err) res.status(500).json({err:err});
+      res.status(200).json({filters:results});
+    });
+  };
 
     scope.getCategories = function(callback){
       Media.aggregate(

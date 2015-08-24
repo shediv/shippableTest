@@ -138,7 +138,7 @@ var User = function()
 
 		source.pipe(dest);
 		source.on('end', function(){
-			res.status(200).json("success");
+			res.status(200).json({userId:result._id});
 			imagick.resize({
 			  srcPath: sourcePath,
 			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
@@ -152,7 +152,7 @@ var User = function()
 			  fs.unlinkSync(sourcePath);
 			  var images = {
 			  	ppic : destPath,
-			  	thumbnail : "/images/users/"+userId+"/"+userId+"_thumbnail."+extension
+			  	thumbnail : destPath//"/images/users/"+userId+"/"+userId+"_thumbnail."+extension
 			  };
 			  User.update({_id : userId}, images, {upsert : true}, function(err, result){
 					res.status(200).json({userId:result._id});
