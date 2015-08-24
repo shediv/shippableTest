@@ -32,7 +32,9 @@ var User = function()
 					newUser.save(function(err) {
 						if (err) throw err;
 						res.status(200).json({userId:newUser._id});
-						fs.mkdirSync('../public/images/users/'+newUser._id);
+						fs.mkdir('./public/images/users/'+newUser._id, function(err){
+							console.log(err);
+						})
 					});
 				}
 			}
@@ -128,22 +130,23 @@ var User = function()
 		var userId = req.body.userId;
 		var sourcePath = req.file.path;
 		var extension = req.file.originalname.split(".");
-		var extension = extension[extension.length - 1];
+		extension = extension[extension.length - 1];
 		var destPath = "/images/users/"+userId+"/"+userId+"_ppic."+extension;
 
 		var source = fs.createReadStream(sourcePath);
-		var dest = fs.createWriteStream('../public'+destPath);
+		var dest = fs.createWriteStream('./public'+destPath);
 
 		source.pipe(dest);
 		source.on('end', function(){
 			res.status(200).json("success");
 			imagick.resize({
 			  srcPath: sourcePath,
-			  dstPath: "../public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
+			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
 			  width:   200
 			}, 
 			function(err, stdout, stderr)
 			{
+				console.log(err);
 			  if(err) throw err;
 			  console.log('resized image to fit within 200x200px');
 			  fs.unlinkSync(sourcePath);
