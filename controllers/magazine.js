@@ -700,9 +700,7 @@ var Magazine = function()
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
             {
-              if(result[0] === undefined) count = 0;
-              else count = result[0].count;
-              callbackInner(err, count);
+                callbackInner(err, result[0].count);
             }
           );
         },
@@ -902,69 +900,51 @@ var Magazine = function()
   };
 
   this.relatedMedia = function(req, res){
-    var catIds = [];
-
-    async.series({
-      medias : function(callback){
-        Media.aggregate(
-          {
-            $match : {
-              categoryId : req.params.categoryId,
-              toolId : scope.toolId,
-              isActive: 1,
-              urlSlug : { $ne : req.query.urlSlug }
-            }
-          },
-          {
-            $project : {
-              urlSlug : 1,
-              name: 1,
-              thumbnail : 1,
-              attributes : 1,
-              categoryId : 1,
-              _id : 1,
-              logo: 1,
-              'print.mediaOptions.fullPage.1-2' : 1
-            }
-          },
-          function(err, results)
-          {
-            scope.yForumala(results, function(err, results){
-              results.map(function(m){
-                catIds.push(m.categoryId);
-              });
-              callback(err, results)       
-            });
-          }
-        );
-      },
-      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
-    },
-    function(err, result)
-    {
-      for(var i = 0; i < result.medias.length; i++)
+    //Query for maxReadership, maxNoOfPages, minFullPage
+    Media.aggregate(
       {
-        scope.yForumala(results, function(err, medias){
+        $match : {
+          categoryId : req.params.categoryId,
+          toolId : scope.toolId,
+          isActive: 1,
+          urlSlug : { $ne : req.query.urlSlug }
+        }
+      },
+      {
+        $project : {
+          urlSlug : 1,
+          name: 1,
+          thumbnail : 1,
+          attributes : 1,
+          categoryId : 1,
+          _id : 1,
+          logo: 1,
+          'print.mediaOptions.fullPage.1-2' : 1
+        }
+      },
+      function(err, results)
+      {
+        scope.yForumala(results, function(err, finalmedias){
 
-          for(var i = 0; i < medias.length; i++)
+          var categoryIds = [];
+
+          for(var i = 0; i < finalmedias.length; i++)
           {
             //medias.categoryName = medias.categories[medias[i].categoryId];
-            categoryIds.push(medias[i].categoryId);
+            categoryIds.push(finalmedias[i].categoryId);
           }
 
           CommonLib.getCategoryName(categoryIds, function(err, catNames){
-          for(var i=0; i<medias.length;i++){
-                medias[i].categoryName = catNames[medias[i].categoryId];
+            console.log(catNames);
+          for(var i=0; i<finalmedias.length;i++){
+                finalmedias[i].categoryName = catNames[finalmedias[i].categoryId];
           }
-          });    
-
-          res.status(200).json({magazines: medias});
+          
+          res.status(200).json({magazines: finalmedias});
+          });              
         });
       }
-      res.status(200).json({magazines:result.medias});
-    });
-
-    
+    );
   };
 
     scope.yForumala = function(medias, callback){
@@ -1062,107 +1042,12 @@ var Magazine = function()
               }
               for(var i=query.offset; i<(query.offset+query.limit);i++)
                 magazine.push(magazines[i]);
-              callback(null, {magazines: magazine,count:magazines.length});
+              callback(null, {magazines: magazines,count:magazines.length});
             });
           });
         }
       );
     };
-
-  this.getBestrates = function(req, res){
-    var medias = {};
-    var mediaIds = [];
-
-    for(key in req.body.medias)
-    {
-      var mediaId = req.body.medias[key]._id;
-      var type = req.body.medias[key].type;
-      var mediaOption = req.body.medias[key].mediaOption;
-      if(medias[req.body.medias[key]._id] === undefined)
-      {
-        mediaIds.push(mediaId);
-        medias[mediaId] = {};
-        medias[mediaId]['name'] = req.body.medias[key].name;
-        medias[mediaId]['urlSlug'] = req.body.medias[key].urlSlug;
-        medias[mediaId]['thumbnail'] = req.body.medias[key].thumbnail;
-        medias[mediaId]['logo'] = req.body.medias[key].logo;
-
-        medias[mediaId].mediaOptions = {};
-        medias[mediaId].mediaOptions[type] = {};
-        medias[mediaId].mediaOptions[type][mediaOption] = {};
-        medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-      }
-      else
-      {
-        if(medias[mediaId].mediaOptions[type][mediaOption] === undefined)
-        {
-          medias[mediaId].mediaOptions[type][mediaOption] = {};
-          medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-        }
-        else
-          medias[mediaId].mediaOptions[type][mediaOption].qty++;
-      }
-    }
-
-    Media.find({_id : {$in : mediaIds}}, function(err, result){
-      result.map(function(media){ 
-        for(key in medias[media._id].mediaOptions)
-        {
-          pricing[media._id][key] = {};
-          switch(key)
-          {
-            case 'print':
-              for(mo in medias[media._id].mediaOptions.print)
-              {
-                medias[media._id][key][mo] = {};
-                medias[media._id][key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
-
-                switch(true)
-                {
-                  case medias[media._id].mediaOptions.print[mo].qty <= 2:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
-                    break;
-                  case medias[media._id].mediaOptions.print[mo].qty <= 6:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
-                    break;
-                  case medias[media._id].mediaOptions.print[mo].qty > 6:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
-                    break;
-                }
-                
-                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              }
-              break;
-            case 'website':
-              for(mo in medias[media._id].mediaOptions[key])
-              {
-                medias[media._id][key][mo] = {};
-                medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
-                medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
-                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              }
-              break;
-            case 'email':
-              medias[media._id][key][mo] = {};
-              medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
-              medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
-              medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-              medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-              medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-              medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              break;
-          }
-        }
-      });
-      res.status(200).json(medias);
-    });
-  };
 };
 
 
