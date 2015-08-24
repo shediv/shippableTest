@@ -19,7 +19,7 @@ var Magazine = function()
 
   this.getMagazines = function(req, res){
     scope.params = JSON.parse(req.query.params);
-    if(scope.params.recommended === 'tma') 
+    if(scope.params.recommend === 'tma') 
     {
       var ProductInfo = [];
       var CS = [];
@@ -924,8 +924,21 @@ var Magazine = function()
       },
       function(err, results)
       {
-        scope.yForumala(results, function(err, results){
-          res.status(200).json({magazines: results});
+        scope.yForumala(results, function(err, medias){
+
+          for(var i = 0; i < medias.length; i++)
+          {
+            //medias.categoryName = medias.categories[medias[i].categoryId];
+            categoryIds.push(medias[i].categoryId);
+          }
+
+          CommonLib.getCategoryName(categoryIds, function(err, catNames){
+          for(var i=0; i<medias.length;i++){
+                medias[i].categoryName = catNames[medias[i].categoryId];
+          }
+          });    
+
+          res.status(200).json({magazines: medias});
         });
       }
     );
