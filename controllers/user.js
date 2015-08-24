@@ -141,9 +141,9 @@ var User = function()
 		source.on('end', function(){
 			res.status(200).json({userId:userId});
 			imagick.resize({
-			  srcPath: sourcePath,
+			  srcPath: './public'+destPath,
 			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
-			  width:   200
+			  width: 200
 			}, 
 			function(err, stdout, stderr)
 			{
