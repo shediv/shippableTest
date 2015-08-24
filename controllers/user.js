@@ -139,7 +139,7 @@ var User = function()
 			res.status(200).json("success");
 			imagick.resize({
 			  srcPath: sourcePath,
-			  dstPath: "..public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
+			  dstPath: "../public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
 			  width:   200
 			}, 
 			function(err, stdout, stderr)
