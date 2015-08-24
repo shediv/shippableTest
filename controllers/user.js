@@ -139,7 +139,7 @@ var User = function()
 
 		source.pipe(dest);
 		source.on('end', function(){
-			res.status(200).json({userId:result._id});
+			res.status(200).json({userId:userId});
 			imagick.resize({
 			  srcPath: sourcePath,
 			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
@@ -155,9 +155,7 @@ var User = function()
 			  	ppic : destPath,
 			  	thumbnail : destPath//"/images/users/"+userId+"/"+userId+"_thumbnail."+extension
 			  };
-			  User.update({_id : userId}, images, {upsert : true}, function(err, result){
-					res.status(200).json({userId:result._id});
-				})
+			  User.update({_id : userId}, images, {upsert : true}, function(err, result){})
 			});
 		});
 	};
