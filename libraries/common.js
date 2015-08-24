@@ -24,6 +24,11 @@ var Common = function()
 		return attributes;
 	};
 
+	this.isNumber = function(n){ 
+		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
+	} 
+
+
 };
 
 module.exports.Common = new Common();
