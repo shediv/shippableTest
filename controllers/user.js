@@ -153,7 +153,7 @@ var User = function()
 			  fs.unlinkSync(sourcePath);
 			  var images = {
 			  	ppic : destPath,
-			  	thumbnail : destPath//"/images/users/"+userId+"/"+userId+"_thumbnail."+extension
+			  	thumbnail : "/images/users/"+userId+"/"+userId+"_thumbnail."+extension
 			  };
 			  User.update({_id : userId}, images, {upsert : true}, function(err, result){})
 			});
