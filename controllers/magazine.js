@@ -19,7 +19,7 @@ var Magazine = function()
 
   this.getMagazines = function(req, res){
     scope.params = JSON.parse(req.query.params);
-    if(scope.params.recommend === 'tma') 
+    if(scope.params.recommended === 'tma') 
     {
       var ProductInfo = [];
       var CS = [];
