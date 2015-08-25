@@ -1119,7 +1119,7 @@ var Magazine = function()
       );
     };
 
-  this.getBestrates = function(req, res){
+  this.getBestRates = function(req, res){
     var medias = {};
     var mediaIds = [];
 
