@@ -1232,7 +1232,7 @@ var Magazine = function()
         if(months.indexOf(key) < currMonth) continue;
         for(eachDate in dates[key])
         {
-          dates[key][eachDate] = trim(dates[key][eachDate]);
+          dates[key][eachDate] = dates[key][eachDate].trim();
           switch(true)
           {
             case dates[key][eachDate] == 'Everyday':
