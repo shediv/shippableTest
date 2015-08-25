@@ -1277,7 +1277,7 @@ var Magazine = function()
               if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
               else pubDates.push(dateObj);
           }
-          if(currMonth == 12) {currMonth++; currYear++;}
+          if(currMonth == 12) {currMonth = 1; currYear++;}
           else currMonth++;
         }
       }
