@@ -1052,7 +1052,7 @@ var Magazine = function()
               }
               //console.log(magazines);
               if(magazines.length>query.offset) {
-                for (var i = query.offset; i < (query.offset + query.limit); i++) {
+                for (var i = query.offset; i<(query.offset + query.limit); i++) {
                   if(magazines[i] != undefined) {
                     magazine.push(magazines[i]);
                   }
