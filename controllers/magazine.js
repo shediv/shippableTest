@@ -355,7 +355,7 @@ var Magazine = function()
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
 
-              res.status(200).json({count:FinalData.length, magazine:FinalData});
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
             });
             
         }
@@ -471,7 +471,7 @@ var Magazine = function()
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
 
-              res.status(200).json({count:FinalData.length, magazine:FinalData});
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
             });
 
             //res.status(200).json({count:FinalData.length, magazine:FinalData});
@@ -575,7 +575,7 @@ var Magazine = function()
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
 
-              res.status(200).json({count:FinalData.length, magazine:FinalData});
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
             });
 
 
