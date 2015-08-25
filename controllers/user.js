@@ -166,6 +166,7 @@ var User = function()
 		User.findOne(
 			{email: user.username},
 			function(err, result){
+				result = result.toObject();
 				if (err) throw err;
 				if(!result) res.status(404).json("User Does Not Exist");
 				else
