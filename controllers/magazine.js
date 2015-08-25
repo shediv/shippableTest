@@ -1229,7 +1229,6 @@ var Magazine = function()
     {
       for(key in dates)
       {
-        console.log(months.indexOf(key),currMonth);
         if(months.indexOf(key) < currMonth) continue;
         for(eachDate in dates[key])
         {
@@ -1248,6 +1247,7 @@ var Magazine = function()
               dateObj.setMonth(currMonth);
               dateObj.setFullYear(currYear);
               dateObj.setDate( parseInt(dates[key][eachDate]) );
+              console.log(cDate,cMonth,cYear,parseInt(dates[key][eachDate]),currMonth,currYear);
               if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
               else pubDates.push(dateObj);
               break;
