@@ -1039,14 +1039,18 @@ var Magazine = function()
                     return a.attributes.circulation.value > b.attributes.circulation.value;
                   });
                   break;
-                case "category":
-                  magazines.sort(function(a ,b){
-                    return a.categoryName < b.categoryName;
-                  });
-                  break;
+                  case "category":
+                    magazines.sort(function(a ,b){
+                      return a.categoryName < b.categoryName;
+                    });
+                    break;
               }
-              for(var i=query.offset; i<(query.offset+query.limit);i++)
+
+               console.log(magazines.length);
+              for(var i=query.offset; i<(query.offset+query.limit);i++) {
+
                 magazine.push(magazines[i]);
+              }
               callback(null, {magazines: magazine,count:magazines.length});
             });
           });
