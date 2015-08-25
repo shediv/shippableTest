@@ -1229,7 +1229,7 @@ var Magazine = function()
     {
       for(key in dates)
       {
-        console.log(key,currMonth);
+        console.log(months.indexOf(key),currMonth);
         if(months.indexOf(key) < currMonth) continue;
         for(eachDate in dates[key])
         {
