@@ -75,10 +75,12 @@ var Magazine = function()
       function(err, result)
       {
         //Match the keywords
+        if(ProductInfo[0].keywords){
         for(var i= 0; i < result.medias.length; i++)
         {
           var check = getMatch(ProductInfo[0].keywords, result.medias[i].keywords);
           if(check.length > 0) CS.push(result.medias[i]);
+        }
         }
 
         if(CS.length > 0)
@@ -341,8 +343,24 @@ var Magazine = function()
                           });
               break;
             }
-            res.status(200).json({count:FinalData.length, magazine:FinalData});
-          }
+
+            var catIds = [];
+            for ( var i = 0; i < FinalData.length; i++ ) 
+            {
+            catIds.push(FinalData[i].categoryId);
+            }
+
+            CommonLib.getCategoryName(catIds, function(err, catNames){
+              for(var i=0; i<FinalData.length;i++){
+                FinalData[i].categoryName = catNames[FinalData[i].categoryId];
+              }
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
+            });
+            
+        }
+
+
+
           //Calculte Y value for the mediaCategoryBuckets1_nonGeo
           var YdataMediaCategoryBuckets1_nonGeo = [];
           if(mediaCategoryBuckets1_nonGeo.length > 0) 
@@ -440,7 +458,21 @@ var Magazine = function()
                 });
                 break;
             }
-            res.status(200).json({count:FinalData.length, magazine:FinalData});
+            
+            var catIds = [];
+            for ( var i = 0; i < FinalData.length; i++ ) 
+            {
+            catIds.push(FinalData[i].categoryId);
+            }
+
+            CommonLib.getCategoryName(catIds, function(err, catNames){
+              for(var i=0; i<FinalData.length;i++){
+                FinalData[i].categoryName = catNames[FinalData[i].categoryId];
+              }
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
+            });
+
+            //res.status(200).json({count:FinalData.length, magazine:FinalData});
           }
 
           //Divide  Non Category Buckets Based on All India and others
@@ -529,7 +561,22 @@ var Magazine = function()
               });
               break;
           }
-          res.status(200).json({count:FinalData.length, magazines:FinalData});
+          
+          var catIds = [];
+            for ( var i = 0; i < FinalData.length; i++ ) 
+            {
+            catIds.push(FinalData[i].categoryId);
+            }
+
+            CommonLib.getCategoryName(catIds, function(err, catNames){
+              for(var i=0; i<FinalData.length;i++){
+                FinalData[i].categoryName = catNames[FinalData[i].categoryId];
+              }
+              res.status(200).json({count:FinalData.length, magazines:FinalData});
+            });
+
+
+          //res.status(200).json({count:FinalData.length, magazines:FinalData});
         }
       );
     } 
@@ -554,6 +601,7 @@ var Magazine = function()
       ],
       function (err, result) 
       {
+
         for(key in result.magazines)
           result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
         res.status(200).json(result);
@@ -713,9 +761,9 @@ var Magazine = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
+			case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
+			case 'category': query.sortBy = { 'categoryId' : -1}; break;
             case 'circulation': query.sortBy = { 'attributes.circulation.value' : -1}; break;
-            case 'readership': query.sortBy = { 'attributes.readership.value' : -1}; break;
-            case 'price': query.sortBy = { 'mediaOptions.print.fullPage.1-2' : -1}; break;
           }
           query.sortBy._id = 1;
           Media.aggregate(
@@ -1043,15 +1091,28 @@ var Magazine = function()
                     return a.attributes.circulation.value > b.attributes.circulation.value;
                   });
                   break;
-                case "category":
-                  magazines.sort(function(a ,b){
-                    return a.categoryName < b.categoryName;
-                  });
-                  break;
+                  case "category":
+                    magazines.sort(function(a ,b){
+                      return a.categoryName < b.categoryName;
+                    });
+                    break;
               }
-              for(var i=query.offset; i<(query.offset+query.limit);i++)
-                magazine.push(magazines[i]);
-              callback(null, {magazines: magazine,count:magazines.length});
+              //console.log(magazines);
+              if(magazines.length>query.offset) {
+                for (var i = query.offset; i<(query.offset + query.limit); i++) {
+                  if(magazines[i] != undefined) {
+                    magazine.push(magazines[i]);
+                  }
+                }
+                //console.log("data from the loop")
+              }
+              else{
+                callback(null, {magazines: magazines,count:magazines.length});
+                //console.log("data outside the loop");
+              }
+              callback(null, {magazines:magazine,count:magazines.length});
+
+
             });
           });
         }
