@@ -1158,7 +1158,7 @@ var Magazine = function()
       result.map(function(media){ 
         for(key in medias[media._id].mediaOptions)
         {
-          pricing[media._id][key] = {};
+          medias[media._id][key] = {};
           switch(key)
           {
             case 'print':
