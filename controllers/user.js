@@ -6,6 +6,7 @@ var User = function()
 	var jwt = require('jsonwebtoken');
 	var fs = require('fs');
 	var imagick = require('imagemagick');
+	var mkdirp = require('mkdirp');
 
 	this.passwordHash = require('password-hash');
 	this.config = require('../config.js');
@@ -32,7 +33,9 @@ var User = function()
 					newUser.save(function(err) {
 						if (err) throw err;
 						res.status(200).json({userId:newUser._id});
-						fs.mkdirSync('../public/images/users/'+newUser._id);
+						fs.mkdir('./public/images/users/'+newUser._id, function(err){
+							console.log(err);
+						})
 					});
 				}
 			}
@@ -70,7 +73,7 @@ var User = function()
 						if (err) throw err;
 						var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 						res.status(200).json({userId:newUser._id,token:token});
-						fs.mkdirSync('../public/images/users/'+newUser._id);
+						mkdirp('../public/images/users/'+newUser._id);
 					});
 				}
 			}
@@ -128,32 +131,32 @@ var User = function()
 		var userId = req.body.userId;
 		var sourcePath = req.file.path;
 		var extension = req.file.originalname.split(".");
-		var extension = extension[extension.length - 1];
+		extension = extension[extension.length - 1];
 		var destPath = "/images/users/"+userId+"/"+userId+"_ppic."+extension;
 
 		var source = fs.createReadStream(sourcePath);
-		var dest = fs.createWriteStream('../public'+destPath);
+		var dest = fs.createWriteStream('./public'+destPath);
 
 		source.pipe(dest);
 		source.on('end', function(){
-			res.status(200).json({userId:result._id});
+			res.status(200).json({userId:userId});
 			imagick.resize({
-			  srcPath: sourcePath,
-			  dstPath: "../public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
-			  width:   200
+			  srcPath: './public'+destPath,
+			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
+			  width: 200
 			}, 
 			function(err, stdout, stderr)
 			{
 			  if(err) throw err;
+			  if (err) throw err
+  			fs.writeFileSync("./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension, stdout, 'binary');
 			  console.log('resized image to fit within 200x200px');
 			  fs.unlinkSync(sourcePath);
 			  var images = {
 			  	ppic : destPath,
-			  	thumbnail : destPath//"/images/users/"+userId+"/"+userId+"_thumbnail."+extension
+			  	thumbnail : "/images/users/"+userId+"/"+userId+"_thumbnail."+extension
 			  };
-			  User.update({_id : userId}, images, {upsert : true}, function(err, result){
-					res.status(200).json({userId:result._id});
-				})
+			  User.update({_id : userId}, images, {upsert : true}, function(err, result){})
 			});
 		});
 	};
