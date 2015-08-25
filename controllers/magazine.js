@@ -554,6 +554,7 @@ var Magazine = function()
       ],
       function (err, result) 
       {
+
         for(key in result.magazines)
           result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
         res.status(200).json(result);
@@ -1049,13 +1050,22 @@ var Magazine = function()
                     });
                     break;
               }
-
-               console.log(magazines.length);
-              for(var i=query.offset; i<(query.offset+query.limit);i++) {
-
-                magazine.push(magazines[i]);
+              //console.log(magazines);
+              if(magazines.length>query.offset) {
+                for (var i = query.offset; i < (query.offset + query.limit); i++) {
+                  if(magazines[i] != undefined) {
+                    magazine.push(magazines[i]);
+                  }
+                }
+                //console.log("data from the loop")
               }
-              callback(null, {magazines: magazine,count:magazines.length});
+              else{
+                callback(null, {magazines: magazines,count:magazines.length});
+                //console.log("data outside the loop");
+              }
+              callback(null, {magazines:magazine,count:magazines.length});
+
+
             });
           });
         }
