@@ -1,16 +1,13 @@
 /**
- * Created by srujan on 20/01/15.
+ * Created by goku on 25/08/15.
  */
 
 var express = require('express');
 var router = express.Router();
-var MagCtrl = new (require('../controllers/magazine')).Mag();
+var CinemaCtrl = new (require('../controllers/cinema')).Cinema();
 
-router.get("/", function(req, res){  MagCtrl.getMagazines(req, res); });
-router.get("/getFilters", function(req, res){ MagCtrl.getFilters(req, res); });
-router.get("/getBestRates", function(req, res){ MagCtrl.getFilters(req, res); });
-router.get("/compare", function(req, res){ MagCtrl.compare(req, res); });
-router.get("/related/:categoryId", function(req, res){ MagCtrl.relatedMedia(req, res) });
-router.get("/:urlSlug", function(req, res){ MagCtrl.show(req, res); });
+router.get("/", function(req, res){  CinemaCtrl.getCinemas(req, res); });
+router.get("/getFilters", function(req, res){ CinemaCtrl.getFilters(req, res); });
+router.get("/getBestRates", function(req, res){ CinemaCtrl.getFilters(req, res); });
 
 module.exports = router;
