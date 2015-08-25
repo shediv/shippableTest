@@ -574,7 +574,6 @@ var Magazine = function()
               for(var i=0; i<FinalData.length;i++){
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
-
               res.status(200).json({count:FinalData.length, magazines:FinalData});
             });
 
