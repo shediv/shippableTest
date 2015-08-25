@@ -1234,6 +1234,7 @@ var Magazine = function()
         for(eachDate in dates[key])
         {
           dates[key][eachDate] = dates[key][eachDate].trim();
+          return;
           switch(true)
           {
             case dates[key][eachDate] == 'Everyday':
