@@ -13,15 +13,15 @@ var Magazine = function()
   
   this.params = {};
   this.toolName = "magazine";
-  var scope = this;
+  var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
-    scope.toolId = result._id.toString();
+    self.toolId = result._id.toString();
   });
 
   this.getMagazines = function(req, res){
-    scope.params = JSON.parse(req.query.params);
-    if(scope.params.recommended === 'tma') 
+    self.params = JSON.parse(req.query.params);
+    if(self.params.recommended === 'tma') 
     {
       var ProductInfo = [];
       var CS = [];
@@ -36,7 +36,7 @@ var Magazine = function()
       
       async.series({
         product : function(callback){
-          Products.findOne({_id: scope.params.productId}, function(err, result){
+          Products.findOne({_id: self.params.productId}, function(err, result){
             ProductInfo.push(result.toObject());
             callback(err, result);
           });
@@ -187,7 +187,7 @@ var Magazine = function()
         {
           for(var i= 0; i < Object.keys(mediacategorybuckets[0]).length; i++)
           {
-            if(mediacategorybuckets[0][i].geography == scope.params.geography)
+            if(mediacategorybuckets[0][i].geography == self.params.geography)
             {
               mediaCategoryBuckets1_Geo.push(mediacategorybuckets[0][i]);
             }
@@ -205,7 +205,7 @@ var Magazine = function()
         {
           for(var i= 0; i < Object.keys(mediacategorybuckets[1]).length; i++)
           {
-            if(mediacategorybuckets[1][i].geography == scope.params.geography)
+            if(mediacategorybuckets[1][i].geography == self.params.geography)
             {
               mediaCategoryBuckets2_Geo.push(mediacategorybuckets[1][i]);
             }
@@ -223,7 +223,7 @@ var Magazine = function()
         {
           for(var i= 0; i < Object.keys(mediacategorybuckets[2]).length; i++)
           {
-            if(mediacategorybuckets[2][i].geography == scope.params.geography){
+            if(mediacategorybuckets[2][i].geography == self.params.geography){
               mediaCategoryBuckets3_Geo.push(mediacategorybuckets[2][i]);
             }
             else
@@ -240,7 +240,7 @@ var Magazine = function()
         {
           for(var i= 0; i < Object.keys(mediacategorybuckets[3]).length; i++)
           {
-            if(mediacategorybuckets[3][i].geography == scope.params.geography)
+            if(mediacategorybuckets[3][i].geography == self.params.geography)
             {
               mediaCategoryBuckets4_Geo.push(mediacategorybuckets[3][i]);
             }
@@ -322,7 +322,7 @@ var Magazine = function()
         if(CountOfMedia == 8)
         {
           //Sort final data base on sort by option
-          switch (scope.params.sortBy)
+          switch (self.params.sortBy)
           {
             case 'views': 
               FinalData = FinalData.sort(function(a,b){ return b.views - a.views; }); 
@@ -413,7 +413,7 @@ var Magazine = function()
           if(CountOfMedia == 8)
           {
             //Sort final data base on sort by option
-            switch (scope.params.sortBy)
+            switch (self.params.sortBy)
             {
               case 'views':          
                 FinalData = FinalData.sort(function(a,b){                
@@ -502,7 +502,7 @@ var Magazine = function()
           }
 
           //Sort final data base on sort by option
-          switch (scope.params.sortBy)
+          switch (self.params.sortBy)
           {
             case 'views': 
               FinalData = FinalData.sort(function(a,b){                
@@ -538,17 +538,17 @@ var Magazine = function()
       async.waterfall([
         function(callback)
         {
-          callback(null, scope.applyFilters());
+          callback(null, self.applyFilters());
         },
         function(query, callback)
         {
-          if(scope.params.recommended =="top3")
+          if(self.params.recommended =="top3")
           {
-            scope.top3(query, callback);
+            self.top3(query, callback);
           } 
           else 
           {
-            scope.sortFilteredMedia(query, callback);
+            self.sortFilteredMedia(query, callback);
           }
         }
       ],
@@ -653,11 +653,11 @@ var Magazine = function()
 
     //................................ test ......................//
 
-    scope.applyFilters = function(){
+    self.applyFilters = function(){
       var query = {};
-      query.sortBy = scope.params.sortBy || 'views';
-      query.offset = scope.params.offset || 0;
-      query.limit = scope.params.limit || 9;
+      query.sortBy = self.params.sortBy || 'views';
+      query.offset = self.params.offset || 0;
+      query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
         'categories' : 'categoryId',
@@ -681,19 +681,19 @@ var Magazine = function()
       };
 
       Object.keys(filters).map(function(value){
-        if(scope.params.filters[value].length)
-          query.match[filters[value]] = {'$in': scope.params.filters[value]};
+        if(self.params.filters[value].length)
+          query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      scope.params.filters.mediaOptions.forEach(function(value, key){
+      self.params.filters.mediaOptions.forEach(function(value, key){
         query.match['mediaOptions.'+value] = { $exists : 1};
       });
       query.match.isActive = 1;
-      query.match.toolId = scope.toolId;
+      query.match.toolId = self.toolId;
       return query;
     };
 
-    scope.sortFilteredMedia = function(query, callback){
+    self.sortFilteredMedia = function(query, callback){
       async.parallel({
         count : function(callbackInner)
         {
@@ -746,13 +746,13 @@ var Magazine = function()
 
   this.getFilters = function(req, res){
     async.parallel({
-      categories: scope.getCategories,
-      geography : scope.getGeographies,
-      languages : scope.getLanguages,
-      targetGroups : scope.getTargetGroups,
-      frequencies : scope.getFrequencies,
-      mediaOptions: scope.getMediaOptions,
-      products : scope.getProducts
+      categories: self.getCategories,
+      geography : self.getGeographies,
+      languages : self.getLanguages,
+      targetGroups : self.getTargetGroups,
+      frequencies : self.getFrequencies,
+      mediaOptions: self.getMediaOptions,
+      products : self.getProducts
     },
     function(err, results) 
     {
@@ -761,9 +761,9 @@ var Magazine = function()
     });
   };
 
-    scope.getCategories = function(callback){
+    self.getCategories = function(callback){
       Media.aggregate(
-        {$match: {toolId:scope.toolId, isActive : 1}},
+        {$match: {toolId:self.toolId, isActive : 1}},
         {$group : { _id : '$categoryId', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -776,9 +776,9 @@ var Magazine = function()
       );
     };
 
-    scope.getGeographies = function(callback){
+    self.getGeographies = function(callback){
       Media.aggregate(
-        {$match: {toolId:scope.toolId, geography: { $exists: 1}, isActive : 1}},
+        {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
         {$unwind: '$geography'},
         {$group : { _id : '$geography', count : {$sum : 1}}},
         function(error, results) 
@@ -792,9 +792,9 @@ var Magazine = function()
       );
     };
 
-    scope.getLanguages = function(callback){
+    self.getLanguages = function(callback){
       Media.aggregate(
-        {$match: {toolId:scope.toolId, "attributes.language.value": { $exists: 1}, isActive : 1}},
+        {$match: {toolId:self.toolId, "attributes.language.value": { $exists: 1}, isActive : 1}},
         {$group : { _id : '$attributes.language.value', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -803,9 +803,9 @@ var Magazine = function()
       );
     };
 
-    scope.getTargetGroups = function(callback){
+    self.getTargetGroups = function(callback){
       Media.aggregate(
-        {$match: {toolId:scope.toolId, targetGroup: { $exists: 1}, isActive : 1}},
+        {$match: {toolId:self.toolId, targetGroup: { $exists: 1}, isActive : 1}},
         {$unwind: '$targetGroup'},
         {$group : { _id : '$targetGroup', count : {$sum : 1}}},
         function(error, results) 
@@ -815,9 +815,9 @@ var Magazine = function()
       );
     };
 
-    scope.getFrequencies = function(callback){
+    self.getFrequencies = function(callback){
       Media.aggregate(
-        {$match: {toolId:scope.toolId, "attributes.frequency": { $exists: 1}, isActive : 1}},
+        {$match: {toolId:self.toolId, "attributes.frequency": { $exists: 1}, isActive : 1}},
         {$group : { _id : '$attributes.frequency.value', count : {$sum : 1}}},
         function(error, results)
         {
@@ -826,7 +826,7 @@ var Magazine = function()
       );
     };
 
-    scope.getMediaOptions = function(callback){
+    self.getMediaOptions = function(callback){
       //Hardcoding the values for now, as the frequency of changes is very low
       var mediaOptions = [
         {'_id' : 'print', 'name' : 'Print'},
@@ -836,7 +836,7 @@ var Magazine = function()
       callback(null, mediaOptions);
     };
 
-    scope.getProducts = function(callback){
+    self.getProducts = function(callback){
       Products.find({}, '_id name', function(error, results){
         callback(error, results);
       });
@@ -916,7 +916,7 @@ var Magazine = function()
           {
             $match : {
               categoryId : req.params.categoryId,
-              toolId : scope.toolId,
+              toolId : self.toolId,
               isActive: 1,
               urlSlug : { $ne : req.query.urlSlug }
             }
@@ -935,7 +935,7 @@ var Magazine = function()
           },
           function(err, results)
           {
-            scope.yForumala(results, function(err, results){
+            self.yForumala(results, function(err, results){
               results.map(function(m){
                 catIds.push(m.categoryId);
               });
@@ -956,13 +956,13 @@ var Magazine = function()
     });
   };
 
-    scope.yForumala = function(medias, callback){
+    self.yForumala = function(medias, callback){
       //Query for maxReadership, maxNoOfPages, minFullPage
       Media.aggregate(
         {
           $match : {
             categoryId : medias[0].categoryId,
-            toolId : scope.toolId,
+            toolId : self.toolId,
             isActive: 1
           }
         },
@@ -1002,7 +1002,7 @@ var Magazine = function()
       );
     };
 
-    scope.top3= function(query,callback){
+    self.top3= function(query,callback){
       var magazines = [];
       var magazine=[];
       Media.aggregate(
@@ -1012,7 +1012,7 @@ var Magazine = function()
         function(err, results)
         {
           async.each(results, function (group ,callback_each){
-            scope.yForumala(group.medias, function (err, res){
+            self.yForumala(group.medias, function (err, res){
               for(var i=0; i < res.length; i++)
                 magazines.push(res[i]);    
               callback_each(err);
@@ -1148,22 +1148,22 @@ var Magazine = function()
               break;
           }
         }
-        medias[media._id].dates = scope.getTenDates(media.timeline.dates, media.attributes.frequency.value);
+        medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
       });
       res.status(200).json(medias);
     });
   };
 
-    scope.getTenDates = function(dates, frequency){
+    self.getTenDates = function(dates, frequency){
       var pubDates = [];
       var dateObj = new Date();
       var currMonth = dateObj.getMonth();
       var currYear = dateObj.getFullYear();
       
-      return scope.formDates(pubDates, dates, currMonth, currYear)
+      return self.formDates(pubDates, dates, currMonth, currYear)
     }
 
-    scope.formDates = function(pubDates, dates, currMonth, currYear)
+    self.formDates = function(pubDates, dates, currMonth, currYear)
     {
       for(key in dates)
       {
@@ -1218,7 +1218,7 @@ var Magazine = function()
           else currMonth++;
         }
       }
-      if(pubDates.length < 10) pubDates = scope.formDates(pubDates, dates, currMonth, currYear);
+      if(pubDates.length < 10) pubDates = self.formDates(pubDates, dates, currMonth, currYear);
       return pubDates;
     }
 };
