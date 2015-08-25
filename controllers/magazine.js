@@ -1156,6 +1156,7 @@ var Magazine = function()
 
     Media.find({_id : {$in : mediaIds}}, function(err, result){
       result.map(function(media){ 
+        media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
           medias[media._id][key] = {};
