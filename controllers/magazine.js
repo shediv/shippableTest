@@ -1248,7 +1248,7 @@ var Magazine = function()
               dateObj.setFullYear(currYear);
               dateObj.setDate( parseInt(dates[key][eachDate]) );
               if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
-              else pubDates.push(dateObj.format("dd-m-yy"));
+              else pubDates.push(dateObj);
               break;
             case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
               var dateObj = new Date();
@@ -1256,7 +1256,7 @@ var Magazine = function()
               while(dateObj.getDay() !== 1) dateObj.setDate(dateObj.getDate() + 1);
               while(dateObj.getMonth() === currMonth) 
               {
-                pubDates.push(new Date(dateObj.getTime()).format("dd-mm-yy"));
+                pubDates.push(new Date(dateObj.getTime()));
                 dateObj.setDate(dateObj.getDate() + 7);
               }
               break;
@@ -1274,7 +1274,7 @@ var Magazine = function()
               while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
               dateObj.setDate(dateObj.getDate() + (7 * days.indexOf(pubDays[0])) )
               if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
-              else pubDates.push(dateObj.format("dd-m-yy"));
+              else pubDates.push(dateObj);
           }
           if(currMonth == 12) {currMonth++; currYear++;}
           else currMonth++;
