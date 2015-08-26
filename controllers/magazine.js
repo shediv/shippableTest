@@ -1158,13 +1158,13 @@ var Magazine = function()
         media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
-          medias[media._id][key] = [];
+          medias[media._id][key] = {};
           switch(key)
           {
             case 'print':
               for(mo in medias[media._id].mediaOptions.print)
               {
-                medias[media._id][key][mo] = {};
+                medias[media._id][key][mo] = [];
                 medias[media._id][key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
 
                 switch(true)
@@ -1191,7 +1191,7 @@ var Magazine = function()
             case 'website':
               for(mo in medias[media._id].mediaOptions[key])
               {
-                medias[media._id][key][mo] = {};
+                medias[media._id][key][mo] = [];
                 medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
                 medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
                 medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
@@ -1203,7 +1203,7 @@ var Magazine = function()
               }
               break;
             case 'email':
-              medias[media._id][key][mo] = {};
+              medias[media._id][key][mo] = [];
               medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
               medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
               medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
