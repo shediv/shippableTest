@@ -1158,7 +1158,7 @@ var Magazine = function()
         media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
-          medias[media._id][key] = {};
+          medias[media._id][key] = [];
           switch(key)
           {
             case 'print':
