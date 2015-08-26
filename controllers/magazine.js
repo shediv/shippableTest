@@ -1152,12 +1152,12 @@ var Magazine = function()
     }
 
     Media.find({_id : {$in : mediaIds}}, function(err, result){
+      medias['totalGrossPrice'] = 0;
+      medias['totalGrossSaving'] = 0;
       result.map(function(media){ 
         media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
-          medias[media._id]['totalGrossPrice'] = 0;
-          medias[media._id]['totalGrossSaving'] = 0;
           medias[media._id][key] = {};
           switch(key)
           {
@@ -1184,8 +1184,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
+                medias['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+                medias['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               }
               break;
             case 'website':
@@ -1198,8 +1198,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
+                medias['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+                medias['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               }
               break;
             case 'email':
@@ -1210,8 +1210,8 @@ var Magazine = function()
               medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
               medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
               medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
-              medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
+              medias['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+              medias['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               break;
           }
         }
