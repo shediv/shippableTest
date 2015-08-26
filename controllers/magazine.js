@@ -1160,8 +1160,8 @@ var Magazine = function()
             case 'website':
               for(mo in medias[media._id].mediaOptions[key])
               {
-                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
-                medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions[mo].pricing;
                 medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
                 medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
                 medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
@@ -1171,8 +1171,8 @@ var Magazine = function()
               }
               break;
             case 'email':
-              medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
-              medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions.pricing;
               medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
               medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
               medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
