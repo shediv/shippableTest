@@ -1156,6 +1156,8 @@ var Magazine = function()
         media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
+          medias[media._id]['totalGrossPrice'] = 0;
+          medias[media._id]['totalGrossSaving'] = 0;
           medias[media._id][key] = {};
           switch(key)
           {
@@ -1182,6 +1184,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
+                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
               }
               break;
             case 'website':
@@ -1194,6 +1198,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
+                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
               }
               break;
             case 'email':
@@ -1204,6 +1210,8 @@ var Magazine = function()
               medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
               medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
               medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
+              medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
+              medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
               break;
           }
         }
@@ -1223,127 +1231,62 @@ var Magazine = function()
       return self.formDates(pubDates, dates, currMonth, currYear, frequency)
     }
 
-    var i = 0;
-    var in1 = 0;
-
     self.formDates = function(pubDates, dates, currMonth, currYear, frequency)
     {
-      var datesLength = 0;
-      for(key in dates) datesLength++;
-      if(datesLength == 1)
+      for(key in dates)
       {
-        for(key in dates)
+        currMonth = months.indexOf(key);
+        for(eachDate in dates[key])
         {
-          currMonth = months.indexOf(key);
-          if(months.indexOf(key) == currMonth) 
+          dates[key][eachDate] = dates[key][eachDate].trim();
+          switch(true)
           {
-            for(eachDate in dates[key])
-            {
-              dates[key][eachDate] = dates[key][eachDate].trim();
-              switch(true)
+            case dates[key][eachDate] == 'Everyday':
+              for(i = 1; i <= 10; i++) 
               {
-                case CommonLib.isNumber(dates[key][eachDate]) == true:
-                  var dateObj = new Date();
-                  var cMonth = dateObj.getMonth();
-                  var cDate = dateObj.getDate();
-                  var cYear = dateObj.getFullYear();
-                  dateObj.setFullYear(currYear);
-                  dateObj.setMonth(currMonth);
-                  dateObj.setDate( parseInt(dates[key][eachDate]) );
-                  var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
-                  if( daysDiff > 0 )pubDates.push(dateObj);
-                  break;
-                default:
-                  var pubDays = dates[key][eachDate].split(' ');
-                  var weekDay = days.indexOf(pubDays[1].toLowerCase());
-                  var dateObj = new Date();
-                  var cMonth = dateObj.getMonth();
-                  var cDate = dateObj.getDate();
-                  var cYear = dateObj.getFullYear();
-                  dateObj.setMonth(currMonth);
-                  dateObj.setFullYear(currYear);
-                  dateObj.setDate(1);
-                  while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
-                  dateObj.setDate(dateObj.getDate() + (7 * week.indexOf(pubDays[0].toLowerCase())) )
-                  var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
-                  if( daysDiff > 0 ) pubDates.push(dateObj);
+                var dateObj = new Date();
+                dateObj.setDate( dateObj.getDate() + i );
+                pubDates.push(dateObj);
               }
-            }
+              break;
+            case CommonLib.isNumber(dates[key][eachDate]) == true:
+              var dateObj = new Date();
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              dateObj.setDate( parseInt(dates[key][eachDate]) );
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 )pubDates.push(dateObj);
+              break;
+            case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
+              var dateObj = new Date();
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              while(dateObj.getMonth() === currMonth) 
+              {
+                var daysDiff = parseInt( (dateObj - new Date()) / dayConversion ); 
+                if( daysDiff > 0 ) pubDates.push(new Date(dateObj.getTime()));
+                dateObj.setDate(dateObj.getDate() + 7);
+              }
+              break;
+            default:
+              var pubDays = dates[key][eachDate].split(' ');
+              var weekDay = days.indexOf(pubDays[1].toLowerCase());
+              var dateObj = new Date();
+              dateObj.setMonth(currMonth);
+              dateObj.setFullYear(currYear);
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              dateObj.setDate(dateObj.getDate() + (7 * week.indexOf(pubDays[0].toLowerCase())) )
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 ) pubDates.push(dateObj);
           }
+          if(pubDates.length >= 10) return pubDates;
         }
       }
-      else
-      {
-        for(key in dates)
-        {
-          currMonth = months.indexOf(key);
-          for(eachDate in dates[key])
-          {
-            dates[key][eachDate] = dates[key][eachDate].trim();
-            switch(true)
-            {
-              case dates[key][eachDate] == 'Everyday':
-                for(i = 1; i <= 10; i++) 
-                {
-                  var dateObj = new Date();
-                  dateObj.setDate( dateObj.getDate() + i );
-                  pubDates.push(dateObj);
-                }
-                break;
-              case CommonLib.isNumber(dates[key][eachDate]) == true:
-                var dateObj = new Date();
-                var cMonth = dateObj.getMonth();
-                var cDate = dateObj.getDate();
-                var cYear = dateObj.getFullYear();
-                dateObj.setFullYear(currYear);
-                dateObj.setMonth(currMonth);
-                dateObj.setDate( parseInt(dates[key][eachDate]) );
-                var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
-                if( daysDiff > 0 )pubDates.push(dateObj);
-                break;
-              case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
-                var dateObj = new Date();
-                dateObj.setFullYear(currYear);
-                dateObj.setMonth(currMonth);
-                var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
-                dateObj.setDate(1);
-                while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
-                console.log('weekday - ',weekDay);
-                while(dateObj.getMonth() === currMonth) 
-                {
-                  console.log('------------------------------');
-                  var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
-                  console.log('daysDiff - ',daysDiff);
-                  if( daysDiff > 0 ) pubDates.push(new Date(dateObj.getTime()));
-                  console.log(pubDates);
-                  console.log('date - before - ',dateObj);
-                  dateObj.setDate(dateObj.getDate() + 7);
-                  console.log('date - after - ',dateObj);
-                  console.log('------------------------------');
-                }
-                console.log('-------------------------------------------------------------------------  ');
-
-                break;
-              default:
-                var pubDays = dates[key][eachDate].split(' ');
-                var weekDay = days.indexOf(pubDays[1].toLowerCase());
-                var dateObj = new Date();
-                var cMonth = dateObj.getMonth();
-                var cDate = dateObj.getDate();
-                var cYear = dateObj.getFullYear();
-                dateObj.setMonth(currMonth);
-                dateObj.setFullYear(currYear);
-                dateObj.setDate(1);
-                while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
-                dateObj.setDate(dateObj.getDate() + (7 * week.indexOf(pubDays[0].toLowerCase())) )
-                var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
-                if( daysDiff > 0 ) pubDates.push(dateObj);
-            }
-            if(pubDates.length >= 10) return pubDates;
-          }
-        }
-      }
-
+      
       currYear++;
       if(pubDates.length < 10)
         pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
