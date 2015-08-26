@@ -24,7 +24,10 @@ app.set('view engine', 'jade');
 app.use(cors({
     allowedOrigins: [
         'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost', 'http://dev1.themediaant.com'
-    ]
+    ],
+	headers: [
+		'x-access-token', 'Content-Type'
+	]
 }));
 
 mongoose.connect(config.mongoUrl);
