@@ -26,7 +26,7 @@ app.use(cors({
         'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost', 'http://dev1.themediaant.com'
     ],
 	headers: [
-		'x-access-token'
+		'x-access-token', 'Content-Type'
 	]
 }));
 
