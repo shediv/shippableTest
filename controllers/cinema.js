@@ -5,6 +5,7 @@ var Cinema = function()
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
+  var Category = require('../models/category').Category;
   var Geography = require('../models/geography').Geography;
   var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
   var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
@@ -18,19 +19,18 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    self.params = JSON.parse(req.query.params);
+    res.status(200).json("test");
+    //self.params = JSON.parse(req.query.params);
     
   };
 
-  this.getFilters = function(req, res){
+  this.getFilters = function(req, res){    
     async.parallel({
-      categories: self.getCategories,
+      mallName: self.getMallName,
       geography : self.getGeographies,
-      languages : self.getLanguages,
-      targetGroups : self.getTargetGroups,
-      frequencies : self.getFrequencies,
-      mediaOptions: self.getMediaOptions,
-      products : self.getProducts
+      cinemaChain : self.getCinemaChain,
+      screenType : self.getScreenType,
+      mediaType : self.getMediaType
     },
     function(err, results) 
     {
@@ -39,17 +39,13 @@ var Cinema = function()
     });
   };
 
-    self.getCategories = function(callback){
+    self.getMallName = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, isActive : 1}},
-        {$group : { _id : '$categoryId', count : {$sum : 1}}},
-        function(error, results) 
+        {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
+        {$group : { _id : '$mallName', count : {$sum : 1}}},
+        function(error, results)
         {
-          var catIds = [];
-          results.map(function(o){ catIds.push(o._id); });
-          Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
-            callback(error, cats);
-          });
+          callback(error, results);
         }
       );
     };
@@ -70,10 +66,10 @@ var Cinema = function()
       );
     };
 
-    self.getLanguages = function(callback){
+    self.getCinemaChain = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "attributes.language.value": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$attributes.language.value', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
+        {$group : { _id : '$cinemaChain', count : {$sum : 1}}},
         function(error, results) 
         {
           callback(error, results);
@@ -81,11 +77,10 @@ var Cinema = function()
       );
     };
 
-    self.getTargetGroups = function(callback){
+    self.getScreenType = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, targetGroup: { $exists: 1}, isActive : 1}},
-        {$unwind: '$targetGroup'},
-        {$group : { _id : '$targetGroup', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "type": { $exists: 1}, isActive : 1}},
+        {$group : { _id : '$type', count : {$sum : 1}}},
         function(error, results) 
         {
           callback(error, results);
@@ -93,31 +88,15 @@ var Cinema = function()
       );
     };
 
-    self.getFrequencies = function(callback){
+    self.getMediaType = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "attributes.frequency": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$attributes.frequency.value', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "mediaOptions": { $exists: 1}, isActive : 1}},
+        {$group : { _id : '$mediaOptions', count : {$sum : 1}}},
         function(error, results)
         {
           callback(error, results);
         }
       );
-    };
-
-    self.getMediaOptions = function(callback){
-      //Hardcoding the values for now, as the frequency of changes is very low
-      var mediaOptions = [
-        {'_id' : 'print', 'name' : 'Print'},
-        {'_id' : 'eMail', 'name' : 'EMail'},
-        {'_id' : 'website', 'name' : 'Website'}
-      ];
-      callback(null, mediaOptions);
-    };
-
-    self.getProducts = function(callback){
-      Products.find({}, '_id name', function(error, results){
-        callback(error, results);
-      });
     };
 
     self.yForumala = function(medias, callback){
