@@ -1118,38 +1118,9 @@ var Magazine = function()
     };
 
   this.getBestRates = function(req, res){
-    var medias = {};
+    var medias = req.body.medias;//{};
     var mediaIds = [];
-    for(key in req.body.medias)
-    {
-      var mediaId = req.body.medias[key]._id;
-      var type = req.body.medias[key].type;
-      var mediaOption = req.body.medias[key].mediaOption;
-      if(medias[req.body.medias[key]._id] === undefined)
-      {
-        mediaIds.push(mediaId);
-        medias[mediaId] = {};
-        medias[mediaId]['name'] = req.body.medias[key].name;
-        medias[mediaId]['urlSlug'] = req.body.medias[key].urlSlug;
-        medias[mediaId]['thumbnail'] = req.body.medias[key].thumbnail;
-        medias[mediaId]['logo'] = req.body.medias[key].logo;
-
-        medias[mediaId].mediaOptions = {};
-        medias[mediaId].mediaOptions[type] = {};
-        medias[mediaId].mediaOptions[type][mediaOption] = {};
-        medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-      }
-      else
-      {
-        if(medias[mediaId].mediaOptions[type][mediaOption] === undefined)
-        {
-          medias[mediaId].mediaOptions[type][mediaOption] = {};
-          medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-        }
-        else
-          medias[mediaId].mediaOptions[type][mediaOption].qty++;
-      }
-    }
+    for(key in medias) mediaIds.push(key);
 
     Media.find({_id : {$in : mediaIds}}, function(err, result){
       totalGrossPrice = 0;
