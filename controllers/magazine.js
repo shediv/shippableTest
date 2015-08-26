@@ -1164,54 +1164,54 @@ var Magazine = function()
             case 'print':
               for(mo in medias[media._id].mediaOptions.print)
               {
-                medias[media._id][key][mo] = {};
-                medias[media._id][key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
+                medias[media._id].mediaOptions[key][mo] = {};
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
 
                 switch(true)
                 {
                   case medias[media._id].mediaOptions.print[mo].qty <= 2:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
                     break;
                   case medias[media._id].mediaOptions.print[mo].qty <= 6:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
                     break;
                   case medias[media._id].mediaOptions.print[mo].qty > 6:
-                    medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
                     break;
                 }
                 
-                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                totalGrossPrice = totalGrossPrice + medias[media._id][key][mo].discountedGrossPrice;
-                totalGrossSaving = totalGrossSaving + medias[media._id][key][mo].grossSaving;
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               }
               break;
             case 'website':
               for(mo in medias[media._id].mediaOptions[key])
               {
-                medias[media._id][key][mo] = {};
-                medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
-                medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
-                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                totalGrossPrice = totalGrossPrice + medias[media._id][key][mo].discountedGrossPrice;
-                totalGrossSaving = totalGrossSaving + medias[media._id][key][mo].grossSaving;
+                medias[media._id].mediaOptions[key][mo] = {};
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               }
               break;
             case 'email':
-              medias[media._id][key][mo] = {};
-              medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
-              medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
-              medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-              medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-              medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-              medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              totalGrossPrice = totalGrossPrice + medias[media._id][key][mo].discountedGrossPrice;
-              totalGrossSaving = totalGrossSaving + medias[media._id][key][mo].grossSaving;
+              medias[media._id].mediaOptions[key][mo] = {};
+              medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+              medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               break;
           }
         }
