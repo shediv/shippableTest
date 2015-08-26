@@ -7,7 +7,7 @@ var router = express.Router();
 var CinemaCtrl = new (require('../controllers/cinema')).Cinema();
 
 router.get("/", function(req, res){  CinemaCtrl.getCinemas(req, res); });
-router.get("/getFilters", function(req, res){ CinemaCtrl.getFilters(req, res); });
+router.get("/filters", function(req, res){ CinemaCtrl.getFilters(req, res); });
 router.get("/getBestRates", function(req, res){ CinemaCtrl.getFilters(req, res); });
 
 module.exports = router;
