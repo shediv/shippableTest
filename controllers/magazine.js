@@ -1184,8 +1184,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
-                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
+                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               }
               break;
             case 'website':
@@ -1198,8 +1198,8 @@ var Magazine = function()
                 medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
                 medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
                 medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
-                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
+                medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+                medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               }
               break;
             case 'email':
@@ -1210,8 +1210,8 @@ var Magazine = function()
               medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
               medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
               medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-              medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + discountedGrossPrice;
-              medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + grossSaving;
+              medias[media._id]['totalGrossPrice'] = medias[media._id]['totalGrossPrice'] + medias[media._id][key][mo].discountedGrossPrice;
+              medias[media._id]['totalGrossSaving'] = medias[media._id]['totalGrossSaving'] + medias[media._id][key][mo].grossSaving;
               break;
           }
         }
