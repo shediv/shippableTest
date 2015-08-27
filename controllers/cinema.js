@@ -19,9 +19,11 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    res.status(200).json("test");
+    this.allScreens(req.query);
+    res.status(200).json();
+
     //self.params = JSON.parse(req.query.params);
-    
+
   };
 
   this.getFilters = function(req, res){    
@@ -312,6 +314,15 @@ var Cinema = function()
       if(pubDates.length < 10) pubDates = self.formDates(pubDates, dates, currMonth, currYear);
       return pubDates;
     }
+
+    this.allScreens= function(data){
+
+      };
+
+
+
+
+
 };
 
 module.exports.Cinema = Cinema;
