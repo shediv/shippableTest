@@ -19,9 +19,48 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    res.status(200).json("test");
-    //self.params = JSON.parse(req.query.params);
-    
+
+    self.params = JSON.parse(req.query.geography);      
+    if(self.params) 
+    { 
+      if(self.params.locality){
+        Geography.aggregate(
+        {$match: {locality:self.params.locality, pincode: { $exists: 1}}},
+        {$group : { _id : '$_id', count : {$sum : 1}}},
+        function(error, results) 
+          {
+            res.status(200).json(results);
+           }  
+          );
+      }
+
+      if(self.params.city){
+        Geography.aggregate(
+        {$match: {city:self.params.city, pincode: { $exists: 1}}},
+        {$group : { _id : '$_id', count : {$sum : 1}}},
+        function(error, results) 
+          {
+            res.status(200).json(results);
+           }  
+          );
+      }      
+      // Geography.findOne({_id: self.params.geography}, function(err, result){
+      // res.status(200).json(result);
+      // });
+
+      //res.status(200).json(self.params.locality);
+    }
+    else
+    {  
+    Media.aggregate(
+        {$match: {toolId:self.toolId, isActive : 1}},
+        {$limit: 9},
+        function(error, results)
+        {
+          res.status(200).json({cinemas:results});
+        }
+      );
+    }
   };
 
   this.getFilters = function(req, res){    
@@ -40,63 +79,67 @@ var Cinema = function()
   };
 
     self.getMallName = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$mallName', count : {$sum : 1}}},
-        function(error, results)
-        {
-          callback(error, results);
-        }
-      );
+      var aggregation = Media.aggregate(
+                          {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
+                          {$group : { _id : '$mallName', count : {$sum : 1}}}
+                        ); 
+      
+      aggregation.options = { allowDiskUse: true }; 
+      aggregation.exec(function(error, results) {
+        callback(error, results)
+      });
     };
 
     self.getGeographies = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-        {$unwind: '$geography'},
-        {$group : { _id : '$geography', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          var geoIds = [];
+      var aggregation = Media.aggregate(
+                          {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
+                          {$unwind: '$geography'},
+                          {$group : { _id : '$geography', count : {$sum : 1}}}
+                        ); 
+      
+      aggregation.options = { allowDiskUse: true }; 
+
+      aggregation.exec(function(error, results) {
+        var geoIds = [];
           results.map(function(o){ geoIds.push(o._id); });
           Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
             callback(error, geos);
           });
-        }
-      );
+      });
     };
 
     self.getCinemaChain = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$cinemaChain', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+      var aggregation = Media.aggregate(
+                          {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
+                          {$group : { _id : '$cinemaChain', count : {$sum : 1}}}
+                        );
+
+      aggregation.options = { allowDiskUse: true }; 
+      aggregation.exec(function(error, results) {
+        callback(error, results)
+      });
     };
 
     self.getScreenType = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "type": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$type', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+      var aggregation = Media.aggregate(
+                          {$match: {toolId:self.toolId, "type": { $exists: 1}, isActive : 1}},
+                          {$group : { _id : '$type', count : {$sum : 1}}}
+                        );
+
+      aggregation.options = { allowDiskUse: true }; 
+      aggregation.exec(function(error, results) {
+        callback(error, results)
+      });
     };
 
     self.getMediaType = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "mediaOptions": { $exists: 1}, isActive : 1}},
-        {$group : { _id : '$mediaOptions', count : {$sum : 1}}},
-        function(error, results)
-        {
-          callback(error, results);
-        }
-      );
+      var mediaOptions = [
+        {'_id' : '10SecMuteSlide', 'name' : '10SecMuteSlide'},
+        {'_id' : '10SecAudioSlide', 'name' : '10SecAudioSlide'},
+        {'_id' : '30SecVideo', 'name' : '30SecVideo'},
+        {'_id' : '60SecVideo', 'name' : '60SecVideo'}
+      ];
+      callback(null, mediaOptions);
     };
 
     self.yForumala = function(medias, callback){
