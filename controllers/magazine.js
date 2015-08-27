@@ -729,10 +729,7 @@ var Magazine = function()
         'toolId' : 1,
         'createdBy' : 1,
         'views':1,
-        'logo' : 1,
-        'email':1,
-        'website':1
-
+        'logo' : 1
       };
 
       Object.keys(filters).map(function(value){
