@@ -1165,9 +1165,14 @@ var Magazine = function()
                 medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
                 medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions[mo].pricing;
                 medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
-                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
-                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log('multiply - ',medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty);
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log(medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice);
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice , medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
                 medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                //console.log(medias[media._id].mediaOptions[key][mo]);
                 totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
                 totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               }
@@ -1186,7 +1191,7 @@ var Magazine = function()
         }
         medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
       });
-      console.log(medias);
+      //console.log(medias);
       res.status(200).json({
         bestrates:medias,
         totalGrossPrice:totalGrossPrice,
@@ -1218,12 +1223,14 @@ var Magazine = function()
               for(i = 1; i <= 10; i++) 
               {
                 var dateObj = new Date();
+                dateObj.setHours(0,0,0,0);
                 dateObj.setDate( dateObj.getDate() + i );
                 pubDates.push(dateObj);
               }
               break;
             case CommonLib.isNumber(dates[key][eachDate]) == true:
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
               dateObj.setFullYear(currYear);
               dateObj.setMonth(currMonth);
               dateObj.setDate( parseInt(dates[key][eachDate]) );
@@ -1232,6 +1239,7 @@ var Magazine = function()
               break;
             case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
               dateObj.setFullYear(currYear);
               dateObj.setMonth(currMonth);
               var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
@@ -1248,6 +1256,7 @@ var Magazine = function()
               var pubDays = dates[key][eachDate].split(' ');
               var weekDay = days.indexOf(pubDays[1].toLowerCase());
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
               dateObj.setMonth(currMonth);
               dateObj.setFullYear(currYear);
               dateObj.setDate(1);
