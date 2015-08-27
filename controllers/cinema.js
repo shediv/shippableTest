@@ -355,11 +355,12 @@ var Cinema = function()
       return pubDates;
     }
 
-    this.makeCinemaCard= function(){
+    /*this.allScreen= function(){
       Media.aggregate(
+          $match
 
       )
-    }
+    }*/
 
 
 
