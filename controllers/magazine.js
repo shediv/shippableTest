@@ -723,11 +723,14 @@ var Magazine = function()
         'thumbnail' : 1,
         'categoryId' : 1,
         'name' : 1,
-        'print.mediaOptions.fullPage.1-2' : 1,
+        'print': 1,
         'toolId' : 1,
         'createdBy' : 1,
         'views':1,
-        'logo' : 1
+        'logo' : 1,
+        'email':1,
+        'website':1
+
       };
 
       Object.keys(filters).map(function(value){
