@@ -19,7 +19,6 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    this.allScreens(req.query);
     res.status(200).json();
 
     //self.params = JSON.parse(req.query.params);
@@ -315,11 +314,11 @@ var Cinema = function()
       return pubDates;
     }
 
-    this.allScreens= function(data){
+    this.makeCinemaCard= function(){
+      Media.aggregate(
 
-      };
-
-
+      )
+    }
 
 
 
