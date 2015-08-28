@@ -22,17 +22,35 @@ var Cinema = function()
 
     self.params = JSON.parse(req.query.geography);      
     if(self.params) 
-    { 
+    {
+      var GeographyIDs = []; 
       if(self.params.locality){
-        Geography.aggregate(
-        {$match: {locality:self.params.locality, pincode: { $exists: 1}}},
-        {$group : { _id : '$_id', count : {$sum : 1}}},
-        function(error, results) 
-          {
-            res.status(200).json(results);
-           }  
-          );
-      }
+
+      //  async.series({
+      //   product : function(callback){
+      //     Geography.aggregate(
+      //       {$match: {locality:self.params.locality, pincode: { $exists: 1}}},
+      //       {$group : { _id : '$_id', count : {$sum : 1}}},
+      //       function(error, results){
+      //         //GeographyIDs.push(result.toObject());
+      //         callback(error, results);              
+      //       }
+      //       ); 
+      //   },
+      //   medias : function(callback){
+      //     function(error, results){
+      //         //GeographyIDs.push(result.toObject());
+      //         callback(error, GeographyIDs);              
+      //       }
+      //   }
+      // }, 
+      // function(results)
+      // {
+      //   res.status(200).json(results);
+      // }
+      // );
+
+    }
 
       if(self.params.city){
         Geography.aggregate(
@@ -65,8 +83,7 @@ var Cinema = function()
 
   this.getFilters = function(req, res){    
     async.parallel({
-      mallName: self.getMallName,
-      geography : self.getGeographies,
+      mallName: self.getMallName,      
       cinemaChain : self.getCinemaChain,
       screenType : self.getScreenType,
       mediaType : self.getMediaType
@@ -90,23 +107,23 @@ var Cinema = function()
       });
     };
 
-    self.getGeographies = function(callback){
-      var aggregation = Media.aggregate(
-                          {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-                          {$unwind: '$geography'},
-                          {$group : { _id : '$geography', count : {$sum : 1}}}
-                        ); 
+    // self.getGeographies = function(callback){
+    //   var aggregation = Media.aggregate(
+    //                       {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
+    //                       {$unwind: '$geography'},
+    //                       {$group : { _id : '$geography', count : {$sum : 1}}}
+    //                     ); 
       
-      aggregation.options = { allowDiskUse: true }; 
+    //   aggregation.options = { allowDiskUse: true }; 
 
-      aggregation.exec(function(error, results) {
-        var geoIds = [];
-          results.map(function(o){ geoIds.push(o._id); });
-          Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-            callback(error, geos);
-          });
-      });
-    };
+    //   aggregation.exec(function(error, results) {
+    //     var geoIds = [];
+    //       results.map(function(o){ geoIds.push(o._id); });
+    //       Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
+    //         callback(error, geos);
+    //       });
+    //   });
+    // };
 
     self.getCinemaChain = function(callback){
       var aggregation = Media.aggregate(
