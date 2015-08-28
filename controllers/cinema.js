@@ -154,8 +154,8 @@ var Cinema = function()
 
     self.getMediaType = function(callback){
       var MediaType = [
-        {'_id' : 'onScreen', 'name' : 'onScreen'},
-        {'_id' : 'offScreen', 'name' : 'offScreen'}
+        {'_id' : 'onScreen', 'name' : 'On Screen'},
+        {'_id' : 'offScreen', 'name' : 'Off Screen'}
       ];
       callback(null, MediaType);
     };
