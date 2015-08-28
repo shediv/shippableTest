@@ -61,20 +61,20 @@ var Cinema = function()
           }, function(error, results) {
               //Data is all ready sorted based on geography (i.e based on pincode in return)              
               //console.log(results.medias[3].geoBasedMedias.length);
-              for(i=0; i<3; i++){
+              for(i=0; i<results.medias.length; i++){
                   geoMedias.push(results.medias[i].geoBasedMedias);
+
                   for(j=0; j<geoMedias.length; j++){
                     count = 1;
                     if(!geoMedias[j].isSingleScreen){
-                      if(count < 3){
+                      if(count < 2){
                       finalData.push(geoMedias[j]);
                       count++;
                       }
                     }
 
+                    console.log(count);
                     }
-
-                  console.log(geoMedias);
                     
                   }                  
                            
@@ -146,7 +146,7 @@ var Cinema = function()
 
     self.getScreenType = function(callback){
       var ScreenType = [
-        {'_id' : 'false', 'name' : 'Multiplex'},
+        {'_id' : 'false', 'name' : 'Multiplex', 'selected' : true},
         {'_id' : 'true', 'name' : 'Single Screen'}
       ];
       callback(null, ScreenType);
