@@ -20,66 +20,73 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-
-    self.params = JSON.parse(req.query.geography);
+    self.params = JSON.parse(req.query.geography);      
     if(self.params) 
     {
-      var GeographyIDs = []; 
+      var GeographyIDs = [];
+      var geoMedias = [];
+      var finalData = []; 
       if(self.params.locality){
+        async.series({
+            geography : function(callback) {
+              Geography.aggregate(
+                      {$match: {locality:self.params.locality, pincode: { $exists: 1}}},
+                      {$group : { _id : '$_id', count : {$sum : 1}}},
+                      function(error, results){
+                        for(i=0; i<results.length; i++){
+                          GeographyIDs.push(results[i]._id);
+                        }              
+                        callback(error, results);             
+                      });
+            },
+            medias : function(callback) {
 
-      //  async.series({
-      //   product : function(callback){
-      //     Geography.aggregate(
-      //       {$match: {locality:self.params.locality, pincode: { $exists: 1}}},
-      //       {$group : { _id : '$_id', count : {$sum : 1}}},
-      //       function(error, results){
-      //         //GeographyIDs.push(result.toObject());
-      //         callback(error, results);              
-      //       }
-      //       ); 
-      //   },
-      //   medias : function(callback){
-      //     function(error, results){
-      //         //GeographyIDs.push(result.toObject());
-      //         callback(error, GeographyIDs);              
-      //       }
-      //   }
-      // }, 
-      // function(results)
-      // {
-      //   res.status(200).json(results);
-      // }
-      // );
+              var match = {
+                "$match" : {
+                  $or: [
+                    {"mallName" : "Diamond City Mall"},
+                    {"geography" : { $in: GeographyIDs }},
+                    {"cinemaChain" : "Chawla Multiplex" }
+                  ]
+                }
+              };
 
-    }
+              var group = {
+                "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
+              }
 
-      if(self.params.city){
-        Geography.aggregate(
-        {$match: {city:self.params.city, pincode: { $exists: 1}}},
-        {$group : { _id : '$_id', count : {$sum : 1}}},
-        function(error, results) 
-          {
-            res.status(200).json(results);
-           }  
-          );
-      }      
-      // Geography.findOne({_id: self.params.geography}, function(err, result){
-      // res.status(200).json(result);
-      // });
+              Media.aggregate([match, group], function(err, medias){                                    
+                callback(err, medias);
+              });   
+            }
+          }, function(error, results) {
+              //Data is all ready sorted based on geography (i.e based on pincode in return)              
+              //console.log(results.medias[3].geoBasedMedias.length);
+              for(i=0; i<results.medias.length; i++){
+                  geoMedias.push(results.medias[i].geoBasedMedias);
 
-      //res.status(200).json(self.params.locality);
-    }
-    else
-    {  
-    Media.aggregate(
-        {$match: {toolId:self.toolId, isActive : 1}},
-        {$limit: 9},
-        function(error, results)
-        {
-          res.status(200).json({cinemas:results});
-        }
-      );
-    }
+                  for(j=0; j<geoMedias.length; j++){
+                    count = 1;
+                    if(!geoMedias[j].isSingleScreen){
+                      if(count < 2){
+                      finalData.push(geoMedias[j]);
+                      count++;
+                      }
+                    }
+
+                    console.log(count);
+                    }
+                    
+                  }                  
+                           
+              //return res.status(200).json(results.medias.length);
+              return res.status(200).json(finalData);
+              //return res.status(200).json({count:results.length,medias:results.medias});
+          }
+        );
+
+      }
+    }  
   };
 
   this.getFilters = function(req, res){    
@@ -108,6 +115,24 @@ var Cinema = function()
       });
     };
 
+    // self.getGeographies = function(callback){
+    //   var aggregation = Media.aggregate(
+    //                       {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
+    //                       {$unwind: '$geography'},
+    //                       {$group : { _id : '$geography', count : {$sum : 1}}}
+    //                     ); 
+      
+    //   aggregation.options = { allowDiskUse: true }; 
+
+    //   aggregation.exec(function(error, results) {
+    //     var geoIds = [];
+    //       results.map(function(o){ geoIds.push(o._id); });
+    //       Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
+    //         callback(error, geos);
+    //       });
+    //   });
+    // };
+
     self.getCinemaChain = function(callback){
       var aggregation = Media.aggregate(
                           {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
@@ -121,25 +146,19 @@ var Cinema = function()
     };
 
     self.getScreenType = function(callback){
-      var aggregation = Media.aggregate(
-                          {$match: {toolId:self.toolId, "type": { $exists: 1}, isActive : 1}},
-                          {$group : { _id : '$type', count : {$sum : 1}}}
-                        );
-
-      aggregation.options = { allowDiskUse: true }; 
-      aggregation.exec(function(error, results) {
-        callback(error, results)
-      });
+      var ScreenType = [
+        {'_id' : 'false', 'name' : 'Multiplex', 'selected' : true},
+        {'_id' : 'true', 'name' : 'Single Screen'}
+      ];
+      callback(null, ScreenType);
     };
 
     self.getMediaType = function(callback){
-      var mediaOptions = [
-        {'_id' : '10SecMuteSlide', 'name' : '10SecMuteSlide'},
-        {'_id' : '10SecAudioSlide', 'name' : '10SecAudioSlide'},
-        {'_id' : '30SecVideo', 'name' : '30SecVideo'},
-        {'_id' : '60SecVideo', 'name' : '60SecVideo'}
+      var MediaType = [
+        {'_id' : 'onScreen', 'name' : 'On Screen'},
+        {'_id' : 'offScreen', 'name' : 'Off Screen'}
       ];
-      callback(null, mediaOptions);
+      callback(null, MediaType);
     };
 
   this.upcomingMovies = function(req, res){
