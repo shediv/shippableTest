@@ -7,6 +7,7 @@ var Cinema = function()
   var Tools = require('../models/tool').Tools;
   var Category = require('../models/category').Category;
   var Geography = require('../models/geography').Geography;
+  var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
   var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
   var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   
@@ -20,7 +21,7 @@ var Cinema = function()
 
   this.getCinemas = function(req, res){
 
-    self.params = JSON.parse(req.query.geography);      
+    self.params = JSON.parse(req.query.geography);
     if(self.params) 
     {
       var GeographyIDs = []; 
@@ -107,24 +108,6 @@ var Cinema = function()
       });
     };
 
-    // self.getGeographies = function(callback){
-    //   var aggregation = Media.aggregate(
-    //                       {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-    //                       {$unwind: '$geography'},
-    //                       {$group : { _id : '$geography', count : {$sum : 1}}}
-    //                     ); 
-      
-    //   aggregation.options = { allowDiskUse: true }; 
-
-    //   aggregation.exec(function(error, results) {
-    //     var geoIds = [];
-    //       results.map(function(o){ geoIds.push(o._id); });
-    //       Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-    //         callback(error, geos);
-    //       });
-    //   });
-    // };
-
     self.getCinemaChain = function(callback){
       var aggregation = Media.aggregate(
                           {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
@@ -159,55 +142,19 @@ var Cinema = function()
       callback(null, mediaOptions);
     };
 
-    self.yForumala = function(medias, callback){
-      //Query for maxReadership, maxNoOfPages, minFullPage
-      Media.aggregate(
-        {
-          $match : {
-            categoryId : medias[0].categoryId,
-            toolId : self.toolId,
-            isActive: 1
-          }
-        },
-        {
-          $group: {
-            _id: "$categoryId",
-            maxReadership: { $max: "$attributes.readership.value" },
-            maxNoOfPages: { $max: "$attributes.noOfPages.value" },
-            minFullPage: { $min: "$print.mediaOptions.fullPage.1-2" }
-          }
-        },
-        function(err, results)
-        {
-          // Assign maxReadership, maxNoOfPages, minFullPage
-          var maxReadership = results[0].maxReadership;
-          var maxNoOfPages = results[0].maxNoOfPages;
-          var minFullPage = results[0].minFullPage;
+  this.upcomingMovies = function(req, res){
+    dateObj = new Date(req.query.date);
 
-          medias.map(function(o){
-            x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.3;
-            y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.1;
-            z = ( (minFullPage * 10)/o.print.mediaOptions.fullPage['1-2'] ) * 0.6;
-            o.yValue = x + y + z;
-          });
+    var firstDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1);
+    var lastDate = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0);
 
-          medias.sort(function(mediaA, mediaB){
-            return mediaB.yValue - mediaA.yValue;
-          })
-
-          var topMedias = [];
-          for(var i=0; i< 3; i++)
-          {
-            if(medias[i] != undefined) topMedias.push(medias[i]);
-          }
-          callback(err, topMedias);
-        }
-      );
-    };
-
-    self.top3= function(query,callback){
-      
-    };
+    UpcomingMovies.find(
+      { releaseDate : { $gte:firstDate, $lte:lastDate } }
+    ).sort({releaseDate:1}, function(err, results){
+      if(err) throw err;
+      res.status(200).json({upcomingMovies:results});
+    });
+  }
 
   this.getBestrates = function(req, res){
     var medias = {};
