@@ -31,7 +31,7 @@ var Geography = function()
       if(err) throw err;
       var geographies = [];
       geographies = geographies.concat(results.states, results.cities, results.localities);
-      res.status(200).json({geographies:results});
+      res.status(200).json({geographies:geographies});
     });
   };
 
