@@ -24,7 +24,8 @@ var Cinema = function()
     {
       var GeographyIDs = [];
       var geoMedias = [];
-      var finalData = []; 
+      var finalData = [];
+      var singleData = []; 
       if(self.params.locality){
         async.series({
             geography : function(callback) {
@@ -59,28 +60,37 @@ var Cinema = function()
               });   
             }
           }, function(error, results) {
-              //Data is all ready sorted based on geography (i.e based on pincode in return)              
-              //console.log(results.medias[3].geoBasedMedias.length);
+              //Data is all ready sorted based on geography (i.e based on pincode in return)                            
               for(i=0; i<results.medias.length; i++){
-                  geoMedias.push(results.medias[i].geoBasedMedias);
-
-                  for(j=0; j<geoMedias.length; j++){
-                    count = 1;
-                    if(!geoMedias[j].isSingleScreen){
-                      if(count < 2){
-                      finalData.push(geoMedias[j]);
+                  //geoMedias.push(results.medias[i].geoBasedMedias);
+                  count = 1;
+                  for(j=0; j<results.medias[i].geoBasedMedias.length; j++){                     
+                    if(!results.medias[i].geoBasedMedias[j].isSingleScreen){                      
+                      if(count < 3){
+                      finalData.push(results.medias[i].geoBasedMedias[j]);
                       count++;
-                      }
-                    }
+                      }                      
+                    }                                       
+                    }                    
+                  }
 
-                    console.log(count);
-                    }
-                    
-                  }                  
-                           
-              //return res.status(200).json(results.medias.length);
-              return res.status(200).json(finalData);
-              //return res.status(200).json({count:results.length,medias:results.medias});
+              //If No multiplex present
+              if(finalData.length < 1){
+                for(i=0; i<results.medias.length; i++){
+                  //geoMedias.push(results.medias[i].geoBasedMedias);
+                  count = 1;
+                  for(j=0; j<results.medias[i].geoBasedMedias.length; j++){                     
+                    if(results.medias[i].geoBasedMedias[j].isSingleScreen){                      
+                      if(count < 3){
+                      finalData.push(results.medias[i].geoBasedMedias[j]);
+                      count++;
+                      }                      
+                    }                                       
+                    }                    
+                  }
+              }
+                            
+              return res.status(200).json({count:finalData.length, medias:finalData});              
           }
         );
 
