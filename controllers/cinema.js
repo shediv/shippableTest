@@ -20,8 +20,50 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    self.params = JSON.parse(req.query.geography);      
-    if(self.params) 
+    self.params = JSON.parse(req.query.params);
+    async.series([self.buildQuery(callbackMain)], function(err, match){
+
+    });
+  };
+
+    self.buildQuery = function(callbackMain){
+      var match = {};
+      var states = [];
+      var cities = [];
+      var localities = [];
+      for(key in scope.params.geographies)
+      {
+        switch(scope.params.geographies[key].place)
+        {
+          case 'state' : states.push(scope.params.geographies[key][place]); break;
+          case 'city' : cities.push(scope.params.geographies[key][place]); break;
+          case 'locality' : localities.push(scope.params.geographies[key][place]); break;
+        }
+      }
+      if(states.length) match['state'] = { $in:states };
+      if(cities.length) match['city'] = { $in:cities };
+      if(localities.length) match['locality'] = { $in:localities };
+      match['pincode'] = { $exists:1 };
+
+      match = { $or : [match] };
+
+      async.series([
+        function(callbackInner){
+          Geography.distinct('_id', match, callbackInner);
+        }
+      ],function(err, geographyIds){
+        var match = {};
+        if(scope.params.mallName.length) match['mallName'] = { $in:scope.params.mallName };
+        if(scope.params.cinemaChain.length) match['cinemaChain'] = { $in:scope.params.cinemaChain };
+        if(scope.params.isSingleScreen.length) match['isSingleScreen'] = { $in:scope.params.cinemaChain };
+        match['type'] = scope.params.type;
+        match = { $or : [match] };
+        callbackMain(err, match);
+      });
+    };
+
+
+    /*if(self.params) 
     {
       var GeographyIDs = [];
       var geoMedias = [];
@@ -86,8 +128,7 @@ var Cinema = function()
         );
 
       }
-    }  
-  };
+    }  */
 
   this.getFilters = function(req, res){    
     async.parallel({
@@ -114,24 +155,6 @@ var Cinema = function()
         callback(error, results)
       });
     };
-
-    // self.getGeographies = function(callback){
-    //   var aggregation = Media.aggregate(
-    //                       {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-    //                       {$unwind: '$geography'},
-    //                       {$group : { _id : '$geography', count : {$sum : 1}}}
-    //                     ); 
-      
-    //   aggregation.options = { allowDiskUse: true }; 
-
-    //   aggregation.exec(function(error, results) {
-    //     var geoIds = [];
-    //       results.map(function(o){ geoIds.push(o._id); });
-    //       Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-    //         callback(error, geos);
-    //       });
-    //   });
-    // };
 
     self.getCinemaChain = function(callback){
       var aggregation = Media.aggregate(
@@ -169,7 +192,7 @@ var Cinema = function()
 
     UpcomingMovies.find(
       { releaseDate : { $gte:firstDate, $lte:lastDate } }
-    ).sort({releaseDate:1}, function(err, results){
+    ).sort({releaseDate:1}).exec(function(err, results){
       if(err) throw err;
       res.status(200).json({upcomingMovies:results});
     });
