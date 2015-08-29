@@ -21,44 +21,67 @@ var Cinema = function()
 
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
-    async.series([self.buildQuery], function(err, match){
+    async.series([self.buildQuery], function(err, match){      
       return res.status(200).json(match);    
     });
   };
 
     self.buildQuery = function(callbackMain){
-      var match = {};
-      var states = [];
-      var cities = [];
-      var localities = [];
-      for(key in self.params.geographies)
+      var or = [];
+      for(key in self.params.filters.geographies)
       {
-        switch(self.params.geographies[key].place)
+        var and = [];
+        switch(self.params.filters.geographies[key].place)
         {
-          case 'state' : states.push(self.params.geographies[key][place]); break;
-          case 'city' : cities.push(self.params.geographies[key][place]); break;
-          case 'locality' : localities.push(self.params.geographies[key][place]); break;
+          case 'state' : 
+            or.push(
+              { $and : [{ state :self.params.filters.geographies[key].state}] }
+            ); 
+            break;                  
+          case 'city' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city}
+              ] 
+            }); 
+            break;          
+          case 'locality' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city},
+                { locality : self.params.filters.geographies[key].locality}
+              ] 
+            });          
         }
-      }
-      if(states.length) match['state'] = { $in:states };
-      if(cities.length) match['city'] = { $in:cities };
-      if(localities.length) match['locality'] = { $in:localities };
-      match['pincode'] = { $exists:1 };
+      }      
 
-      match = { $or : [match] };
+      var match = { $or:or, pincode : { $exists:1 } };
 
       async.series([
         function(callbackInner){
           Geography.distinct('_id', match, callbackInner);
         }
-      ],function(err, geographyIds){        
-        var match = {};
-        if(self.params.filters.mallName.length) match['mallName'] = { $in:self.params.mallName };
-        if(self.params.filters.cinemaChain.length) match['cinemaChain'] = { $in:self.params.cinemaChain };
-        if(self.params.filters.isSingleScreen) match['isSingleScreen'] = { $in:self.params.screenType };
-        match['type'] = self.params.filters.mediaType;
-        match = { $or : [match] };
-        callbackMain(err, match);
+      ],function(err, geographyIds){ 
+
+        geographyIds = geographyIds[0];
+        for(id in geographyIds) geographyIds[id] = geographyIds[id].toString();
+        var match = [];
+        if(geographyIds.length) match.push({geographyId : { $in:geographyIds }});
+        if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
+        if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
+        if(self.params.filters.screenType) match.push({isSingleScreen : { $in:self.params.filters.screenType }});
+        match.push({type : self.params.filters.mediaType });        
+        match = {  $match : {  $and: match } };
+
+        console.log(match);
+
+        Media.aggregate(match, function(err, medias){
+                //console.log(medias);                                    
+                callbackMain(err, medias);
+              });
+        //callbackMain(err, match);
       });
     };
 
