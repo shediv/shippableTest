@@ -20,9 +20,9 @@ var Cinema = function()
   });
 
   this.getCinemas = function(req, res){
-    self.params = JSON.parse(req.query.params);
-    async.series([self.buildQuery(callbackMain)], function(err, match){
-
+    self.params = JSON.parse(req.query.params);                
+    async.series([self.buildQuery], function(err, match){
+      return res.status(200).json(match);    
     });
   };
 
@@ -31,13 +31,13 @@ var Cinema = function()
       var states = [];
       var cities = [];
       var localities = [];
-      for(key in scope.params.geographies)
+      for(key in self.params.geographies)
       {
-        switch(scope.params.geographies[key].place)
+        switch(self.params.geographies[key].place)
         {
-          case 'state' : states.push(scope.params.geographies[key][place]); break;
-          case 'city' : cities.push(scope.params.geographies[key][place]); break;
-          case 'locality' : localities.push(scope.params.geographies[key][place]); break;
+          case 'state' : states.push(self.params.geographies[key][place]); break;
+          case 'city' : cities.push(self.params.geographies[key][place]); break;
+          case 'locality' : localities.push(self.params.geographies[key][place]); break;
         }
       }
       if(states.length) match['state'] = { $in:states };
@@ -51,12 +51,12 @@ var Cinema = function()
         function(callbackInner){
           Geography.distinct('_id', match, callbackInner);
         }
-      ],function(err, geographyIds){
+      ],function(err, geographyIds){        
         var match = {};
-        if(scope.params.mallName.length) match['mallName'] = { $in:scope.params.mallName };
-        if(scope.params.cinemaChain.length) match['cinemaChain'] = { $in:scope.params.cinemaChain };
-        if(scope.params.isSingleScreen.length) match['isSingleScreen'] = { $in:scope.params.cinemaChain };
-        match['type'] = scope.params.type;
+        if(self.params.filters.mallName.length) match['mallName'] = { $in:self.params.mallName };
+        if(self.params.filters.cinemaChain.length) match['cinemaChain'] = { $in:self.params.cinemaChain };
+        if(self.params.filters.isSingleScreen) match['isSingleScreen'] = { $in:self.params.screenType };
+        match['type'] = self.params.filters.mediaType;
         match = { $or : [match] };
         callbackMain(err, match);
       });
@@ -180,8 +180,8 @@ var Cinema = function()
 
     self.getScreenType = function(callback){
       var ScreenType = [
-        {'_id' : 'false', 'name' : 'Multiplex', 'selected' : true},
-        {'_id' : 'true', 'name' : 'Single Screen'}
+        {'_id' : false, 'name' : 'Multiplex', 'selected' : true},
+        {'_id' : true, 'name' : 'Single Screen'}
       ];
       callback(null, ScreenType);
     };
