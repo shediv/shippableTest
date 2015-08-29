@@ -190,12 +190,15 @@ var Cinema = function()
     var firstDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1);
     var lastDate = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0);
 
-    UpcomingMovies.find(
-      { releaseDate : { $gte:firstDate, $lte:lastDate } }
-    ).sort({releaseDate:1}).exec(function(err, results){
-      if(err) throw err;
-      res.status(200).json({upcomingMovies:results});
-    });
+    UpcomingMovies.aggregate(
+      {$match : { releaseDate : { $gte:firstDate, $lte:lastDate } }},
+      {$sort : {releaseDate:1}},
+      {$group : {_id : '$releaseDate', movies:{$push : '$$ROOT'}, count : {$sum : 1}}},
+      function(err, results){
+        if(err) throw err;
+        res.status(200).json({upcomingMovies:results});
+      }
+    );
   }
 
   this.getBestrates = function(req, res){
