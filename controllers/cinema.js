@@ -21,8 +21,9 @@ var Cinema = function()
 
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
-    async.series([self.buildQuery], function(err, match){      
-      return res.status(200).json(match);    
+    async.series([self.buildQuery], function(err, results){      
+      //return res.status(200).json(results);    
+      return res.status(200).json({allScreens: {count:results[0].allSCreens.length, medias:results[0].allSCreens}, recommend: {count:results[0].recommend.length, medias:results[0].recommend}});
     });
   };
 
@@ -75,13 +76,34 @@ var Cinema = function()
         match.push({type : self.params.filters.mediaType });        
         match = {  $match : {  $and: match } };
 
-        console.log(match);
+        var group = {
+                "$group" : { _id : '$geographyId', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
+              }                    
 
-        Media.aggregate(match, function(err, medias){
-                //console.log(medias);                                    
-                callbackMain(err, medias);
+        async.parallel({
+         allSCreens : function(callback){
+           Media.aggregate(match, function(err, medias){                                    
+                callback(err, medias);
               });
-        //callbackMain(err, match);
+         },
+         recommend : function(callback){
+          var finalData = [];
+          Media.aggregate(match, group, function(err, medias){
+                for(key in medias){
+                  medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
+                  finalData = finalData.concat(medias[key].geoBasedMedias);
+                }                
+
+                callback(err, finalData);
+              });
+         } 
+
+        }, function(error, results){
+                callbackMain(err, results);
+
+        }
+        );
+
       });
     };
 
