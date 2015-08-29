@@ -123,7 +123,7 @@ var Cinema = function()
     //                       {$group : { _id : '$geography', count : {$sum : 1}}}
     //                     ); 
 
-      aggregation.options = { allowDiskUse: true };
+    //aggregation.options = { allowDiskUse: true };
     //   aggregation.options = { allowDiskUse: true };
     //   aggregation.exec(function(error, results) {
     //     var geoIds = [];
@@ -380,29 +380,15 @@ var Cinema = function()
     }
 
     this.allScreen= function(req,res){
+          var value = this.screenCall(callback);
+      };
 
-      /*var aggregation = Media.aggregate(
-          {$match: {toolId:self.toolId}},
-          {$group : { _id : '$name'}}
-      );
-
-      aggregation.options = { allowDiskUse: true };
-      aggregation.exec(function(error, results) {
-        res.status(200).json(results);
-      });*/
-      var someAggregationVariable = Media.aggregate(
-          {$match:{toolId:'55755d8a66579f76671b1a1e'}}
-
-      );
-      someAggregationVariable.options = { allowDiskUse: true };
-      someAggregationVariable.exec(function(error,results){
-      if(error) res.status(200).json(error);
-        res.status(200).json(results);
-
-      });
+    this.screenCall=function(){
+      return "some message";
+    };
 
 
-    }
+
 
 };
 
