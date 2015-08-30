@@ -1187,7 +1187,6 @@ var Magazine = function()
         }
         medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
       });
-      console.log(medias);
       res.status(200).json({
         bestrates:medias,
         totalGrossPrice:totalGrossPrice,
