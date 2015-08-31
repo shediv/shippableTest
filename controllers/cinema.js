@@ -1,22 +1,30 @@
 var Cinema = function()
 {
-    var async = require('async');
-    var underscore = require('underscore');
-    var CommonLib = require('../libraries/common').Common;
-    var Media = require('../models/media').Media;
-    var Tools = require('../models/tool').Tools;
-    var Category = require('../models/category').Category;
-    var Geography = require('../models/geography').Geography;
-    var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
-    var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
-    var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
-    this.params = {};
-    this.toolName = "cinema";
-    var self = this;
+  var async = require('async');
+  var underscore = require('underscore');
+  var CommonLib = require('../libraries/common').Common;
+  var Media = require('../models/media').Media;
+  var Tools = require('../models/tool').Tools;
+  var Category = require('../models/category').Category;
+  var Geography = require('../models/geography').Geography;
+  var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
+  var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
+  var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  
+  this.params = {};
+  this.toolName = "cinema";
+  var self = this;
 
-    Tools.findOne({name: this.toolName}, function(err, result){
-        self.toolId = result._id.toString();
+  Tools.findOne({name: this.toolName}, function(err, result){
+    self.toolId = result._id.toString();
+  });
+
+  this.getCinemas = function(req, res){
+    self.params = JSON.parse(req.query.params);                
+    async.series([self.buildGeographyQuery], function(err, results){
+      return res.status(200).json({media:results[0]});
+
     });
 
     this.getCinemas = function(req, res){
