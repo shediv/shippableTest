@@ -1121,7 +1121,7 @@ var Magazine = function()
     };
 
   this.getBestRates = function(req, res){
-    var medias = req.body.medias;//{};
+    var medias = req.body.medias;
     var mediaIds = [];
     for(key in medias) mediaIds.push(key);
 
@@ -1166,8 +1166,8 @@ var Magazine = function()
                 medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
                 medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions[mo].pricing;
                 medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
-                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
-                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice , medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
                 medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
                 totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
                 totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
@@ -1198,17 +1198,17 @@ var Magazine = function()
     self.getTenDates = function(dates, frequency){
       var pubDates = [];
       var dateObj = new Date();
-      var currMonth = dateObj.getMonth();
       var currYear = dateObj.getFullYear();
       
-      return self.formDates(pubDates, dates, currMonth, currYear, frequency)
+      return self.formDates(pubDates, dates, currYear, frequency)
     }
 
-    self.formDates = function(pubDates, dates, currMonth, currYear, frequency)
+    self.formDates = function(pubDates, dates, currYear, frequency)
     {
       for(key in dates)
       {
-        currMonth = months.indexOf(key);
+        var currMonth = months.indexOf(key);
+        console.log(currMonth);
         for(eachDate in dates[key])
         {
           dates[key][eachDate] = dates[key][eachDate].trim();
@@ -1218,20 +1218,23 @@ var Magazine = function()
               for(i = 1; i <= 10; i++) 
               {
                 var dateObj = new Date();
+                dateObj.setHours(0,0,0,0);
                 dateObj.setDate( dateObj.getDate() + i );
                 pubDates.push(dateObj);
               }
               break;
             case CommonLib.isNumber(dates[key][eachDate]) == true:
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
               dateObj.setFullYear(currYear);
-              dateObj.setMonth(currMonth);
               dateObj.setDate( parseInt(dates[key][eachDate]) );
+              dateObj.setMonth(currMonth);
               var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
               if( daysDiff > 0 )pubDates.push(dateObj);
               break;
             case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
               dateObj.setFullYear(currYear);
               dateObj.setMonth(currMonth);
               var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
@@ -1248,6 +1251,7 @@ var Magazine = function()
               var pubDays = dates[key][eachDate].split(' ');
               var weekDay = days.indexOf(pubDays[1].toLowerCase());
               var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);  
               dateObj.setMonth(currMonth);
               dateObj.setFullYear(currYear);
               dateObj.setDate(1);
@@ -1262,12 +1266,9 @@ var Magazine = function()
       
       currYear++;
       if(pubDates.length < 10)
-        pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
+        pubDates = self.formDates(pubDates, dates, currYear, frequency);
       return pubDates;
     }
 };
-
-
-
 
 module.exports.Mag = Magazine;
