@@ -1270,7 +1270,4 @@ var Magazine = function()
     }
 };
 
-
-
-
 module.exports.Mag = Magazine;
