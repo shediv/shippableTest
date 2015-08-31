@@ -22,7 +22,7 @@ var Cinema = function()
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
-      return res.status(200).json(results);
+      return res.status(200).json({media:results[0]});
     });
   };
 
