@@ -175,8 +175,8 @@ var Cinema = function()
       {
         totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
         totalSeats += medias[i].seats;
-        medias[i]['geography'] = {};
-        medias[i]['geography'] = geographies[0][medias[i].geography];
+        medias[i]['geographyData'] = {};
+        medias[i]['geographyData'] = geographies[0][medias[i].geography];
 
       }
       var data = {
@@ -202,7 +202,7 @@ var Cinema = function()
         {
           totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
           totalSeats += medias[i].seats;
-          medias[i].geography = geographies[0][medias[i].geography];
+          medias[i].geographyData = geographies[0][medias[i].geography];
         }      
         callbackMain(err, {
           offScreen : {
