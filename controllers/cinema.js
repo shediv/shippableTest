@@ -68,7 +68,10 @@ var Cinema = function()
       async.series([
         function(callbackInner){
           Geography.find(match, function(err, results){
-            var geographies = {};
+            var geographies = [];
+            console.log('in - ' , geographies);
+            if(!results) return callbackInner(err, geographies);
+            console.log('out - ' , geographies);
             for(i in results)
             {
               results[i] = results[i].toObject();
@@ -81,13 +84,13 @@ var Cinema = function()
       ],
       function(err, geographies)
       {
-        self.buildScreensQuery(err, geographies, callbackMain);
+        self.buildScreensQuery(err, geographies[0], callbackMain);
       });
     };
 
     self.buildScreensQuery = function(err, geographies, callbackMain){ 
       var match = [];
-      if(self.params.geographyIds.length) match.push({geographyId : { $in:self.params.geographyIds }});
+      if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
       if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
       if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
       if(self.params.filters.mediaType == 'onScreen')
@@ -97,14 +100,14 @@ var Cinema = function()
       match = {  $match : {  $and: match } };
 
       var group = {
-        "$group" : { _id : '$geographyId', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
+        "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
       };
       var project = {
         type : 1,
         mallName : 1,
         cinemaChain : 1,
         seats : 1,
-        geographyId : 1
+        geography : 1
       };
       
       if(self.params.filters.mediaType == 'onScreen')
@@ -129,7 +132,7 @@ var Cinema = function()
             else
             {
               self.params.geographyIds = [];
-              for(i in medias) self.params.geographyIds.push(medias[i].geographyId);
+              for(i in medias) self.params.geographyIds.push(medias[i].geography);
               Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
@@ -145,14 +148,15 @@ var Cinema = function()
             {
               medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
               finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
-            }                
-            if(geographies.length) callback(err, self.populateOnScreenData(finalMedias, geographies));
+            }
+            medias = finalMedias;
+            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
             else
             {
-              self.params.geographyIds = {};
-              for(i in medias) self.params.geographyIds.push(medias[i].geographyId);
+              self.params.geographyIds = [];
+              for(i in medias) self.params.geographyIds.push(medias[i].geography);
               Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
-                var geographies = [];
+                var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                 callback(err, self.populateOnScreenData(medias, geographies));
               });
@@ -175,8 +179,8 @@ var Cinema = function()
       {
         totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
         totalSeats += medias[i].seats;
-        medias[i]['geography'] = {};
-        medias[i]['geography'] = geographies[0][medias[i].geographyId];
+        medias[i]['geographyData'] = {};
+        medias[i]['geographyData'] = geographies[medias[i].geography];
 
       }
       var data = {
@@ -202,7 +206,8 @@ var Cinema = function()
         {
           totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
           totalSeats += medias[i].seats;
-          medias[i].geography = geographies[0][medias[i].geographyId];
+          medias[i]['geographyData'] = {};
+          medias[i]['geographyData'] = geographies[0][medias[i].geography];
         }      
         callbackMain(err, {
           offScreen : {
