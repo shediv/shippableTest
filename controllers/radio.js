@@ -22,9 +22,8 @@ var Radio = function()
   });
 
   this.getRadios = function(req, res){
-    //res.status(200).json("{media:results[0]}");
      self.params = JSON.parse(req.query.params);
-     self.sortBy = JSON.parse(req.query.params);
+     self.sortBy = req.query.sortBy;
 
       async.waterfall([
         function(callback)
@@ -39,9 +38,6 @@ var Radio = function()
       function (err, result)
       {
         res.status(200).json(result);
-        // for(key in result.magazines)
-        //   result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
-        // res.status(200).json(result);
       });
     
   };
@@ -59,11 +55,11 @@ var Radio = function()
       };
       query.projection = {
         '_id' : 1,
+        'radioFrequency' : 1,
         'station' : 1,
         'city' : 1,
-        'frequency' : 1,
         'language' : 1,
-        'mediaOptions' : 1,
+        'mediaOptions' : 1,        
         'logo' : 1
       };
 
@@ -93,21 +89,21 @@ var Radio = function()
           );
         },
         radios : function(callbackInner)
-        {
+        {          
           switch(self.sortBy)
           {
-            //case 'topSearched': query.sortBy = { 'topSearched' : -1 }; break;
-            //case 'rate10sec': query.sortBy = { 'rate10sec' : -1}; break;
-            case 'city': query.sortBy = { 'city' : -1}; break;            
+            //case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
+            case 'city': query.sortBy = { 'city' : 1}; break;            
           }
           query.sortBy._id = 1;
 
           Media.aggregate(
-            {$match: query.match}, //{$sort: query.sortBy},
+            {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {
+            {              
               callbackInner(err, results);
             }
           );
@@ -147,6 +143,7 @@ var Radio = function()
     self.getMusicLanguages = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
+        {$unwind: '$language'},
         {$group : { _id : '$language', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -177,225 +174,107 @@ var Radio = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
-        Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
-          results['categoryName'] = category.name;
-          res.status(200).json({magazine : results});
-        });
+        res.status(200).json({radio : results});        
+        // Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
+        //   results['categoryName'] = category.name;
+        //   res.status(200).json({magazine : results});
+        // });
       }
     );
   }
 
+  //Waiting for the categories to be taged
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
     var project = {
       '_id' : 1,
-      'name' : 1,
+      'radioFrequency' : 1,
+      'station' : 1,
       'urlSlug' : 1,
-      'thumbnail' : 1,
-      'targetGroup' : 1,
-      'categoryId' : 1,
-      'attributes.frequency.value' : 1,
-      'attributes.language.value' : 1,
-      'attributes.targetGroup' : 1,
-      'attributes.readership.value' : 1,
-      'attributes.circulation.value' : 1,
-      'print.mediaOptions.fullPage.1-2' : 1,
-      'IRS' : 1,
-      'digital' : 1
+      'city' : 1,
+      'language' : 1,
+      'mediaOptions' : 1,        
+      'logo' : 1
     };
     async.series({
       medias : function(callback){
         Media.find({_id: { $in: ids }}, project,function(err, results){
           var medias = results.map(function(m){
-            catIds.push(m.categoryId);
+            //catIds.push(m.categoryId);
             return m.toObject();
           });
           callback(err, medias);
         });
-      },
-      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+      }//,
+      //categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
     },
     function(err, result)
     {
       for(var i = 0; i < result.medias.length; i++)
       {
-        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
-        result.medias[i].frequency = result.medias[i].attributes.frequency.value;
-        result.medias[i].language = result.medias[i].attributes.language.value;
-        result.medias[i].circulation = result.medias[i].attributes.circulation.value;
-        result.medias[i].readership = result.medias[i].attributes.readership.value;
-        result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage['1-2'];
-        result.medias[i].website = result.medias[i].digital;
-        delete result.medias[i].digital;
-        delete result.medias[i].attributes;
-        delete result.medias[i].print;
+        result.medias[i]._id = result.medias[i]._id;
+        result.medias[i].frequency = result.medias[i].radioFrequency;
+        result.medias[i].station = result.medias[i].station;
+        result.medias[i].urlSlug = result.medias[i].urlSlug;
+        result.medias[i].city = result.medias[i].city;
+        result.medias[i].language = result.medias[i].language;
+        result.medias[i].mediaOptions = result.medias[i].mediaOptions;
+        result.medias[i].logo = result.medias[i].logo;
       }
-      res.status(200).json({magazines:result.medias});
+      res.status(200).json({radios:result.medias});
     });
   };
 
+  //Waiting for the categories to be taged
   this.relatedMedia = function(req, res){
     var catIds = [];
+    var sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1};
 
     async.series({
       medias : function(callback){
         Media.aggregate(
           {
+            $sort : sortBy 
+          },
+          {
             $match : {
-              categoryId : req.params.categoryId,
+              //categoryId : req.params.categoryId,
               toolId : self.toolId,
-              isActive: 1,
+              //isActive: 1,
               urlSlug : { $ne : req.query.urlSlug }
             }
           },
           {
             $project : {
               urlSlug : 1,
-              name: 1,
-              thumbnail : 1,
-              attributes : 1,
-              categoryId : 1,
+              radioFrequency: 1,
+              station : 1,
+              city : 1,
+              language : 1,
+              mediaOptions : 1,
               _id : 1,
-              logo: 1,
-              'print.mediaOptions.fullPage.1-2' : 1
+              logo: 1
             }
           },
           function(err, results)
           {
-            self.yForumala(results, function(err, results){
-              results.map(function(m){
-                catIds.push(m.categoryId);
-              });
-              callback(err, results)       
-            });
+            results = results.slice(0,3);
+            callback(err, results)
           }
         );
-      },
-      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+      }//,
+      //categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
     },
     function(err, result)
     {
-      for(var i = 0; i < result.medias.length; i++)
-      {
-        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
-      }
-      res.status(200).json({magazines:result.medias});
+      // for(var i = 0; i < result.medias.length; i++)
+      // {
+      //   result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+      // }
+      res.status(200).json({radios:result.medias});
     });
   };
-
-    self.yForumala = function(medias, callback){
-      //Query for maxReadership, maxNoOfPages, minFullPage
-      Media.aggregate(
-        {
-          $match : {
-            categoryId : medias[0].categoryId,
-            toolId : self.toolId,
-            isActive: 1
-          }
-        },
-        {
-          $group: {
-            _id: "$categoryId",
-            maxReadership: { $max: "$attributes.readership.value" },
-            maxNoOfPages: { $max: "$attributes.noOfPages.value" },
-            minFullPage: { $min: "$print.mediaOptions.fullPage.1-2" }
-          }
-        },
-        function(err, results)
-        {
-          // Assign maxReadership, maxNoOfPages, minFullPage
-          var maxReadership = results[0].maxReadership;
-          var maxNoOfPages = results[0].maxNoOfPages;
-          var minFullPage = results[0].minFullPage;
-
-          medias.map(function(o){
-            x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.3;
-            y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.1;
-            z = ( (minFullPage * 10)/o.print.mediaOptions.fullPage['1-2'] ) * 0.6;
-            o.yValue = x + y + z;
-          });
-
-          medias.sort(function(mediaA, mediaB){
-            return mediaB.yValue - mediaA.yValue;
-          })
-
-          var topMedias = [];
-          for(var i=0; i< 3; i++)
-          {
-            if(medias[i] != undefined) topMedias.push(medias[i]);
-          }
-          callback(err, topMedias);
-        }
-      );
-    };
-
-    self.top3= function(query,callback){
-      var magazines = [];
-      var magazine=[];
-      Media.aggregate(
-        {$match: query.match},
-        {$project: query.projection},
-        {$group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}},
-        function(err, results)
-        {
-          async.each(results, function (group ,callback_each){
-            self.yForumala(group.medias, function (err, res){
-              for(var i=0; i < res.length; i++)
-                magazines.push(res[i]);
-              callback_each(err);
-            });
-          },
-          function(err)
-          {
-            var categoryIds=[];
-            for(var i=0 ;i<magazines.length ; i++)
-              categoryIds.push(magazines[i].categoryId);
-            CommonLib.getCategoryName(categoryIds, function(err, catNames){
-              for(var i=0; i<magazines.length;i++)
-                magazines[i].categoryName = catNames[magazines[i].categoryId];
-              switch(query.sortBy)
-              {
-                case "views":
-                  magazines.sort(function(a ,b){
-                    return a.views > b.views;
-                  });
-                  break;
-                case "price":
-                  magazines.sort(function(a ,b){
-                    return a.print.mediaOptions.fullPage['1-2'] < b.print.mediaOptions.fullPage['1-2'];
-                  });
-                  break;
-                case "circulation":
-                  magazines.sort(function(a ,b){
-                    return a.attributes.circulation.value > b.attributes.circulation.value;
-                  });
-                  break;
-                  case "category":
-                    magazines.sort(function(a ,b){
-                      return a.categoryName < b.categoryName;
-                    });
-                    break;
-              }
-              if(magazines.length>query.offset) {
-                for (var i = query.offset; i<(query.offset + query.limit); i++) {
-                  if(magazines[i] != undefined) {
-                    magazine.push(magazines[i]);
-                  }
-                }
-              }
-              else{
-                callback(null, {magazines: magazines,count:magazines.length});
-              }
-              callback(null, {magazines:magazine,count:magazines.length});
-
-
-            });
-          });
-        }
-      );
-    };
 
   this.getBestRates = function(req, res){
     var medias = req.body.medias;//{};
