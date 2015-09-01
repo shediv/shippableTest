@@ -131,11 +131,12 @@ var Cinema = function()
             if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
             else
             {
-              self.params.geographyIds = [];
-              for(i in medias) self.params.geographyIds.push(medias[i].geography);
+              var geographyIds = [];
+              for(i in medias) geographyIds.push(medias[i].geography);
               Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
+                geographies['length'] = results.length;
                 callback(err, self.populateOnScreenData(medias, geographies));
               });
             }
@@ -153,11 +154,12 @@ var Cinema = function()
             if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
             else
             {
-              self.params.geographyIds = [];
-              for(i in medias) self.params.geographyIds.push(medias[i].geography);
+              var geographyIds = [];
+              for(i in medias) geographyIds.push(medias[i].geography);
               Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
+                geographies['length'] = results.length;
                 callback(err, self.populateOnScreenData(medias, geographies));
               });
             }
