@@ -91,7 +91,6 @@ var Cinema = function()
 
     self.buildScreensQuery = function(err, geographies, callbackMain){ 
       var match = [];
-      console.log('geos - ',geographies);
       if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
       else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
       if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
@@ -177,7 +176,7 @@ var Cinema = function()
 
     self.populateOnScreenData = function(medias, geographies){
       var totalPrice = 0;
-      var cities = geographies.length;
+      var cities = [];
       var reach = 0;
       var totalSeats = 0;
       for(i in medias)
@@ -186,13 +185,14 @@ var Cinema = function()
         totalSeats += medias[i].seats;
         medias[i]['geographyData'] = {};
         medias[i]['geographyData'] = geographies[medias[i].geography];
-
+        if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
+          cities.push(medias[i]['geographyData'].city);
       }
       var data = {
         count:medias.length, 
         screens:medias, 
         totalPrice:totalPrice, 
-        cities:cities, 
+        cities:{ count:cities.length, values:cities }, 
         reach:(totalSeats * 4 * 7)
       };
 
@@ -204,7 +204,7 @@ var Cinema = function()
       project['dimensions'] = 1;
       Media.aggregate(match, {$project:project}, function(err, medias){
         var totalPrice = 0;
-        var cities = geographies.length;
+        var cities = [];
         var reach = 0;
         var totalSeats = 0;
         for(i in medias)
@@ -213,14 +213,16 @@ var Cinema = function()
           totalSeats += medias[i].seats;
           medias[i]['geographyData'] = {};
           medias[i]['geographyData'] = geographies[0][medias[i].geography];
+          if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
+            cities.push(medias[i]['geographyData'].city);
         }      
         callbackMain(err, {
           offScreen : {
             count:medias.length, 
             screens:medias,
             totalPrice:totalPrice, 
-            cities:cities, 
-            reach:(totalSeats * 4 * 7)
+            cities:{ count:cities.length, values:cities }, 
+            reach:(totalSeats * 4 * 30)
           }
         });
       });
