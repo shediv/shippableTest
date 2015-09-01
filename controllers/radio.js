@@ -32,11 +32,11 @@ var Radio = function()
           callback(null, self.applyFilters());
         },
         function(query, callback)
-        {              
-          self.sortFilteredMedia(query, callback);        
+        {
+          self.sortFilteredMedia(query, callback);
         }
       ],
-      function (err, result) 
+      function (err, result)
       {
         res.status(200).json(result);
         // for(key in result.magazines)
@@ -337,13 +337,13 @@ var Radio = function()
       Media.aggregate(
         {$match: query.match},
         {$project: query.projection},
-        {$group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}}, 
+        {$group: {_id: '$categoryId', medias:{$push : '$$ROOT'},count:{$sum:1}}},
         function(err, results)
         {
           async.each(results, function (group ,callback_each){
             self.yForumala(group.medias, function (err, res){
               for(var i=0; i < res.length; i++)
-                magazines.push(res[i]);    
+                magazines.push(res[i]);
               callback_each(err);
             });
           },
