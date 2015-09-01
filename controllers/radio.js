@@ -22,29 +22,28 @@ var Radio = function()
   });
 
   this.getRadios = function(req, res){
-    // res.status(200).json("{media:results[0]}");
-    // self.params = JSON.parse(req.query.params);
-    // } 
-    // else 
-    // {
-    //   async.waterfall([
-    //     function(callback)
-    //     {
-    //       callback(null, self.applyFilters());
-    //     },
-    //     function(query, callback)
-    //     {              
-    //       self.sortFilteredMedia(query, callback);        
-    //     }
-    //   ],
-    //   function (err, result) 
-    //   {
+    //res.status(200).json("{media:results[0]}");
+     self.params = JSON.parse(req.query.params);
+     self.sortBy = JSON.parse(req.query.params);
 
-    //     for(key in result.magazines)
-    //       result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
-    //     res.status(200).json(result);
-    //   });
-    // }
+      async.waterfall([
+        function(callback)
+        {
+          callback(null, self.applyFilters());
+        },
+        function(query, callback)
+        {              
+          self.sortFilteredMedia(query, callback);        
+        }
+      ],
+      function (err, result) 
+      {
+        res.status(200).json(result);
+        // for(key in result.magazines)
+        //   result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
+        // res.status(200).json(result);
+      });
+    
   };
 
     self.applyFilters = function(){
@@ -55,7 +54,7 @@ var Radio = function()
       query.match = {};
       var filters = {
         'city' : 'city',
-        'musicLanguage' : 'musicLanguage',
+        'language' : 'language',
         'station' : 'station'
       };
       query.projection = {
@@ -63,7 +62,7 @@ var Radio = function()
         'station' : 1,
         'city' : 1,
         'frequency' : 1,
-        'musicLanguage' : 1,
+        'language' : 1,
         'mediaOptions' : 1,
         'logo' : 1
       };
@@ -73,18 +72,15 @@ var Radio = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      self.params.filters.mediaOptions.forEach(function(value, key){
-        query.match['mediaOptions.'+value] = { $exists : 1};
-      });
-      query.match.isActive = 1;
-      query.match.toolId = self.toolId;
+      //query.match.isActive = 1;
+      //query.match.toolId = self.toolId;
       return query;
     };
 
     self.sortFilteredMedia = function(query, callback){
       async.parallel({
         count : function(callbackInner)
-        {
+        {          
           Media.aggregate(
             {$match : query.match},
             {$group: { _id : null, count: {$sum: 1} }},
@@ -92,37 +88,30 @@ var Radio = function()
             {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, count);
+              callbackInner(err, result);
             }
           );
         },
-        magazines : function(callbackInner)
+        radios : function(callbackInner)
         {
-          switch(query.sortBy)
+          switch(self.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'topSearched' : -1 }; break;
-            case 'rate10sec': query.sortBy = { 'rate10sec' : -1}; break;
+            //case 'topSearched': query.sortBy = { 'topSearched' : -1 }; break;
+            //case 'rate10sec': query.sortBy = { 'rate10sec' : -1}; break;
             case 'city': query.sortBy = { 'city' : -1}; break;            
           }
           query.sortBy._id = 1;
+
           Media.aggregate(
-            {$match: query.match}, {$sort: query.sortBy},
+            {$match: query.match}, //{$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
-              var catIds = [];
-              for ( var i = 0; i < results.length; i++ ) 
-              {
-                catIds.push(results[i].categoryId);
-              }
-              CommonLib.getCategoryName(catIds, function(err, catNames){
-                for(var i=0; i<results.length;i++)
-                  results[i].categoryName = catNames[results[i].categoryId];
-                callbackInner(err, results);
-              });
+              callbackInner(err, results);
             }
           );
+
         }
       },
       function(err, results) 
