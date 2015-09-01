@@ -22,9 +22,8 @@ var Radio = function()
   });
 
   this.getRadios = function(req, res){
-    //res.status(200).json("{media:results[0]}");
      self.params = JSON.parse(req.query.params);
-     self.sortBy = JSON.parse(req.query.params);
+     self.sortBy = req.query.sortBy;
 
       async.waterfall([
         function(callback)
@@ -39,9 +38,6 @@ var Radio = function()
       function (err, result) 
       {
         res.status(200).json(result);
-        // for(key in result.magazines)
-        //   result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
-        // res.status(200).json(result);
       });
     
   };
@@ -93,21 +89,21 @@ var Radio = function()
           );
         },
         radios : function(callbackInner)
-        {
+        {          
           switch(self.sortBy)
           {
-            //case 'topSearched': query.sortBy = { 'topSearched' : -1 }; break;
-            //case 'rate10sec': query.sortBy = { 'rate10sec' : -1}; break;
-            case 'city': query.sortBy = { 'city' : -1}; break;            
+            //case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
+            case 'city': query.sortBy = { 'city' : 1}; break;            
           }
           query.sortBy._id = 1;
 
           Media.aggregate(
-            {$match: query.match}, //{$sort: query.sortBy},
+            {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {
+            {              
               callbackInner(err, results);
             }
           );
@@ -147,6 +143,7 @@ var Radio = function()
     self.getMusicLanguages = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
+        {$unwind: '$language'},
         {$group : { _id : '$language', count : {$sum : 1}}},
         function(error, results) 
         {
