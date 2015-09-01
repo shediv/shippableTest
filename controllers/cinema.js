@@ -34,7 +34,8 @@ var Cinema = function()
       self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                         + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                         + dateObj.getFullYear();
-      if(self.params.filters.geographies === undefined) self.params.filters.geographies = [];
+      if(self.params.filters.geographies === undefined)
+       return self.buildScreensQuery(err, [], callbackMain); 
       for(key in self.params.filters.geographies)
       {
         switch(self.params.filters.geographies[key].place)
@@ -90,7 +91,9 @@ var Cinema = function()
 
     self.buildScreensQuery = function(err, geographies, callbackMain){ 
       var match = [];
+      console.log('geos - ',geographies);
       if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
+      else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
       if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
       if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
       if(self.params.filters.mediaType == 'onScreen')
