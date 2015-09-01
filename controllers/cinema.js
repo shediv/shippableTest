@@ -67,18 +67,18 @@ var Cinema = function()
 
       async.series([
         function(callbackInner){
-          Geography.find(match, function(err, results){
-            var geographies = [];
-            console.log('in - ' , geographies);
-            if(!results) return callbackInner(err, geographies);
-            console.log('out - ' , geographies);
-            for(i in results)
-            {
-              results[i] = results[i].toObject();
-              geographies[results[i]._id.toString()] = results[i];
-              self.params.geographyIds.push(results[i]._id.toString());
-            }
-            callbackInner(err, geographies); 
+          Geography.distinct('pincode', match, function(err, pincodes){
+            Geography.find({pincode:{$in:pincodes}}, function(err, results){
+              var geographies = [];
+              if(!results) return callbackInner(err, geographies);
+              for(i in results)
+              {
+                results[i] = results[i].toObject();
+                geographies[results[i]._id.toString()] = results[i];
+                self.params.geographyIds.push(results[i]._id.toString());
+              }
+              callbackInner(err, geographies); 
+            });
           });
         }
       ],
