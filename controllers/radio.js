@@ -47,24 +47,23 @@ var Radio = function()
   };
 
   this.getRadios = function(req, res){
-     self.params = JSON.parse(req.query.params);
-     self.sortBy = req.query.sortBy;
+    self.params = JSON.parse(req.query.params);
+    self.sortBy = req.query.sortBy;
 
-      async.waterfall([
-        function(callback)
-        {
-          callback(null, self.applyFilters());
-        },
-        function(query, callback)
-        {              
-          self.sortFilteredMedia(query, callback);        
-        }
-      ],
-      function (err, result) 
+    async.waterfall([
+      function(callback)
       {
-        res.status(200).json(result);
-      });
-    
+        callback(null, self.applyFilters());
+      },
+      function(query, callback)
+      {              
+        self.sortFilteredMedia(query, callback);        
+      }
+    ],
+    function (err, result) 
+    {
+      res.status(200).json(result);
+    });
   };
 
     self.applyFilters = function(){
@@ -84,7 +83,7 @@ var Radio = function()
         'station' : 1,
         'city' : 1,
         'language' : 1,
-        'mediaOptions' : 1,        
+        'mediaOptions.regularOptions' : 1,        
         'logo' : 1
       };
 
@@ -93,7 +92,7 @@ var Radio = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      //query.match.isActive = 1;
+      query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
@@ -117,7 +116,7 @@ var Radio = function()
         {          
           switch(self.sortBy)
           {
-            //case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
             case 'city': query.sortBy = { 'city' : 1}; break;            
           }
@@ -132,7 +131,6 @@ var Radio = function()
               callbackInner(err, results);
             }
           );
-
         }
       },
       function(err, results) 
@@ -145,7 +143,8 @@ var Radio = function()
     async.parallel({
       cities: self.getCities,
       stations : self.getStations,
-      languages : self.getMusicLanguages
+      languages : self.getLanguages,
+      products : self.getProducts
     },
     function(err, results) 
     {
@@ -165,7 +164,7 @@ var Radio = function()
       );
     };
 
-    self.getMusicLanguages = function(callback){
+    self.getLanguages = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
         {$unwind: '$language'},
@@ -186,7 +185,7 @@ var Radio = function()
           callback(error, results);
         }
       );
-    };    
+    };
 
     self.getProducts = function(callback){
       Products.find({}, '_id name', function(error, results){
@@ -200,15 +199,10 @@ var Radio = function()
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         res.status(200).json({radio : results});        
-        // Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
-        //   results['categoryName'] = category.name;
-        //   res.status(200).json({magazine : results});
-        // });
       }
     );
   }
 
-  //Waiting for the categories to be taged
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
@@ -219,35 +213,17 @@ var Radio = function()
       'urlSlug' : 1,
       'city' : 1,
       'language' : 1,
-      'mediaOptions' : 1,        
+      'mediaOptions.regularOptions.showRate.allDayPlan' : 1,        
       'logo' : 1
     };
-    async.series({
-      medias : function(callback){
-        Media.find({_id: { $in: ids }}, project,function(err, results){
-          var medias = results.map(function(m){
-            //catIds.push(m.categoryId);
-            return m.toObject();
-          });
-          callback(err, medias);
-        });
-      }//,
-      //categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
-    },
-    function(err, result)
-    {
-      for(var i = 0; i < result.medias.length; i++)
-      {
-        result.medias[i]._id = result.medias[i]._id;
-        result.medias[i].frequency = result.medias[i].radioFrequency;
-        result.medias[i].station = result.medias[i].station;
-        result.medias[i].urlSlug = result.medias[i].urlSlug;
-        result.medias[i].city = result.medias[i].city;
-        result.medias[i].language = result.medias[i].language;
-        result.medias[i].mediaOptions = result.medias[i].mediaOptions;
-        result.medias[i].logo = result.medias[i].logo;
-      }
-      res.status(200).json({radios:result.medias});
+    
+    Media.find({_id: { $in: ids }}, project,function(err, results){
+      var medias = results.map(function(m){
+        m['frequency'] = m.radioFrequency;
+        delete m.radioFrequency;
+        return m.toObject();
+      });
+      res.status(200).json({radios:medias});
     });
   };
 
