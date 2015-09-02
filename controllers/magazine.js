@@ -1054,6 +1054,7 @@ var Magazine = function()
     };
 
     self.top3= function(query,callback){
+      //console.log(query);
       var magazines = [];
       var magazine=[];
       Media.aggregate(

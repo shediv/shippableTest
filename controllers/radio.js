@@ -50,20 +50,28 @@ var Radio = function()
     self.params = JSON.parse(req.query.params);
     self.sortBy = req.query.sortBy;
 
-    async.waterfall([
-      function(callback)
+      async.waterfall([
+        function(callback)
+        {
+          callback(null, self.applyFilters());
+
+        },
+        function(query, callback)
+        {
+          if(self.params.recommended ==true){
+            self.radioRecommend(self.params,callback);
+          }
+          else{
+            self.sortFilteredMedia(query, callback);
+          }
+
+        }
+      ],
+      function (err, result)
       {
-        callback(null, self.applyFilters());
-      },
-      function(query, callback)
-      {              
-        self.sortFilteredMedia(query, callback);        
-      }
-    ],
-    function (err, result) 
-    {
-      res.status(200).json(result);
-    });
+        res.status(200).json(result);
+      });
+
   };
 
     self.applyFilters = function(){
@@ -433,6 +441,28 @@ var Radio = function()
       if(pubDates.length < 10)
         pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
       return pubDates;
+    }
+
+  self.radioRecommend = function(queryParams,callback){
+      Media.aggregate({
+        $match : {
+          //categoryId : medias[0].categoryId,
+          toolId : self.toolId,
+          city :{$in:queryParams.filters.city},
+          categories:{ $exists:1 }
+        }
+      },
+      {
+        $group: { _id: null,radio:{$push : '$$ROOT'}, count: { $sum: 1 } }
+      },
+      function(error,results)
+      {
+        callback(null,results);
+      });
+
+
+    /*callback(null,queryParams.filters.categories);*/
+
     }
 };
 
