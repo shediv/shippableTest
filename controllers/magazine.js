@@ -882,7 +882,7 @@ var Magazine = function()
       //Hardcoding the values for now, as the frequency of changes is very low
       var mediaOptions = [
         {'_id' : 'print', 'name' : 'Print'},
-        {'_id' : 'eMail', 'name' : 'EMail'},
+        {'_id' : 'email', 'name' : 'EMail'},
         {'_id' : 'website', 'name' : 'Website'}
       ];
       callback(null, mediaOptions);
