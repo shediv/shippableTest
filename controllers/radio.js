@@ -23,29 +23,21 @@ var Radio = function()
   });
 
   this.mail = function(req, res){
-    var nodemailer = require('nodemailer');
 
-    // create reusable transporter object using SMTP transport
-    var transporter = nodemailer.createTransport({
-        service: 'Gmail',
-        auth: {
-            user: 'videsh@themediaant.com',
-            pass: 'videsh786'
-        }
-    });
+    console.log(CommonLib.transporter);
 
     // setup e-mail data with unicode symbols
     var mailOptions = {
-        from: 'Fred Foo ✔ <foo@blurdybloop.com>', // sender address
+        from: 'The Media Ant <help@themediaant.com>', // sender address
         to: 'videsh@themediaant.com', // list of receivers
-        subject: 'Hello ✔', // Subject line
+        subject: 'The Media Ant', // Subject line
         text: 'Hello world ✔', // plaintext body
         html: '<b>Hello world ✔</b>' // html body
     };
 
 
     // send mail with defined transport object
-    transporter.sendMail(mailOptions, function(error, info){
+    CommonLib.transporter.sendMail(mailOptions, function(error, info){
         if(error){
             return console.log(error);
         }
@@ -82,9 +74,9 @@ var Radio = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'city' : 'city',
-        'language' : 'language',
-        'station' : 'station'
+        'cities' : 'city',
+        'languages' : 'language',
+        'stations' : 'station'
       };
       query.projection = {
         '_id' : 1,
@@ -102,7 +94,7 @@ var Radio = function()
       });
 
       //query.match.isActive = 1;
-      //query.match.toolId = self.toolId;
+      query.match.toolId = self.toolId;
       return query;
     };
 
@@ -153,7 +145,7 @@ var Radio = function()
     async.parallel({
       cities: self.getCities,
       stations : self.getStations,
-      musiclanguages : self.getMusicLanguages
+      languages : self.getMusicLanguages
     },
     function(err, results) 
     {
