@@ -34,7 +34,8 @@ var Cinema = function()
         self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
             + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
             + dateObj.getFullYear();
-        if(self.params.filters.geographies === undefined) self.params.filters.geographies = [];
+        if(self.params.filters.geographies === undefined)
+            return self.buildScreensQuery(err, [], callbackMain);
         for(key in self.params.filters.geographies)
         {
             switch(self.params.filters.geographies[key].place)
@@ -67,18 +68,18 @@ var Cinema = function()
 
         async.series([
                 function(callbackInner){
-                    Geography.find(match, function(err, results){
-                        var geographies = [];
-                        console.log('in - ' , geographies);
-                        if(!results) return callbackInner(err, geographies);
-                        console.log('out - ' , geographies);
-                        for(i in results)
-                        {
-                            results[i] = results[i].toObject();
-                            geographies[results[i]._id.toString()] = results[i];
-                            self.params.geographyIds.push(results[i]._id.toString());
-                        }
-                        callbackInner(err, geographies);
+                    Geography.distinct('pincode', match, function(err, pincodes){
+                        Geography.find({pincode:{$in:pincodes}}, function(err, results){
+                            var geographies = [];
+                            if(!results) return callbackInner(err, geographies);
+                            for(i in results)
+                            {
+                                results[i] = results[i].toObject();
+                                geographies[results[i]._id.toString()] = results[i];
+                                self.params.geographyIds.push(results[i]._id.toString());
+                            }
+                            callbackInner(err, geographies);
+                        });
                     });
                 }
             ],
@@ -91,6 +92,7 @@ var Cinema = function()
     self.buildScreensQuery = function(err, geographies, callbackMain){
         var match = [];
         if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
+        else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
         if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
         if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
         if(self.params.filters.mediaType == 'onScreen')
@@ -131,11 +133,12 @@ var Cinema = function()
                         if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
                         else
                         {
-                            self.params.geographyIds = [];
-                            for(i in medias) self.params.geographyIds.push(medias[i].geography);
+                            var geographyIds = [];
+                            for(i in medias) geographyIds.push(medias[i].geography);
                             Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
                                 var geographies = {};
                                 for(i in results) geographies[results[i]._id.toString()] = results[i];
+                                geographies['length'] = results.length;
                                 callback(err, self.populateOnScreenData(medias, geographies));
                             });
                         }
@@ -153,11 +156,12 @@ var Cinema = function()
                         if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
                         else
                         {
-                            self.params.geographyIds = [];
-                            for(i in medias) self.params.geographyIds.push(medias[i].geography);
+                            var geographyIds = [];
+                            for(i in medias) geographyIds.push(medias[i].geography);
                             Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
                                 var geographies = {};
                                 for(i in results) geographies[results[i]._id.toString()] = results[i];
+                                geographies['length'] = results.length;
                                 callback(err, self.populateOnScreenData(medias, geographies));
                             });
                         }
@@ -172,7 +176,7 @@ var Cinema = function()
 
     self.populateOnScreenData = function(medias, geographies){
         var totalPrice = 0;
-        var cities = geographies.length;
+        var cities = [];
         var reach = 0;
         var totalSeats = 0;
         for(i in medias)
@@ -181,13 +185,14 @@ var Cinema = function()
             totalSeats += medias[i].seats;
             medias[i]['geographyData'] = {};
             medias[i]['geographyData'] = geographies[medias[i].geography];
-
+            if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
+                cities.push(medias[i]['geographyData'].city);
         }
         var data = {
             count:medias.length,
             screens:medias,
             totalPrice:totalPrice,
-            cities:cities,
+            cities:{ count:cities.length, values:cities },
             reach:(totalSeats * 4 * 7)
         };
 
@@ -199,7 +204,7 @@ var Cinema = function()
         project['dimensions'] = 1;
         Media.aggregate(match, {$project:project}, function(err, medias){
             var totalPrice = 0;
-            var cities = geographies.length;
+            var cities = [];
             var reach = 0;
             var totalSeats = 0;
             for(i in medias)
@@ -208,14 +213,16 @@ var Cinema = function()
                 totalSeats += medias[i].seats;
                 medias[i]['geographyData'] = {};
                 medias[i]['geographyData'] = geographies[0][medias[i].geography];
+                if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
+                    cities.push(medias[i]['geographyData'].city);
             }
             callbackMain(err, {
                 offScreen : {
                     count:medias.length,
                     screens:medias,
                     totalPrice:totalPrice,
-                    cities:cities,
-                    reach:(totalSeats * 4 * 7)
+                    cities:{ count:cities.length, values:cities },
+                    reach:(totalSeats * 4 * 30)
                 }
             });
         });
