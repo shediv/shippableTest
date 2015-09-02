@@ -7,6 +7,7 @@ var Cinema = function()
     var Tools = require('../models/tool').Tools;
     var Category = require('../models/category').Category;
     var Geography = require('../models/geography').Geography;
+    var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
     var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
     var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
 
@@ -19,15 +20,219 @@ var Cinema = function()
     });
 
     this.getCinemas = function(req, res){
-        res.status(200).json("test");
-        //self.params = JSON.parse(req.query.params);
-
+        self.params = JSON.parse(req.query.params);
+        async.series([self.buildGeographyQuery], function(err, results){
+            return res.status(200).json({media:results[0]});
+        });
     };
+
+    self.buildGeographyQuery = function(callbackMain){
+
+        var or = [];
+        self.params.geographyIds = [];
+        var dateObj = new Date();
+        dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
+        self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
+            + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
+            + dateObj.getFullYear();
+        if(self.params.filters.geographies === undefined)
+            return self.buildScreensQuery(err, [], callbackMain);
+        for(key in self.params.filters.geographies)
+
+        {
+            switch(self.params.filters.geographies[key].place)
+            {
+                case 'state' :
+                    or.push(
+                        { $and : [{ state :self.params.filters.geographies[key].state}] }
+                    );
+                    break;
+                case 'city' :
+                    or.push({
+                        $and : [
+                            { state :self.params.filters.geographies[key].state},
+                            { city : self.params.filters.geographies[key].city}
+                        ]
+                    });
+                    break;
+                case 'locality' :
+                    or.push({
+                        $and : [
+                            { state :self.params.filters.geographies[key].state},
+                            { city : self.params.filters.geographies[key].city},
+                            { locality : self.params.filters.geographies[key].locality}
+                        ]
+                    });
+            }
+        }
+
+        var match = { $or:or, pincode : { $exists:1 } };
+
+        async.series([
+                function(callbackInner){
+                    Geography.distinct('pincode', match, function(err, pincodes){
+                        Geography.find({pincode:{$in:pincodes}}, function(err, results){
+                            var geographies = [];
+                            if(!results) return callbackInner(err, geographies);
+                            for(i in results)
+                            {
+                                results[i] = results[i].toObject();
+                                geographies[results[i]._id.toString()] = results[i];
+                                self.params.geographyIds.push(results[i]._id.toString());
+                            }
+                            callbackInner(err, geographies);
+                        });
+                    });
+                }
+            ],
+            function(err, geographies)
+            {
+                self.buildScreensQuery(err, geographies[0], callbackMain);
+            });
+    };
+
+    self.buildScreensQuery = function(err, geographies, callbackMain){
+        var match = [];
+        if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
+        else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
+        if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
+        if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
+        if(self.params.filters.mediaType == 'onScreen')
+            if(self.params.filters.screenType.length) match.push({isSingleScreen : { $in:self.params.filters.screenType }});
+        match.push({type : self.params.filters.mediaType });
+        match.push({toolId : self.toolId});
+        match = {  $match : {  $and: match } };
+
+        var group = {
+            "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
+        };
+        var project = {
+            type : 1,
+            mallName : 1,
+            cinemaChain : 1,
+            seats : 1,
+            geography : 1
+        };
+
+        if(self.params.filters.mediaType == 'onScreen')
+            self.fetchOnScreenData(geographies, match, group, project, callbackMain);
+        else
+            self.fetchOffScreenData(geographies, match, group, project, callbackMain);
+    };
+
+    self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
+        project['cinemaName'] = 1;
+        project['theatreName'] = 1;
+        project['screenNumber'] = 1;
+        project['creativeFormat'] = 1;
+        project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
+        project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
+        project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
+        project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
+        async.parallel({
+                allScreens : function(callback){
+                    Media.aggregate(match, {$project:project}, function(err, medias){
+                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+                        else
+                        {
+                            var geographyIds = [];
+                            for(i in medias) geographyIds.push(medias[i].geography);
+                            Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
+                                var geographies = {};
+                                for(i in results) geographies[results[i]._id.toString()] = results[i];
+                                geographies['length'] = results.length;
+                                callback(err, self.populateOnScreenData(medias, geographies));
+                            });
+                        }
+                    });
+                },
+                recommendedScreens : function(callback){
+                    var finalMedias = [];
+                    Media.aggregate(match, {$project:project}, group, function(err, medias){
+                        for(key in medias)
+                        {
+                            medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);
+                            finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
+                        }
+                        medias = finalMedias;
+                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+                        else
+                        {
+                            var geographyIds = [];
+                            for(i in medias) geographyIds.push(medias[i].geography);
+                            Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
+                                var geographies = {};
+                                for(i in results) geographies[results[i]._id.toString()] = results[i];
+                                geographies['length'] = results.length;
+                                callback(err, self.populateOnScreenData(medias, geographies));
+                            });
+                        }
+                    });
+                }
+            },
+            function(err, results)
+            {
+                callbackMain(err, results);
+            });
+    }
+
+    self.populateOnScreenData = function(medias, geographies){
+        var totalPrice = 0;
+        var cities = [];
+        var reach = 0;
+        var totalSeats = 0;
+        for(i in medias)
+        {
+            totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+            totalSeats += medias[i].seats;
+            medias[i]['geographyData'] = {};
+            medias[i]['geographyData'] = geographies[medias[i].geography];
+            if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
+                cities.push(medias[i]['geographyData'].city);
+        }
+        var data = {
+            count:medias.length,
+            screens:medias,
+            totalPrice:totalPrice,
+            cities:{ count:cities.length, values:cities },
+            reach:(totalSeats * 4 * 7)
+        };
+
+        return data;
+    }
+
+    self.fetchOffScreenData = function(geographies, match, group, project, callbackMain){
+        project['mediaOptions'] = 1;
+        project['dimensions'] = 1;
+        Media.aggregate(match, {$project:project}, function(err, medias){
+            var totalPrice = 0;
+            var cities = [];
+            var reach = 0;
+            var totalSeats = 0;
+            for(i in medias)
+            {
+                totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
+                totalSeats += medias[i].seats;
+                medias[i]['geographyData'] = {};
+                medias[i]['geographyData'] = geographies[0][medias[i].geography];
+                if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
+                    cities.push(medias[i]['geographyData'].city);
+            }
+            callbackMain(err, {
+                offScreen : {
+                    count:medias.length,
+                    screens:medias,
+                    totalPrice:totalPrice,
+                    cities:{ count:cities.length, values:cities },
+                    reach:(totalSeats * 4 * 30)
+                }
+            });
+        });
+    }
 
     this.getFilters = function(req, res){
         async.parallel({
                 mallName: self.getMallName,
-                geography : self.getGeographies,
                 cinemaChain : self.getCinemaChain,
                 screenType : self.getScreenType,
                 mediaType : self.getMediaType
@@ -39,115 +244,63 @@ var Cinema = function()
             });
     };
 
-    self.getMallName = function(callback){
-        Media.aggregate(
-            {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$mallName', count : {$sum : 1}}},
-            function(error, results)
-            {
-                callback(error, results);
-            }
-        );
-    };
 
-    self.getGeographies = function(callback){
-        Media.aggregate(
-            {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-            {$unwind: '$geography'},
-            {$group : { _id : '$geography', count : {$sum : 1}}},
-            function(error, results)
-            {
-                var geoIds = [];
-                results.map(function(o){ geoIds.push(o._id); });
-                Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-                    callback(error, geos);
-                });
-            }
+    self.getMallName = function(callback){
+        var aggregation = Media.aggregate(
+            {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
+            {$group : { _id : '$mallName', count : {$sum : 1}}}
         );
+
+        aggregation.options = { allowDiskUse: true };
+        aggregation.exec(function(error, results) {
+            callback(error, results)
+        });
     };
 
     self.getCinemaChain = function(callback){
-        Media.aggregate(
+        var aggregation = Media.aggregate(
             {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$cinemaChain', count : {$sum : 1}}},
-            function(error, results)
-            {
-                callback(error, results);
-            }
+            {$group : { _id : '$cinemaChain', count : {$sum : 1}}}
         );
+
+        aggregation.options = { allowDiskUse: true };
+        aggregation.exec(function(error, results) {
+            callback(error, results)
+        });
     };
 
     self.getScreenType = function(callback){
-        Media.aggregate(
-            {$match: {toolId:self.toolId, "type": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$type', count : {$sum : 1}}},
-            function(error, results)
-            {
-                callback(error, results);
-            }
-        );
+        var ScreenType = [
+            {'_id' : false, 'name' : 'Multiplex', 'selected' : true},
+            {'_id' : true, 'name' : 'Single Screen'}
+        ];
+        callback(null, ScreenType);
     };
 
     self.getMediaType = function(callback){
-        Media.aggregate(
-            {$match: {toolId:self.toolId, "mediaOptions": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$mediaOptions', count : {$sum : 1}}},
-            function(error, results)
-            {
-                callback(error, results);
+        var MediaType = [
+            {'_id' : 'onScreen', 'name' : 'On Screen'},
+            {'_id' : 'offScreen', 'name' : 'Off Screen'}
+        ];
+        callback(null, MediaType);
+    };
+
+    this.upcomingMovies = function(req, res){
+        dateObj = new Date(req.query.date);
+
+        var firstDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1);
+        var lastDate = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0);
+
+        UpcomingMovies.aggregate(
+            {$match : { releaseDate : { $gte:firstDate, $lte:lastDate } }},
+            {$sort : {releaseDate:1}},
+            {$group : {_id : '$releaseDate', movies:{$push : '$$ROOT'}, count : {$sum : 1}}},
+            function(err, results){
+                if(err) throw err;
+                res.status(200).json({upcomingMovies:results});
             }
         );
-    };
-
-    self.yForumala = function(medias, callback){
-        //Query for maxReadership, maxNoOfPages, minFullPage
-        Media.aggregate(
-            {
-                $match : {
-                    categoryId : medias[0].categoryId,
-                    toolId : self.toolId,
-                    isActive: 1
-                }
-            },
-            {
-                $group: {
-                    _id: "$categoryId",
-                    maxReadership: { $max: "$attributes.readership.value" },
-                    maxNoOfPages: { $max: "$attributes.noOfPages.value" },
-                    minFullPage: { $min: "$print.mediaOptions.fullPage.1-2" }
-                }
-            },
-            function(err, results)
-            {
-                // Assign maxReadership, maxNoOfPages, minFullPage
-                var maxReadership = results[0].maxReadership;
-                var maxNoOfPages = results[0].maxNoOfPages;
-                var minFullPage = results[0].minFullPage;
-
-                medias.map(function(o){
-                    x = ( (o.attributes.noOfPages.value * 10)/maxNoOfPages ) * 0.3;
-                    y = ( (o.attributes.readership.value * 10)/maxReadership ) * 0.1;
-                    z = ( (minFullPage * 10)/o.print.mediaOptions.fullPage['1-2'] ) * 0.6;
-                    o.yValue = x + y + z;
-                });
-
-                medias.sort(function(mediaA, mediaB){
-                    return mediaB.yValue - mediaA.yValue;
-                })
-
-                var topMedias = [];
-                for(var i=0; i< 3; i++)
-                {
-                    if(medias[i] != undefined) topMedias.push(medias[i]);
-                }
-                callback(err, topMedias);
-            }
-        );
-    };
-
-    self.top3= function(query,callback){
-
-    };
+    }
 
     this.getBestrates = function(req, res){
         var medias = {};
