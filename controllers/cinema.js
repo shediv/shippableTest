@@ -163,7 +163,7 @@ var Cinema = function()
               var geographyIds = [];
               for(i in medias) geographyIds.push(medias[i].geography);
               Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                var geographies = [];
+                var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                 geographies['length'] = results.length;
                 callback(err, self.populateOnScreenData(medias, geographies));
@@ -208,29 +208,45 @@ var Cinema = function()
       project['mediaOptions'] = 1;
       project['dimensions'] = 1;
       Media.aggregate(match, {$project:project}, function(err, medias){
-        var totalPrice = 0;
-        var cities = [];
-        var reach = 0;
-        var totalSeats = 0;
-        for(i in medias)
+        if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
+        else
         {
-          totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
-          totalSeats += medias[i].seats;
-          medias[i]['geographyData'] = {};
-          medias[i]['geographyData'] = geographies[medias[i].geography];
-          if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
-            cities.push(medias[i]['geographyData'].city);
-        }      
-        callbackMain(err, {
-          offScreen : {
-            count:medias.length, 
-            screens:medias,
-            totalPrice:totalPrice, 
-            cities:{ count:cities.length, values:cities }, 
-            reach:(totalSeats * 4 * 30)
-          }
-        });
+          var geographyIds = [];
+          for(i in medias) geographyIds.push(medias[i].geography);
+          Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+            var geographies = {};
+            for(i in results) geographies[results[i]._id.toString()] = results[i];
+            geographies['length'] = results.length;
+            callbackMain(err, self.populateOffScreenData(medias, geographies));
+          });
+        }
       });
+    }
+
+    self.populateOffScreenData = function(medias, geographies){
+      var totalPrice = 0;
+      var cities = [];
+      var reach = 0;
+      var totalSeats = 0;
+      console.log(geographies);
+      for(i in medias)
+      {
+        totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
+        totalSeats += medias[i].seats;
+        medias[i]['geographyData'] = {};
+        medias[i]['geographyData'] = geographies[medias[i].geography];
+        if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
+          cities.push(medias[i]['geographyData'].city);
+      }
+      var data = {
+        count:medias.length, 
+        screens:medias, 
+        totalPrice:totalPrice, 
+        cities:{ count:cities.length, values:cities }, 
+        reach:(totalSeats * 4 * 30)
+      };
+
+      return {offScreen:data};
     }
 
   this.getFilters = function(req, res){    
