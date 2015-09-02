@@ -91,8 +91,9 @@ var Cinema = function()
 
     self.buildScreensQuery = function(err, geographies, callbackMain){ 
       var match = [];
-      if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
-      else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
+      //if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
+      //else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
+      if(self.params.filters.geographies !== undefined) match.push({geography : { $in:self.params.geographyIds }});
       if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
       if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
       if(self.params.filters.mediaType == 'onScreen')
