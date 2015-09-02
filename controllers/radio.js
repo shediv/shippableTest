@@ -33,16 +33,20 @@ var Radio = function()
         },
         function(query, callback)
         {
+          if(self.params.recommended ==true){
+            self.radioRecommend(self.params,callback);
+          }
+          else{
+            self.sortFilteredMedia(query, callback);
+          }
 
-          var fei=self.params.sortBy;
-          callback(null,fei);
         }
       ],
       function (err, result)
       {
         res.status(200).json(result);
       });
-    
+
   };
 
     self.applyFilters = function(){
@@ -436,12 +440,28 @@ var Radio = function()
       return pubDates;
     }
 
-  self.radioRecommend = function(query,callback){
-      console.log(query);
+  self.radioRecommend = function(queryParams,callback){
+      Media.aggregate({
+        $match : {
+          //categoryId : medias[0].categoryId,
+          toolId : self.toolId,
+          city :{$in:queryParams.filters.city},
+          categories:{ $exists:1 }
+        }
+      },
+      {
+        $group: { _id: null,radio:{$push : '$$ROOT'}, count: { $sum: 1 } }
+      },
+      function(error,results)
+      {
+        callback(null,results);
+      });
+
+
+    /*callback(null,queryParams.filters.categories);*/
+
     }
 };
-
-
 
 
 

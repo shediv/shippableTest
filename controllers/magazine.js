@@ -17,7 +17,7 @@ var Magazine = function()
   this.toolName = "magazine";
   var self = this;
 
-  Tools.findOne({name: this.toolName}, function(err, result){3
+  Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
 
