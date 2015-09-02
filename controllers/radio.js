@@ -29,10 +29,13 @@ var Radio = function()
         function(callback)
         {
           callback(null, self.applyFilters());
+
         },
         function(query, callback)
         {
-          self.sortFilteredMedia(query, callback);
+
+          var fei=self.params.sortBy;
+          callback(null,fei);
         }
       ],
       function (err, result)
@@ -67,7 +70,6 @@ var Radio = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
-
       //query.match.isActive = 1;
       //query.match.toolId = self.toolId;
       return query;
@@ -433,7 +435,12 @@ var Radio = function()
         pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
       return pubDates;
     }
+
+  self.radioRecommend = function(query,callback){
+      console.log(query);
+    }
 };
+
 
 
 
