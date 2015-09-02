@@ -738,7 +738,7 @@ var Magazine = function()
       });
 
       self.params.filters.mediaOptions.forEach(function(value, key){
-        query.match['mediaOptions.'+value] = { $exists : 1};
+        query.match[value+'.mediaOptions'] = { $exists : 1};
       });
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
@@ -882,7 +882,7 @@ var Magazine = function()
       //Hardcoding the values for now, as the frequency of changes is very low
       var mediaOptions = [
         {'_id' : 'print', 'name' : 'Print'},
-        {'_id' : 'eMail', 'name' : 'EMail'},
+        {'_id' : 'email', 'name' : 'EMail'},
         {'_id' : 'website', 'name' : 'Website'}
       ];
       callback(null, mediaOptions);
@@ -1160,7 +1160,7 @@ var Magazine = function()
                 totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               }
               break;
-            case 'website':
+            default:
               for(mo in medias[media._id].mediaOptions[key])
               {
                 medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
@@ -1172,7 +1172,7 @@ var Magazine = function()
                 totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
                 totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
               }
-              break;
+              /*break;
             case 'email':
               medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions.pricing;
               medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions.pricing;
@@ -1182,7 +1182,7 @@ var Magazine = function()
               medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
               totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
               totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
-              break;
+              break;*/
           }
         }
         medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);

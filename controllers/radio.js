@@ -1,5 +1,6 @@
 var Radio = function()
 {
+  var nodemailer = require('nodemailer');
   var async = require('async');
   var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
@@ -20,6 +21,30 @@ var Radio = function()
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
+
+  this.mail = function(req, res){
+
+    console.log(CommonLib.transporter);
+
+    // setup e-mail data with unicode symbols
+    var mailOptions = {
+        from: 'The Media Ant <help@themediaant.com>', // sender address
+        to: 'videsh@themediaant.com', // list of receivers
+        subject: 'The Media Ant', // Subject line
+        text: 'Hello world ✔', // plaintext body
+        html: '<b>Hello world ✔</b>' // html body
+    };
+
+
+    // send mail with defined transport object
+    CommonLib.transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+
+    });
+  };
 
   this.getRadios = function(req, res){
      self.params = JSON.parse(req.query.params);
@@ -56,9 +81,9 @@ var Radio = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'city' : 'city',
-        'language' : 'language',
-        'station' : 'station'
+        'cities' : 'city',
+        'languages' : 'language',
+        'stations' : 'station'
       };
       query.projection = {
         '_id' : 1,
@@ -75,7 +100,7 @@ var Radio = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
       //query.match.isActive = 1;
-      //query.match.toolId = self.toolId;
+      query.match.toolId = self.toolId;
       return query;
     };
 
@@ -126,7 +151,7 @@ var Radio = function()
     async.parallel({
       cities: self.getCities,
       stations : self.getStations,
-      musiclanguages : self.getMusicLanguages
+      languages : self.getMusicLanguages
     },
     function(err, results) 
     {
@@ -245,7 +270,7 @@ var Radio = function()
           },
           {
             $match : {
-              //categoryId : req.params.categoryId,
+              city : req.params.city,
               toolId : self.toolId,
               //isActive: 1,
               urlSlug : { $ne : req.query.urlSlug }
