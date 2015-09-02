@@ -738,7 +738,7 @@ var Magazine = function()
       });
 
       self.params.filters.mediaOptions.forEach(function(value, key){
-        query.match['mediaOptions.'+value] = { $exists : 1};
+        query.match[value+'.mediaOptions'] = { $exists : 1};
       });
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
