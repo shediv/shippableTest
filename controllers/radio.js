@@ -1,5 +1,6 @@
 var Radio = function()
 {
+  var nodemailer = require('nodemailer');
   var async = require('async');
   var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
@@ -20,6 +21,38 @@ var Radio = function()
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
+
+  this.mail = function(req, res){
+    var nodemailer = require('nodemailer');
+
+    // create reusable transporter object using SMTP transport
+    var transporter = nodemailer.createTransport({
+        service: 'Gmail',
+        auth: {
+            user: 'videsh@themediaant.com',
+            pass: 'videsh786'
+        }
+    });
+
+    // setup e-mail data with unicode symbols
+    var mailOptions = {
+        from: 'Fred Foo ✔ <foo@blurdybloop.com>', // sender address
+        to: 'videsh@themediaant.com', // list of receivers
+        subject: 'Hello ✔', // Subject line
+        text: 'Hello world ✔', // plaintext body
+        html: '<b>Hello world ✔</b>' // html body
+    };
+
+
+    // send mail with defined transport object
+    transporter.sendMail(mailOptions, function(error, info){
+        if(error){
+            return console.log(error);
+        }
+        console.log('Message sent: ' + info.response);
+
+    });
+  };
 
   this.getRadios = function(req, res){
      self.params = JSON.parse(req.query.params);
@@ -239,7 +272,7 @@ var Radio = function()
           },
           {
             $match : {
-              //categoryId : req.params.categoryId,
+              city : req.params.city,
               toolId : self.toolId,
               //isActive: 1,
               urlSlug : { $ne : req.query.urlSlug }
