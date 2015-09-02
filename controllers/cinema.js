@@ -34,10 +34,10 @@ var Cinema = function()
       self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                         + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                         + dateObj.getFullYear();
-      if(self.params.filters.geographies.length)
+      if(!self.params.filters.geographies.length)
       {
-       self.params.filters.geographies = undefined;
-       return self.buildScreensQuery(err, [], callbackMain); 
+       delete self.params.filters.geographies;
+       return self.buildScreensQuery([], callbackMain); 
       }
       for(key in self.params.filters.geographies)
       {
@@ -88,11 +88,11 @@ var Cinema = function()
       ],
       function(err, geographies)
       {
-        self.buildScreensQuery(err, geographies[0], callbackMain);
+        self.buildScreensQuery(geographies[0], callbackMain);
       });
     };
 
-    self.buildScreensQuery = function(err, geographies, callbackMain){ 
+    self.buildScreensQuery = function(geographies, callbackMain){ 
       var match = [];
       //if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
       //else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
@@ -115,7 +115,7 @@ var Cinema = function()
         seats : 1,
         geography : 1
       };
-      
+      //return callbackMain(null, match);
       if(self.params.filters.mediaType == 'onScreen')
         self.fetchOnScreenData(geographies, match, group, project, callbackMain);
       else
@@ -139,7 +139,7 @@ var Cinema = function()
             {
               var geographyIds = [];
               for(i in medias) geographyIds.push(medias[i].geography);
-              Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
+              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                 geographies['length'] = results.length;
@@ -162,8 +162,8 @@ var Cinema = function()
             {
               var geographyIds = [];
               for(i in medias) geographyIds.push(medias[i].geography);
-              Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
-                var geographies = {};
+              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+                var geographies = [];
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                 geographies['length'] = results.length;
                 callback(err, self.populateOnScreenData(medias, geographies));
@@ -183,6 +183,7 @@ var Cinema = function()
       var cities = [];
       var reach = 0;
       var totalSeats = 0;
+      console.log(geographies);
       for(i in medias)
       {
         totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
@@ -216,7 +217,7 @@ var Cinema = function()
           totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
           totalSeats += medias[i].seats;
           medias[i]['geographyData'] = {};
-          medias[i]['geographyData'] = geographies[0][medias[i].geography];
+          medias[i]['geographyData'] = geographies[medias[i].geography];
           if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
             cities.push(medias[i]['geographyData'].city);
         }      
