@@ -34,8 +34,11 @@ var Cinema = function()
       self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                         + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                         + dateObj.getFullYear();
-      if(self.params.filters.geographies === undefined)
+      if(self.params.filters.geographies.length)
+      {
+       self.params.filters.geographies = undefined;
        return self.buildScreensQuery(err, [], callbackMain); 
+      }
       for(key in self.params.filters.geographies)
       {
         switch(self.params.filters.geographies[key].place)
