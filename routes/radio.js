@@ -11,8 +11,7 @@ router.get("/", function(req, res){  RadioCtrl.getRadios(req, res); });
 router.get("/filters", function(req, res){ RadioCtrl.getFilters(req, res); });
 router.post("/bestRates", function(req, res){ RadioCtrl.getBestRates(req, res); });
 router.get("/compare", function(req, res){ RadioCtrl.compare(req, res); });
-router.get("/related/:city", function(req, res){ RadioCtrl.relatedMedia(req, res) });
-router.get("/mail", function(req, res){ MailCtrl.mail(req, res); });
+router.get("/related", function(req, res){ RadioCtrl.relatedMedia(req, res) });
 router.get("/:urlSlug", function(req, res){ RadioCtrl.show(req, res); });
 
 module.exports = router;

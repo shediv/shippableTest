@@ -760,7 +760,7 @@ var Magazine = function()
             }
           );
         },
-        magazines : function(callbackInner)
+        medias : function(callbackInner)
         {
           switch(query.sortBy)
           {
@@ -954,7 +954,7 @@ var Magazine = function()
         delete result.medias[i].attributes;
         delete result.medias[i].print;
       }
-      res.status(200).json({magazines:result.medias});
+      res.status(200).json({medias:result.medias});
     });
   };
 
@@ -1003,7 +1003,7 @@ var Magazine = function()
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
       }
-      res.status(200).json({magazines:result.medias});
+      res.status(200).json({medias:result.medias});
     });
   };
 
@@ -1108,9 +1108,9 @@ var Magazine = function()
                 }
               }
               else{
-                callback(null, {magazines: magazines,count:magazines.length});
+                callback(null, {medias: magazines,count:magazines.length});
               }
-              callback(null, {magazines:magazine,count:magazines.length});
+              callback(null, {medias:magazine,count:magazines.length});
 
 
             });
