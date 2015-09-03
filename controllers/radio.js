@@ -117,7 +117,6 @@ var Radio = function()
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': query.sortBy = { 'city' : 1 }; break;
           }
           query.sortBy._id = 1;
 
@@ -133,6 +132,7 @@ var Radio = function()
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                if(query.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
                 callbackInner(err, results);
               });
             }
@@ -244,6 +244,7 @@ var Radio = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
+        Geography.findOne()
         res.status(200).json({radio : results});        
       }
     );
@@ -274,52 +275,35 @@ var Radio = function()
   };
 
   this.relatedMedia = function(req, res){
-    var catIds = [];
-    var sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1};
-
-    async.series({
-      medias : function(callback){
-        Media.aggregate(
-          {
-            $sort : sortBy 
-          },
-          {
-            $match : {
-              city : req.params.city,
-              toolId : self.toolId,
-              //isActive: 1,
-              urlSlug : { $ne : req.query.urlSlug }
-            }
-          },
-          {
-            $project : {
-              urlSlug : 1,
-              radioFrequency: 1,
-              station : 1,
-              city : 1,
-              language : 1,
-              mediaOptions : 1,
-              _id : 1,
-              logo: 1
-            }
-          },
-          function(err, results)
-          {
-            results = results.slice(0,3);
-            callback(err, results)
-          }
-        );
-      }//,
-      //categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
-    },
-    function(err, result)
-    {
-      // for(var i = 0; i < result.medias.length; i++)
-      // {
-      //   result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
-      // }
-      res.status(200).json({radios:result.medias});
-    });
+    Media.aggregate(
+      {
+        $match : {
+          geography : req.query.geographyId,
+          toolId : self.toolId,
+          isActive: 1,
+          urlSlug : { $ne : req.query.urlSlug }
+        }
+      },
+      {$skip : 0}, {$limit: 3},
+      {
+        $project : {
+          '_id' : 1,
+          'radioFrequency' : 1,
+          'station' : 1,
+          'geography' : 1,
+          'language' : 1,
+          'mediaOptions.regularOptions' : 1,        
+          'logo' : 1
+        },
+      },
+      function(err, results)
+      {
+        Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
+          for(i in results) results[i].city = geo.city;
+          res.status(200).json({radios:results});
+        });
+      }
+    );
   };
 
   this.getBestRates = function(req, res){
