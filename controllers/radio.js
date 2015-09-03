@@ -1,6 +1,5 @@
 var Radio = function()
 {
-  var nodemailer = require('nodemailer');
   var async = require('async');
   var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
@@ -21,30 +20,6 @@ var Radio = function()
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
-
-  this.mail = function(req, res){
-
-    console.log(CommonLib.transporter);
-
-    // setup e-mail data with unicode symbols
-    var mailOptions = {
-        from: 'The Media Ant <help@themediaant.com>', // sender address
-        to: 'videsh@themediaant.com', // list of receivers
-        subject: 'The Media Ant', // Subject line
-        text: 'Hello world ✔', // plaintext body
-        html: '<b>Hello world ✔</b>' // html body
-    };
-
-
-    // send mail with defined transport object
-    CommonLib.transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            return console.log(error);
-        }
-        console.log('Message sent: ' + info.response);
-
-    });
-  };
 
   this.getRadios = function(req, res){
     self.params = JSON.parse(req.query.params);

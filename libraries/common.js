@@ -5,6 +5,7 @@ var Common = function()
 	var Products = require('../models/product').Products;
 	var Geography = require('../models/geography').Geography;
 	var Category = require('../models/category').Category;
+	var nodemailer = require('nodemailer');
 
 	var scope = this;
 
@@ -26,7 +27,18 @@ var Common = function()
 
 	this.isNumber = function(n){ 
 		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
-	} 
+	}
+
+	// create reusable transporter object using SMTP transport
+    this.transporter = nodemailer.createTransport({
+        service: 'smtp.mandrillapp.com',
+        host: 'smtp.mandrillapp.com',
+        port:587,
+        auth: {
+            user: 'manjunath@themediaant.com',
+            pass: 'pWCZVZ17BC26LNamo3GNoA'
+        }
+    }); 
 
 
 };
