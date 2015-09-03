@@ -132,7 +132,7 @@ var Radio = function()
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(query.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
+                //if(query.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
                 callbackInner(err, results);
               });
             }
