@@ -117,7 +117,7 @@ var Radio = function()
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': quer.sortBy = {}; break;
+            case 'city': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
