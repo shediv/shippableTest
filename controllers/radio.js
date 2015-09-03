@@ -128,7 +128,7 @@ var Radio = function()
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {              
+            {
               var geographyIds = [];
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
