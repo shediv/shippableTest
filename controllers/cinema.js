@@ -27,7 +27,6 @@ var Cinema = function()
     };
 
     self.buildGeographyQuery = function(callbackMain){
-
         var or = [];
         self.params.geographyIds = [];
         var dateObj = new Date();
@@ -35,10 +34,12 @@ var Cinema = function()
         self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
             + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
             + dateObj.getFullYear();
-        if(self.params.filters.geographies === undefined)
-            return self.buildScreensQuery(err, [], callbackMain);
+        if(!self.params.filters.geographies.length)
+        {
+            delete self.params.filters.geographies;
+            return self.buildScreensQuery([], callbackMain);
+        }
         for(key in self.params.filters.geographies)
-
         {
             switch(self.params.filters.geographies[key].place)
             {
@@ -87,14 +88,15 @@ var Cinema = function()
             ],
             function(err, geographies)
             {
-                self.buildScreensQuery(err, geographies[0], callbackMain);
+                self.buildScreensQuery(geographies[0], callbackMain);
             });
     };
 
-    self.buildScreensQuery = function(err, geographies, callbackMain){
+    self.buildScreensQuery = function(geographies, callbackMain){
         var match = [];
-        if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
-        else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
+        //if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
+        //else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
+        if(self.params.filters.geographies !== undefined) match.push({geography : { $in:self.params.geographyIds }});
         if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
         if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
         if(self.params.filters.mediaType == 'onScreen')
@@ -113,7 +115,7 @@ var Cinema = function()
             seats : 1,
             geography : 1
         };
-
+        //return callbackMain(null, match);
         if(self.params.filters.mediaType == 'onScreen')
             self.fetchOnScreenData(geographies, match, group, project, callbackMain);
         else
@@ -121,6 +123,7 @@ var Cinema = function()
     };
 
     self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
+        project['resultMallName'] = 1;
         project['cinemaName'] = 1;
         project['theatreName'] = 1;
         project['screenNumber'] = 1;
@@ -136,8 +139,8 @@ var Cinema = function()
                         else
                         {
                             var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography);
-                            Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
+                            for(i in medias) geographyIds.push(medias[i].geography[0]);
+                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
                                 var geographies = {};
                                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                                 geographies['length'] = results.length;
@@ -159,8 +162,8 @@ var Cinema = function()
                         else
                         {
                             var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography);
-                            Geography.find({ _id:{ $in:self.params.geographyIds } }).lean().exec(function(err, results){
+                            for(i in medias) geographyIds.push(medias[i].geography[0]);
+                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
                                 var geographies = {};
                                 for(i in results) geographies[results[i]._id.toString()] = results[i];
                                 geographies['length'] = results.length;
@@ -181,14 +184,15 @@ var Cinema = function()
         var cities = [];
         var reach = 0;
         var totalSeats = 0;
+        console.log(geographies);
         for(i in medias)
         {
             totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
             totalSeats += medias[i].seats;
-            medias[i]['geographyData'] = {};
-            medias[i]['geographyData'] = geographies[medias[i].geography];
-            if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
-                cities.push(medias[i]['geographyData'].city);
+            medias[i]['city'] = geographies[medias[i].geography[0]].city;
+            medias[i]['state'] = geographies[medias[i].geography[0]].state;
+            if(cities.indexOf(medias[i].city) <= -1)
+                cities.push(medias[i].city);
         }
         var data = {
             count:medias.length,
@@ -205,29 +209,45 @@ var Cinema = function()
         project['mediaOptions'] = 1;
         project['dimensions'] = 1;
         Media.aggregate(match, {$project:project}, function(err, medias){
-            var totalPrice = 0;
-            var cities = [];
-            var reach = 0;
-            var totalSeats = 0;
-            for(i in medias)
+            if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
+            else
             {
-                totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
-                totalSeats += medias[i].seats;
-                medias[i]['geographyData'] = {};
-                medias[i]['geographyData'] = geographies[0][medias[i].geography];
-                if(cities.indexOf(medias[i]['geographyData'].city) <= -1)
-                    cities.push(medias[i]['geographyData'].city);
+                var geographyIds = [];
+                for(i in medias) geographyIds.push(medias[i].geography[0]);
+                Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+                    var geographies = {};
+                    for(i in results) geographies[results[i]._id.toString()] = results[i];
+                    geographies['length'] = results.length;
+                    callbackMain(err, self.populateOffScreenData(medias, geographies));
+                });
             }
-            callbackMain(err, {
-                offScreen : {
-                    count:medias.length,
-                    screens:medias,
-                    totalPrice:totalPrice,
-                    cities:{ count:cities.length, values:cities },
-                    reach:(totalSeats * 4 * 30)
-                }
-            });
         });
+    }
+
+    self.populateOffScreenData = function(medias, geographies){
+        var totalPrice = 0;
+        var cities = [];
+        var reach = 0;
+        var totalSeats = 0;
+        console.log(medias);
+        for(i in medias)
+        {
+            totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
+            totalSeats += medias[i].seats;
+            medias[i]['city'] = geographies[medias[i].geography[0]].city;
+            medias[i]['state'] = geographies[medias[i].geography[0]].state;
+            if(cities.indexOf(medias[i].city) <= -1)
+                cities.push(medias[i].city);
+        }
+        var data = {
+            count:medias.length,
+            screens:medias,
+            totalPrice:totalPrice,
+            cities:{ count:cities.length, values:cities },
+            reach:(totalSeats * 4 * 30)
+        };
+
+        return {offScreen:data};
     }
 
     this.getFilters = function(req, res){
@@ -243,7 +263,6 @@ var Cinema = function()
                 res.status(200).json({filters:results});
             });
     };
-
 
     self.getMallName = function(callback){
         var aggregation = Media.aggregate(
