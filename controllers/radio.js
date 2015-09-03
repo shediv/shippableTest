@@ -117,6 +117,7 @@ var Radio = function()
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
+            case 'city': quer.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
@@ -132,7 +133,7 @@ var Radio = function()
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                //if(query.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
+                if(self.params.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
                 callbackInner(err, results);
               });
             }
