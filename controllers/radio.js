@@ -82,7 +82,7 @@ var Radio = function()
         '_id' : 1,
         'radioFrequency' : 1,
         'station' : 1,
-        'city' : 1,
+        'geography' : 1,
         'language' : 1,
         'mediaOptions.regularOptions' : 1,        
         'logo' : 1
@@ -115,11 +115,11 @@ var Radio = function()
         },
         radios : function(callbackInner)
         {          
-          switch(self.sortBy)
+          switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': query.sortBy = { 'city' : 1}; break;            
+            case 'city': query.sortBy = { 'city' : 1 }; break;
           }
           query.sortBy._id = 1;
 
@@ -128,12 +128,12 @@ var Radio = function()
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {
+            {              
               var geographyIds = [];
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 geographies = {};
-                for(i in geos) geographies[geos._id] = geos[i];
+                for(i in geos) geographies[geos[i]._id] = geos[i];
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
                 callbackInner(err, results);
               });
@@ -205,7 +205,6 @@ var Radio = function()
         { toolId:self.toolId , isActive:1 },
         function(error, geographyIds) 
         {
-          console.log(geographyIds);
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
             callback(error, geos);
           });
