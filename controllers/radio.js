@@ -48,7 +48,7 @@ var Radio = function()
 
   this.getRadios = function(req, res){
     self.params = JSON.parse(req.query.params);
-    self.sortBy = req.query.sortBy;
+    //res.status(200).json(self.params);
 
     async.waterfall([
       function(callback)
@@ -74,7 +74,7 @@ var Radio = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'geography' : 'geography',
+        'geographies' : 'geography',
         'languages' : 'language',
         'stations' : 'station'
       };
@@ -115,7 +115,7 @@ var Radio = function()
         },
         radios : function(callbackInner)
         {          
-          switch(self.sortBy)
+          switch(self.params.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
@@ -205,7 +205,6 @@ var Radio = function()
         { toolId:self.toolId , isActive:1 },
         function(error, geographyIds) 
         {
-          console.log(geographyIds);
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
             callback(error, geos);
           });
