@@ -48,8 +48,6 @@ var Radio = function()
 
   this.getRadios = function(req, res){
     self.params = JSON.parse(req.query.params);
-    self.sortBy = req.query.sortBy;
-
     async.waterfall([
       function(callback)
       {
