@@ -5,7 +5,6 @@
 var express = require('express');
 var router = express.Router();
 var RadioCtrl = new (require('../controllers/radio')).Radio();
-var MailCtrl = new (require('../controllers/mail')).Mail();
 
 router.get("/", function(req, res){  RadioCtrl.getRadios(req, res); });
 router.get("/filters", function(req, res){ RadioCtrl.getFilters(req, res); });
