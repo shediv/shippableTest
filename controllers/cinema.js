@@ -123,6 +123,7 @@ var Cinema = function()
     };
 
     self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
+      project['resultMallName'] = 1;
       project['cinemaName'] = 1;
       project['theatreName'] = 1;
       project['screenNumber'] = 1;
@@ -138,7 +139,7 @@ var Cinema = function()
             else
             {
               var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography);
+              for(i in medias) geographyIds.push(medias[i].geography[0]);
               Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
@@ -161,7 +162,7 @@ var Cinema = function()
             else
             {
               var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography);
+              for(i in medias) geographyIds.push(medias[i].geography[0]);
               Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
                 var geographies = {};
                 for(i in results) geographies[results[i]._id.toString()] = results[i];
@@ -188,10 +189,10 @@ var Cinema = function()
       {
         totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
         totalSeats += medias[i].seats;
-        medias[i]['geographyData'] = {};
-        medias[i]['geographyData'] = geographies[medias[i].geography];
-        if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
-          cities.push(medias[i]['geographyData'].city);
+        medias[i]['city'] = geographies[medias[i].geography[0]].city;
+        medias[i]['state'] = geographies[medias[i].geography[0]].state;
+        if(cities.indexOf(medias[i].city) <= -1) 
+          cities.push(medias[i].city);
       }
       var data = {
         count:medias.length, 
@@ -212,7 +213,7 @@ var Cinema = function()
         else
         {
           var geographyIds = [];
-          for(i in medias) geographyIds.push(medias[i].geography);
+          for(i in medias) geographyIds.push(medias[i].geography[0]);
           Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
             var geographies = {};
             for(i in results) geographies[results[i]._id.toString()] = results[i];
@@ -228,15 +229,15 @@ var Cinema = function()
       var cities = [];
       var reach = 0;
       var totalSeats = 0;
-      console.log(geographies);
+      console.log(medias);
       for(i in medias)
       {
         totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
         totalSeats += medias[i].seats;
-        medias[i]['geographyData'] = {};
-        medias[i]['geographyData'] = geographies[medias[i].geography];
-        if(cities.indexOf(medias[i]['geographyData'].city) <= -1) 
-          cities.push(medias[i]['geographyData'].city);
+        medias[i]['city'] = geographies[medias[i].geography[0]].city;
+        medias[i]['state'] = geographies[medias[i].geography[0]].state;
+        if(cities.indexOf(medias[i].city) <= -1) 
+          cities.push(medias[i].city);
       }
       var data = {
         count:medias.length, 
