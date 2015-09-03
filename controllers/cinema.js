@@ -22,17 +22,22 @@ var Cinema = function()
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
-      if(results[0].allScreens !== undefined) delete results[0].allScreens.screens;
-      if(results[0].recommendedScreens !== undefined) delete results[0].recommendedScreens.screens;
-      if(results[0].offScreen !== undefined) delete results[0].offScreen.screens;
-      return res.status(200).json({media:results[0]});
+      var count = 0;
+      if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; delete results[0].allScreens.screens;}
+      if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; delete results[0].recommendedScreens.screens;}
+      if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; delete results[0].offScreen.screens;}
+      return res.status(200).json({medias:results[0],count:count});
     });
   };
 
   this.showCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
-      return res.status(200).json({media:results[0]});
+      var count = 0;
+      if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count;}
+      if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count;}
+      if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count;}
+      return res.status(200).json({medias:results[0],count:count});
     });
   };
 

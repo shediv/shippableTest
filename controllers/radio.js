@@ -111,7 +111,7 @@ var Radio = function()
             }
           );
         },
-        radios : function(callbackInner)
+        medias : function(callbackInner)
         {          
           switch(query.sortBy)
           {
@@ -178,7 +178,7 @@ var Radio = function()
               geographies = {};
               for(i in geos) geographies[geos._id] = geos[i];
               for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-              callback(err, {radios:results});
+              callback(err, {medias:results,count:results.length});
             });
           }
         );
@@ -271,11 +271,15 @@ var Radio = function()
         delete m.radioFrequency;
         return m.toObject();
       });
-      res.status(200).json({radios:medias});
+      res.status(200).json({medias:medias});
     });
   };
 
   this.relatedMedia = function(req, res){
+    console.log(typeof(req.query.geographyId));
+    console.log(req.query.geographyId);
+    console.log(typeof(req.query.urlSlug));
+    console.log(req.query.urlSlug);
     Media.aggregate(
       {
         $match : {
@@ -295,13 +299,14 @@ var Radio = function()
           'language' : 1,
           'mediaOptions.regularOptions' : 1,        
           'logo' : 1
-        },
+        }
       },
       function(err, results)
       {
+        if(err) console.log(err);
         Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
           for(i in results) results[i].city = geo.city;
-          res.status(200).json({radios:results});
+          res.status(200).json({medias:results});
         });
       }
     );
