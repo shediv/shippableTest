@@ -50,28 +50,21 @@ var Radio = function()
     self.params = JSON.parse(req.query.params);
     self.sortBy = req.query.sortBy;
 
-      async.waterfall([
-        function(callback)
-        {
-          callback(null, self.applyFilters());
-
-        },
-        function(query, callback)
-        {
-          if(self.params.recommended ==true){
-            self.radioRecommend(self.params,callback);
-          }
-          else{
-            self.sortFilteredMedia(query, callback);
-          }
-
-        }
-      ],
-      function (err, result)
+    async.waterfall([
+      function(callback)
       {
-        res.status(200).json(result);
-      });
-
+        callback(null, self.applyFilters());
+      },
+      function(query, callback)
+      {
+        if(self.params.recommended) return self.radioRecommend(self.params,callback);
+        self.sortFilteredMedia(query, callback);
+      }
+    ],
+    function (err, result)
+    {
+      res.status(200).json(result);
+    });
   };
 
     self.applyFilters = function(){
@@ -81,7 +74,7 @@ var Radio = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'cities' : 'city',
+        'geography' : 'geography',
         'languages' : 'language',
         'stations' : 'station'
       };
@@ -135,8 +128,15 @@ var Radio = function()
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {              
-              callbackInner(err, results);
+            {
+              var geographyIds = [];
+              for(i in results) geographyIds.push(results[i].geography);
+              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+                geographies = {};
+                for(i in geos) geographies[geos._id] = geos[i];
+                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                callbackInner(err, results);
+              });
             }
           );
         }
@@ -147,12 +147,51 @@ var Radio = function()
       });
     };
 
+    self.radioRecommend = function(query, callback){
+      query.match = {};
+      query.sortBy = {};
+      async.waterfall([
+        function(callbackInner)
+        {
+          Products.findOne({ _id:self.params.productId },{ radio:1 },function(err, result){
+            callbackInner(err, result.radio.categoryId);
+          });
+        },
+        function(categoryId, callbackInner)
+        {
+          query.match['categories'][categoryId] = { $exists:1 };
+          query.match['geography'] = query.params.geography;
+          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+          callbackInner(null, query);
+        }
+      ],
+      function(err, query)
+      {
+        Medias.aggregate(
+          {$match: query.match}, {$sort: query.sortBy},
+          {$skip : 0}, {$limit: 2},
+          {$project: query.projection}, 
+          function(err, results) 
+          { 
+            var geographyIds = [];
+            for(i in results) geographyIds.push(results[i].geography);
+            Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+              geographies = {};
+              for(i in geos) geographies[geos._id] = geos[i];
+              for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+              callback(err, {radios:results});
+            });
+          }
+        );
+      });
+    }
+
   this.getFilters = function(req, res){
     async.parallel({
-      cities: self.getCities,
+      geographies : self.getGeographies,
       stations : self.getStations,
       languages : self.getLanguages,
-      products : self.getProducts
+      products  : self.getProducts
     },
     function(err, results) 
     {
@@ -161,13 +200,15 @@ var Radio = function()
     });
   };
 
-    self.getCities = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "city": { $exists: 1} }},
-        {$group : { _id : '$city', count : {$sum : 1}}},
-        function(error, results) 
+    self.getGeographies = function(callback){
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
         {
-          callback(error, results);
+          console.log(geographyIds);
+          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            callback(error, geos);
+          });
         }
       );
     };
@@ -235,7 +276,6 @@ var Radio = function()
     });
   };
 
-  //Waiting for the categories to be taged
   this.relatedMedia = function(req, res){
     var catIds = [];
     var sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1};
@@ -441,28 +481,6 @@ var Radio = function()
       if(pubDates.length < 10)
         pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
       return pubDates;
-    }
-
-  self.radioRecommend = function(queryParams,callback){
-      Media.aggregate({
-        $match : {
-          //categoryId : medias[0].categoryId,
-          toolId : self.toolId,
-          city :{$in:queryParams.filters.city},
-          categories:{ $exists:1 }
-        }
-      },
-      {
-        $group: { _id: null,radio:{$push : '$$ROOT'}, count: { $sum: 1 } }
-      },
-      function(error,results)
-      {
-        callback(null,results);
-      });
-
-
-    /*callback(null,queryParams.filters.categories);*/
-
     }
 };
 

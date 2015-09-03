@@ -123,131 +123,131 @@ var Cinema = function()
     };
 
     self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
-        project['resultMallName'] = 1;
-        project['cinemaName'] = 1;
-        project['theatreName'] = 1;
-        project['screenNumber'] = 1;
-        project['creativeFormat'] = 1;
-        project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
-        project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
-        project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
-        project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
-        async.parallel({
-                allScreens : function(callback){
-                    Media.aggregate(match, {$project:project}, function(err, medias){
-                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-                        else
-                        {
-                            var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography[0]);
-                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                                var geographies = {};
-                                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                                geographies['length'] = results.length;
-                                callback(err, self.populateOnScreenData(medias, geographies));
-                            });
-                        }
-                    });
-                },
-                recommendedScreens : function(callback){
-                    var finalMedias = [];
-                    Media.aggregate(match, {$project:project}, group, function(err, medias){
-                        for(key in medias)
-                        {
-                            medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);
-                            finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
-                        }
-                        medias = finalMedias;
-                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-                        else
-                        {
-                            var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography[0]);
-                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                                var geographies = {};
-                                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                                geographies['length'] = results.length;
-                                callback(err, self.populateOnScreenData(medias, geographies));
-                            });
-                        }
-                    });
-                }
-            },
-            function(err, results)
+      project['resultMallName'] = 1;
+      project['cinemaName'] = 1;
+      project['theatreName'] = 1;
+      project['screenNumber'] = 1;
+      project['creativeFormat'] = 1;
+      project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
+      project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
+      project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
+      project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
+      async.parallel({
+        allScreens : function(callback){
+          Media.aggregate(match, {$project:project}, function(err, medias){
+            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+            else
             {
-                callbackMain(err, results);
-            });
+              var geographyIds = [];
+              for(i in medias) geographyIds.push(medias[i].geography[0]);
+              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+                var geographies = {};
+                for(i in results) geographies[results[i]._id.toString()] = results[i];
+                geographies['length'] = results.length;
+                callback(err, self.populateOnScreenData(medias, geographies));
+              });
+            }
+          });
+        },
+        recommendedScreens : function(callback){
+          var finalMedias = [];
+          Media.aggregate(match, {$project:project}, group, function(err, medias){
+            for(key in medias)
+            {
+              medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
+              finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
+            }
+            medias = finalMedias;
+            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+            else
+            {
+              var geographyIds = [];
+              for(i in medias) geographyIds.push(medias[i].geography[0]);
+              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+                var geographies = {};
+                for(i in results) geographies[results[i]._id.toString()] = results[i];
+                geographies['length'] = results.length;
+                callback(err, self.populateOnScreenData(medias, geographies));
+              });
+            }
+          });
+        } 
+      },
+      function(err, results)
+      {
+        callbackMain(err, results);
+      });  
     }
 
     self.populateOnScreenData = function(medias, geographies){
-        var totalPrice = 0;
-        var cities = [];
-        var reach = 0;
-        var totalSeats = 0;
-        console.log(geographies);
-        for(i in medias)
-        {
-            totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
-            totalSeats += medias[i].seats;
-            medias[i]['city'] = geographies[medias[i].geography[0]].city;
-            medias[i]['state'] = geographies[medias[i].geography[0]].state;
-            if(cities.indexOf(medias[i].city) <= -1)
-                cities.push(medias[i].city);
-        }
-        var data = {
-            count:medias.length,
-            screens:medias,
-            totalPrice:totalPrice,
-            cities:{ count:cities.length, values:cities },
-            reach:(totalSeats * 4 * 7)
-        };
+      var totalPrice = 0;
+      var cities = [];
+      var reach = 0;
+      var totalSeats = 0;
+      console.log(geographies);
+      for(i in medias)
+      {
+        totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+        totalSeats += medias[i].seats;
+        medias[i]['city'] = geographies[medias[i].geography[0]].city;
+        medias[i]['state'] = geographies[medias[i].geography[0]].state;
+        if(cities.indexOf(medias[i].city) <= -1) 
+          cities.push(medias[i].city);
+      }
+      var data = {
+        count:medias.length, 
+        screens:medias, 
+        totalPrice:totalPrice, 
+        cities:{ count:cities.length, values:cities }, 
+        reach:(totalSeats * 4 * 7)
+      };
 
-        return data;
+      return data;
     }
 
     self.fetchOffScreenData = function(geographies, match, group, project, callbackMain){
-        project['mediaOptions'] = 1;
-        project['dimensions'] = 1;
-        Media.aggregate(match, {$project:project}, function(err, medias){
-            if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
-            else
-            {
-                var geographyIds = [];
-                for(i in medias) geographyIds.push(medias[i].geography[0]);
-                Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                    var geographies = {};
-                    for(i in results) geographies[results[i]._id.toString()] = results[i];
-                    geographies['length'] = results.length;
-                    callbackMain(err, self.populateOffScreenData(medias, geographies));
-                });
-            }
-        });
+      project['mediaOptions'] = 1;
+      project['dimensions'] = 1;
+      Media.aggregate(match, {$project:project}, function(err, medias){
+        if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
+        else
+        {
+          var geographyIds = [];
+          for(i in medias) geographyIds.push(medias[i].geography[0]);
+          Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+            var geographies = {};
+            for(i in results) geographies[results[i]._id.toString()] = results[i];
+            geographies['length'] = results.length;
+            callbackMain(err, self.populateOffScreenData(medias, geographies));
+          });
+        }
+      });
     }
 
     self.populateOffScreenData = function(medias, geographies){
-        var totalPrice = 0;
-        var cities = [];
-        var reach = 0;
-        var totalSeats = 0;
-        console.log(medias);
-        for(i in medias)
-        {
-            totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
-            totalSeats += medias[i].seats;
-            medias[i]['city'] = geographies[medias[i].geography[0]].city;
-            medias[i]['state'] = geographies[medias[i].geography[0]].state;
-            if(cities.indexOf(medias[i].city) <= -1)
-                cities.push(medias[i].city);
-        }
-        var data = {
-            count:medias.length,
-            screens:medias,
-            totalPrice:totalPrice,
-            cities:{ count:cities.length, values:cities },
-            reach:(totalSeats * 4 * 30)
-        };
+      var totalPrice = 0;
+      var cities = [];
+      var reach = 0;
+      var totalSeats = 0;
+      console.log(medias);
+      for(i in medias)
+      {
+        totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
+        totalSeats += medias[i].seats;
+        medias[i]['city'] = geographies[medias[i].geography[0]].city;
+        medias[i]['state'] = geographies[medias[i].geography[0]].state;
+        if(cities.indexOf(medias[i].city) <= -1) 
+          cities.push(medias[i].city);
+      }
+      var data = {
+        count:medias.length, 
+        screens:medias, 
+        totalPrice:totalPrice, 
+        cities:{ count:cities.length, values:cities }, 
+        reach:(totalSeats * 4 * 30)
+      };
 
-        return {offScreen:data};
+      return {offScreen:data};
     }
 
     this.getFilters = function(req, res){
