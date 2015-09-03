@@ -22,9 +22,9 @@ var Cinema = function()
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
-      if(results[0].allScreens.screens !== undefined) delete results[0].allScreens.screens;
-      if(results[0].recommendedScreens.screens !== undefined) delete results[0].recommendedScreens.screens;
-      if(results[0].offScreen.screens !== undefined) delete results[0].offScreen.screens;
+      if(results[0].allScreens !== undefined) delete results[0].allScreens.screens;
+      if(results[0].recommendedScreens !== undefined) delete results[0].recommendedScreens.screens;
+      if(results[0].offScreen !== undefined) delete results[0].offScreen.screens;
       return res.status(200).json({media:results[0]});
     });
   };
