@@ -197,6 +197,7 @@ var Cinema = function()
     self.populateOnScreenData = function(medias, geographies){
       var totalPrice = 0;
       var cities = [];
+      var cinemas = [];
       var reach = 0;
       var totalSeats = 0;
       console.log(geographies);
@@ -208,12 +209,15 @@ var Cinema = function()
         medias[i]['state'] = geographies[medias[i].geography[0]].state;
         if(cities.indexOf(medias[i].city) <= -1) 
           cities.push(medias[i].city);
+        if(cinemas.indexOf(medias[i].theatreName) <= -1) 
+          cinemas.push(medias[i].theatreName);
       }
       var data = {
         count:medias.length, 
         screens:medias, 
         totalPrice:totalPrice, 
         cities:{ count:cities.length, values:cities }, 
+        cinemas:{ count:cinemas.length, values:cinemas }, 
         reach:(totalSeats * 4 * 7)
       };
 
