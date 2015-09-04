@@ -30,7 +30,7 @@ var Newspaper = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.radioRecommend(self.params,callback);
+        if(self.params.recommended) return self.paperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -123,7 +123,7 @@ var Newspaper = function()
       });
     };
 
-    self.radioRecommend = function(query, callback){
+    self.paperRecommend = function(query, callback){
       query.match = {};
       query.sortBy = {};
       async.waterfall([
