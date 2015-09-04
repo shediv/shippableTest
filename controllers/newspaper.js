@@ -241,7 +241,7 @@ var Newspaper = function()
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         Geography.findOne()
-        res.status(200).json({radio : results});        
+        res.status(200).json({newspaper : results});        
       }
     );
   }
@@ -251,58 +251,71 @@ var Newspaper = function()
     var catIds = [];
     var project = {
       '_id' : 1,
-      'radioFrequency' : 1,
-      'station' : 1,
-      'urlSlug' : 1,
-      'city' : 1,
+      'newspaperName' : 1,
+      'editionName' : 1,
+      'circulation' : 1,
+      'areaCovered' : 1,
+      'categoryId' :1,
       'language' : 1,
-      'mediaOptions.regularOptions.showRate.allDayPlan' : 1,        
+      'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
       'logo' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
-      var medias = results.map(function(m){
-        m['frequency'] = m.radioFrequency;
-        delete m.radioFrequency;
-        return m.toObject();
-      });
-      res.status(200).json({medias:medias});
+    async.series({
+      medias : function(callback){
+        Media.find({_id: { $in: ids }}, project,function(err, results){
+          var medias = results.map(function(m){
+            catIds.push(m.categoryId);
+            return m.toObject();
+          });
+          callback(err, medias);
+        });
+      },
+      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+    },
+    function(err, result)
+    {
+      for(var i = 0; i < result.medias.length; i++)
+      {
+        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+      }
+      res.status(200).json({medias:result.medias});
     });
   };
 
   this.relatedMedia = function(req, res){
-    console.log(typeof(req.query.geographyId));
-    console.log(req.query.geographyId);
-    console.log(typeof(req.query.urlSlug));
-    console.log(req.query.urlSlug);
     Media.aggregate(
       {
         $match : {
-          geography : req.query.geographyId,
+          categoryId : req.params.categoryId,
+          geography : req.query.geography,
           toolId : self.toolId,
-          isActive: 1,
+          //isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
+        }
+      },
+      {
+        $sort : {
+          circulation : -1,
         }
       },
       {$skip : 0}, {$limit: 3},
       {
         $project : {
           '_id' : 1,
-          'radioFrequency' : 1,
-          'station' : 1,
-          'geography' : 1,
+          'newspaperName' : 1,
+          'editionName' : 1,
+          'circulation' : 1,
+          'areaCovered' : 1,
           'language' : 1,
-          'mediaOptions.regularOptions' : 1,        
+          'urlSlug' : 1,
+          'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
           'logo' : 1
         }
       },
       function(err, results)
       {
-        if(err) console.log(err);
-        Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
-          for(i in results) results[i].city = geo.city;
-          res.status(200).json({medias:results});
-        });
+        res.status(200).json({medias:results});
       }
     );
   };
