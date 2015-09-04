@@ -21,7 +21,8 @@ var Newspaper = function()
     self.toolId = result._id.toString();
   });
 
-  this.getRadios = function(req, res){    
+  this.getPaper = function(req, res){    
+   
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -30,7 +31,7 @@ var Newspaper = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.paperRecommend(self.params,callback);
+        if(self.params.recommended) return self.PaperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -47,11 +48,11 @@ var Newspaper = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'category..' : 'categoryId',
-        'areaCovered..' : 'areaCovered',
+        'category' : 'categoryId',
+        'areaCovered' : 'areaCovered',
         'languages' : 'language',
-        'frequency..' : 'frequency',
-        'newspaperType..' : 'newspaperType'
+        'frequency' : 'frequency',
+        'newspaperType' : 'newspaperType'
       };
       query.projection = {
         '_id' : 1,
@@ -123,7 +124,8 @@ var Newspaper = function()
       });
     };
 
-    self.paperRecommend = function(query, callback){
+    self.PaperRecommend = function(query, callback){
+
       query.match = {};
       query.sortBy = {};
       async.waterfall([
