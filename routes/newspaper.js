@@ -10,7 +10,7 @@ router.get("/", function(req, res){  NewspaperCtrl.getNewspapers(req, res); });
 router.get("/filters", function(req, res){ NewspaperCtrl.getFilters(req, res); });
 router.post("/bestRates", function(req, res){ NewspaperCtrl.getBestRates(req, res); });
 router.get("/compare", function(req, res){ NewspaperCtrl.compare(req, res); });
-router.get("/related", function(req, res){ NewspaperCtrl.relatedMedia(req, res) });
+router.get("/related/:categoryId", function(req, res){ NewspaperCtrl.relatedMedia(req, res) });
 router.get("/:urlSlug", function(req, res){ NewspaperCtrl.show(req, res); });
 
 module.exports = router;
