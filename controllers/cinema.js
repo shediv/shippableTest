@@ -1,504 +1,485 @@
-var Cinema = function()
+var Newspaper = function()
 {
-    var async = require('async');
-    var underscore = require('underscore');
-    var CommonLib = require('../libraries/common').Common;
-    var Media = require('../models/media').Media;
-    var Tools = require('../models/tool').Tools;
-    var Category = require('../models/category').Category;
-    var Geography = require('../models/geography').Geography;
-    var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
-    var months = ['','january','february','march','april','may','june','july','august','september','october','november','december'];
-    var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  var async = require('async');
+  var underscore = require('underscore');
+  var CommonLib = require('../libraries/common').Common;
+  var Media = require('../models/media').Media;
+  var Tools = require('../models/tool').Tools;
+  var Products = require('../models/product').Products;
+  var Geography = require('../models/geography').Geography;
+  var Category = require('../models/category').Category;
+  var months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+  var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  var week = ['first','second','third','fourth'];
+  var dayConversion = (24 * 60 * 60 * 1000);
+  
+  this.params = {};
+  this.toolName = "newspaper";
+  var self = this;
 
-    this.params = {};
-    this.toolName = "cinema";
-    var self = this;
+  Tools.findOne({name: this.toolName}, function(err, result){
+    self.toolId = result._id.toString();
+  });
 
-    Tools.findOne({name: this.toolName}, function(err, result){
-        self.toolId = result._id.toString();
-    });
-
-    this.getCinemas = function(req, res){
-        self.params = JSON.parse(req.query.params);
-        async.series([self.buildGeographyQuery], function(err, results){
-            var count = 0;
-            if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; delete results[0].allScreens.screens;}
-            if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; delete results[0].recommendedScreens.screens;}
-            if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; delete results[0].offScreen.screens;}
-            return res.status(200).json({medias:results[0],count:count});
-        });
-    };
-
-    this.showCinemas = function(req, res){
-        self.params = JSON.parse(req.query.params);
-        async.series([self.buildGeographyQuery], function(err, results){
-            var count = 0;
-            if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count;}
-            if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count;}
-            if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count;}
-            return res.status(200).json({medias:results[0],count:count});
-        });
-    };
-
-    self.buildGeographyQuery = function(callbackMain){
-        var or = [];
-        self.params.geographyIds = [];
-        var dateObj = new Date();
-        dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
-        self.params.nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
-            + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
-            + dateObj.getFullYear();
-        if(!self.params.filters.geographies.length)
-        {
-            delete self.params.filters.geographies;
-            return self.buildScreensQuery([], callbackMain);
-        }
-        for(key in self.params.filters.geographies)
-        {
-            switch(self.params.filters.geographies[key].place)
-            {
-                case 'state' :
-                    or.push(
-                        { $and : [{ state :self.params.filters.geographies[key].state}] }
-                    );
-                    break;
-                case 'city' :
-                    or.push({
-                        $and : [
-                            { state :self.params.filters.geographies[key].state},
-                            { city : self.params.filters.geographies[key].city}
-                        ]
-                    });
-                    break;
-                case 'locality' :
-                    or.push({
-                        $and : [
-                            { state :self.params.filters.geographies[key].state},
-                            { city : self.params.filters.geographies[key].city},
-                            { locality : self.params.filters.geographies[key].locality}
-                        ]
-                    });
-            }
-        }
-
-        var match = { $or:or, pincode : { $exists:1 } };
-
-        async.series([
-                function(callbackInner){
-                    Geography.distinct('pincode', match, function(err, pincodes){
-                        Geography.find({pincode:{$in:pincodes}}, function(err, results){
-                            var geographies = [];
-                            if(!results) return callbackInner(err, geographies);
-                            for(i in results)
-                            {
-                                results[i] = results[i].toObject();
-                                geographies[results[i]._id.toString()] = results[i];
-                                self.params.geographyIds.push(results[i]._id.toString());
-                            }
-                            callbackInner(err, geographies);
-                        });
-                    });
-                }
-            ],
-            function(err, geographies)
-            {
-                self.buildScreensQuery(geographies[0], callbackMain);
-            });
-    };
-
-    self.buildScreensQuery = function(geographies, callbackMain){
-        var match = [];
-        //if(self.params.geographyIds.length) match.push({geography : { $in:self.params.geographyIds }});
-        //else if(self.params.filters.geographies !== undefined) match.push({geography : -1});
-        if(self.params.filters.geographies !== undefined) match.push({geography : { $in:self.params.geographyIds }});
-        if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
-        if(self.params.filters.cinemaChain.length) match.push({cinemaChain : { $in:self.params.filters.cinemaChain }});
-        if(self.params.filters.mediaType == 'onScreen')
-            if(self.params.filters.screenType.length) match.push({isSingleScreen : { $in:self.params.filters.screenType }});
-        match.push({type : self.params.filters.mediaType });
-        match.push({toolId : self.toolId});
-        match = {  $match : {  $and: match } };
-
-        var group = {
-            "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
-        };
-        var project = {
-            type : 1,
-            mallName : 1,
-            cinemaChain : 1,
-            seats : 1,
-            geography : 1
-        };
-        //return callbackMain(null, match);
-        if(self.params.filters.mediaType == 'onScreen')
-            self.fetchOnScreenData(geographies, match, group, project, callbackMain);
-        else
-            self.fetchOffScreenData(geographies, match, group, project, callbackMain);
-    };
-
-    self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
-        project['resultMallName'] = 1;
-        project['cinemaName'] = 1;
-        project['theatreName'] = 1;
-        project['screenNumber'] = 1;
-        project['creativeFormat'] = 1;
-        project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
-        project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
-        project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
-        project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
-        async.parallel({
-                allScreens : function(callback){
-                    Media.aggregate(match, {$project:project}, function(err, medias){
-                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-                        else
-                        {
-                            var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography[0]);
-                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                                var geographies = {};
-                                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                                geographies['length'] = results.length;
-                                callback(err, self.populateOnScreenData(medias, geographies));
-                            });
-                        }
-                    });
-                },
-                recommendedScreens : function(callback){
-                    var finalMedias = [];
-                    Media.aggregate(match, {$project:project}, group, function(err, medias){
-                        for(key in medias)
-                        {
-                            medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);
-                            finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
-                        }
-                        medias = finalMedias;
-                        if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-                        else
-                        {
-                            var geographyIds = [];
-                            for(i in medias) geographyIds.push(medias[i].geography[0]);
-                            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                                var geographies = {};
-                                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                                geographies['length'] = results.length;
-                                callback(err, self.populateOnScreenData(medias, geographies));
-                            });
-                        }
-                    });
-                }
-            },
-            function(err, results)
-            {
-                callbackMain(err, results);
-            });
-    }
-
-    self.populateOnScreenData = function(medias, geographies){
-        var totalPrice = 0;
-        var cities = [];
-        var reach = 0;
-        var totalSeats = 0;
-        console.log(geographies);
-        for(i in medias)
-        {
-            totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
-            totalSeats += medias[i].seats;
-            medias[i]['city'] = geographies[medias[i].geography[0]].city;
-            medias[i]['state'] = geographies[medias[i].geography[0]].state;
-            if(cities.indexOf(medias[i].city) <= -1)
-                cities.push(medias[i].city);
-        }
-        var data = {
-            count:medias.length,
-            screens:medias,
-            totalPrice:totalPrice,
-            cities:{ count:cities.length, values:cities },
-            reach:(totalSeats * 4 * 7)
-        };
-
-        return data;
-    }
-
-    self.fetchOffScreenData = function(geographies, match, group, project, callbackMain){
-        project['mediaOptions'] = 1;
-        project['dimensions'] = 1;
-        Media.aggregate(match, {$project:project}, function(err, medias){
-            if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
-            else
-            {
-                var geographyIds = [];
-                for(i in medias) geographyIds.push(medias[i].geography[0]);
-                Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                    var geographies = {};
-                    for(i in results) geographies[results[i]._id.toString()] = results[i];
-                    geographies['length'] = results.length;
-                    callbackMain(err, self.populateOffScreenData(medias, geographies));
-                });
-            }
-        });
-    }
-
-    self.populateOffScreenData = function(medias, geographies){
-        var totalPrice = 0;
-        var cities = [];
-        var reach = 0;
-        var totalSeats = 0;
-        console.log(medias);
-        for(i in medias)
-        {
-            totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
-            totalSeats += medias[i].seats;
-            medias[i]['city'] = geographies[medias[i].geography[0]].city;
-            medias[i]['state'] = geographies[medias[i].geography[0]].state;
-            if(cities.indexOf(medias[i].city) <= -1)
-                cities.push(medias[i].city);
-        }
-        var data = {
-            count:medias.length,
-            screens:medias,
-            totalPrice:totalPrice,
-            cities:{ count:cities.length, values:cities },
-            reach:(totalSeats * 4 * 30)
-        };
-
-        return {offScreen:data};
-    }
-
-    this.getFilters = function(req, res){
-        async.parallel({
-                mallName: self.getMallName,
-                cinemaChain : self.getCinemaChain,
-                screenType : self.getScreenType,
-                mediaType : self.getMediaType
-            },
-            function(err, results)
-            {
-                if(err) res.status(500).json({err:err});
-                res.status(200).json({filters:results});
-            });
-    };
-
-    self.getMallName = function(callback){
-        var aggregation = Media.aggregate(
-            {$match: {toolId:self.toolId, "mallName": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$mallName', count : {$sum : 1}}}
-        );
-
-        aggregation.options = { allowDiskUse: true };
-        aggregation.exec(function(error, results) {
-            callback(error, results)
-        });
-    };
-
-    self.getCinemaChain = function(callback){
-        var aggregation = Media.aggregate(
-            {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
-            {$group : { _id : '$cinemaChain', count : {$sum : 1}}}
-        );
-
-        aggregation.options = { allowDiskUse: true };
-        aggregation.exec(function(error, results) {
-            callback(error, results)
-        });
-    };
-
-    self.getScreenType = function(callback){
-        var ScreenType = [
-            {'_id' : false, 'name' : 'Multiplex', 'selected' : true},
-            {'_id' : true, 'name' : 'Single Screen'}
-        ];
-        callback(null, ScreenType);
-    };
-
-    self.getMediaType = function(callback){
-        var MediaType = [
-            {'_id' : 'onScreen', 'name' : 'On Screen'},
-            {'_id' : 'offScreen', 'name' : 'Off Screen'}
-        ];
-        callback(null, MediaType);
-    };
-
-    this.upcomingMovies = function(req, res){
-        dateObj = new Date(req.query.date);
-
-        var firstDate = new Date(dateObj.getFullYear(), dateObj.getMonth(), 1);
-        var lastDate = new Date(dateObj.getFullYear(), dateObj.getMonth() + 1, 0);
-
-        UpcomingMovies.aggregate(
-            {$match : { releaseDate : { $gte:firstDate, $lte:lastDate } }},
-            {$sort : {releaseDate:1}},
-            {$group : {_id : '$releaseDate', movies:{$push : '$$ROOT'}, count : {$sum : 1}}},
-            function(err, results){
-                if(err) throw err;
-                res.status(200).json({upcomingMovies:results});
-            }
-        );
-    }
-
-    this.getBestrates = function(req, res){
-        var medias = {};
-        var mediaIds = [];
-
-        for(key in req.body.medias)
-        {
-            var mediaId = req.body.medias[key]._id;
-            var type = req.body.medias[key].type;
-            var mediaOption = req.body.medias[key].mediaOption;
-            if(medias[req.body.medias[key]._id] === undefined)
-            {
-                mediaIds.push(mediaId);
-                medias[mediaId] = {};
-                medias[mediaId]['name'] = req.body.medias[key].name;
-                medias[mediaId]['urlSlug'] = req.body.medias[key].urlSlug;
-                medias[mediaId]['thumbnail'] = req.body.medias[key].thumbnail;
-                medias[mediaId]['logo'] = req.body.medias[key].logo;
-
-                medias[mediaId].mediaOptions = {};
-                medias[mediaId].mediaOptions[type] = {};
-                medias[mediaId].mediaOptions[type][mediaOption] = {};
-                medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-            }
-            else
-            {
-                if(medias[mediaId].mediaOptions[type][mediaOption] === undefined)
-                {
-                    medias[mediaId].mediaOptions[type][mediaOption] = {};
-                    medias[mediaId].mediaOptions[type][mediaOption].qty = 1;
-                }
-                else
-                    medias[mediaId].mediaOptions[type][mediaOption].qty++;
-            }
-        }
-
-        Media.find({_id : {$in : mediaIds}}, function(err, result){
-            result.map(function(media){
-                for(key in medias[media._id].mediaOptions)
-                {
-                    pricing[media._id][key] = {};
-                    switch(key)
-                    {
-                        case 'print':
-                            for(mo in medias[media._id].mediaOptions.print)
-                            {
-                                medias[media._id][key][mo] = {};
-                                medias[media._id][key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
-
-                                switch(true)
-                                {
-                                    case medias[media._id].mediaOptions.print[mo].qty <= 2:
-                                        medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];
-                                        break;
-                                    case medias[media._id].mediaOptions.print[mo].qty <= 6:
-                                        medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];
-                                        break;
-                                    case medias[media._id].mediaOptions.print[mo].qty > 6:
-                                        medias[media._id][key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];
-                                        break;
-                                }
-
-                                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                            }
-                            break;
-                        case 'website':
-                            for(mo in medias[media._id].mediaOptions[key])
-                            {
-                                medias[media._id][key][mo] = {};
-                                medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions[mo].pricing;
-                                medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions[mo].pricing;
-                                medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                                medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                                medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                                medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                            }
-                            break;
-                        case 'email':
-                            medias[media._id][key][mo] = {};
-                            medias[media._id][key][mo].originalUnitPrice = media[type].mediaOptions.pricing;
-                            medias[media._id][key][mo].dicsountedUnitPrice = media[type].mediaOptions.pricing;
-                            medias[media._id][key][mo].originalGrossPrice = medias[media._id][key][mo].originalUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                            medias[media._id][key][mo].discountedGrossPrice = medias[media._id][key][mo].discountedUnitPrice * medias[media._id].mediaOptions.print[mo].qty;
-                            medias[media._id][key][mo].unitSaving = medias[media._id][key][mo].originalUnitPrice - medias[media._id][key][mo].discountedUnitPrice;
-                            medias[media._id][key][mo].grossSaving = medias[media._id][key][mo].originalGrossPrice - medias[media._id][key][mo].discountedGrossPrice;
-                            break;
-                    }
-                }
-                medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
-            });
-            res.status(200).json(medias);
-        });
-    };
-
-    self.getTenDates = function(dates, frequency){
-        var pubDates = [];
-        var dateObj = new Date();
-        var currMonth = dateObj.getMonth();
-        var currYear = dateObj.getFullYear();
-
-        return self.formDates(pubDates, dates, currMonth, currYear)
-    }
-
-    self.formDates = function(pubDates, dates, currMonth, currYear)
+  this.getNewspapers = function(req, res){    
+    self.params = JSON.parse(req.query.params);
+    //return res.status(200).json(self.params);
+    async.waterfall([
+      function(callback)
+      {
+        callback(null, self.applyFilters());
+      },
+      function(query, callback)
+      {
+        if(self.params.recommended) return self.radioRecommend(self.params,callback);
+        self.sortFilteredMedia(query, callback);
+      }
+    ],
+    function (err, result)
     {
-        for(key in dates)
-        {
-            if(months.indexOf(key) < currMonth) continue;
-            for(eachDate in dates[key])
+      res.status(200).json(result);
+    });
+  };
+
+    self.applyFilters = function(){
+      var query = {};
+      query.sortBy = self.params.sortBy || 'views';
+      query.offset = self.params.offset || 0;
+      query.limit = self.params.limit || 9;
+      query.match = {};
+      var filters = {
+        'categories' : 'categoryId',
+        'areas' : 'areaCovered',
+        'languages' : 'language',
+        'frequencies' : 'frequency',
+        'type' : 'newspaperType'
+      };
+      query.projection = {
+        '_id' : 1,
+        'newspaperName' : 1,
+        'editionName' : 1,
+        'areaCovered' : 1,
+        'circulation' : 1,
+        'language' : 1,
+        'geography':1,
+        'mediaOptions.anyPage' : 1,        
+        'logo' : 1
+      };
+
+      Object.keys(filters).map(function(value){
+        if(self.params.filters[value].length)
+          query.match[filters[value]] = {'$in': self.params.filters[value]};
+      });
+
+      //query.match.isActive = 1;
+      query.match.toolId = self.toolId;
+      return query;
+    };
+
+    self.sortFilteredMedia = function(query, callback){     
+      async.parallel({
+        count : function(callbackInner)
+        {          
+          Media.aggregate(
+            {$match : query.match},
+            {$group: { _id : null, count: {$sum: 1} }},
+            function(err, result)
             {
-                dates[key][eachDate] = trim(dates[key][eachDate]);
+              if(result[0] === undefined) count = 0;
+              else count = result[0].count;
+              callbackInner(err, result);
+            }
+          );
+        },
+        medias : function(callbackInner)
+        {          
+          switch(query.sortBy)
+          {
+            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'circulation': query.sortBy = { 'circulation' : -1}; break;
+            case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
+          }
+          query.sortBy._id = 1;
+
+          Media.aggregate(
+            {$match: query.match}, {$sort: query.sortBy},
+            {$skip : query.offset}, {$limit: query.limit},
+            {$project: query.projection}, 
+            function(err, results) 
+            {
+              callbackInner(err, results);
+            }
+          );
+        }
+      },
+      function(err, results) 
+      {
+        callback(err, results);
+      });
+    };
+
+    self.radioRecommend = function(query, callback){
+      query.match = {};
+      query.sortBy = {};
+      async.waterfall([
+        function(callbackInner)
+        {
+          Products.findOne({ _id:self.params.productId },{ radio:1 },function(err, result){
+            callbackInner(err, result.radio.categoryId);
+          });
+        },
+        function(categoryId, callbackInner)
+        {
+          query.match['categories'][categoryId] = { $exists:1 };
+          query.match['geography'] = query.params.geography;
+          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+          callbackInner(null, query);
+        }
+      ],
+      function(err, query)
+      {
+        Medias.aggregate(
+          {$match: query.match}, {$sort: query.sortBy},
+          {$skip : 0}, {$limit: 2},
+          {$project: query.projection}, 
+          function(err, results) 
+          { 
+            var geographyIds = [];
+            for(i in results) geographyIds.push(results[i].geography);
+            Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+              geographies = {};
+              for(i in geos) geographies[geos._id] = geos[i];
+              for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+              callback(err, {medias:results,count:results.length});
+            });
+          }
+        );
+      });
+    }
+
+  this.getFilters = function(req, res){
+    async.parallel({
+      categories : self.getCategories,
+      areas : self.getAreas,
+      languages : self.getLanguages,
+      frequency : self.getFrequency,
+      type : self.getNewspaperType,
+      products  : self.getProducts
+    },
+    function(err, results) 
+    {
+      if(err) res.status(500).json({err:err});
+      res.status(200).json({filters:results});
+    });
+  };
+
+    self.getCategories = function(callback){
+      Media.distinct('categoryId',
+        { toolId:self.toolId},
+        function(error, categoryIds) 
+        {
+          Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
+            callback(error, cats);
+          });
+        }
+      );
+    };
+
+    self.getAreas = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "areaCovered": { $exists: 1} }},
+        {$group : { _id : '$areaCovered', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getLanguages = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "language": { $exists: 1} }},
+        {$group : { _id : '$language', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getFrequency = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "frequency": { $exists: 1} }},
+        {$group : { _id : '$frequency', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getNewspaperType = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "newspaperType": { $exists: 1} }},
+        {$group : { _id : '$newspaperType', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getProducts = function(callback){
+      Products.find({}, '_id name', function(error, results){
+        callback(error, results);
+      });
+    };
+
+  this.show = function(req, res){
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+      function(err, results)
+      {
+        if(!results) res.status(404).json({error : 'No Such Media Found'});
+        Geography.findOne()
+        res.status(200).json({newspaper : results});        
+      }
+    );
+  }
+
+  this.compare = function(req, res){
+    var ids = JSON.parse(req.query.params);
+    var catIds = [];
+    var project = {
+      '_id' : 1,
+      'newspaperName' : 1,
+      'editionName' : 1,
+      'circulation' : 1,
+      'areaCovered' : 1,
+      'categoryId' :1,
+      'language' : 1,
+      'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+      'logo' : 1
+    };
+    
+    async.series({
+      medias : function(callback){
+        Media.find({_id: { $in: ids }}, project,function(err, results){
+          var medias = results.map(function(m){
+            catIds.push(m.categoryId);
+            return m.toObject();
+          });
+          callback(err, medias);
+        });
+      },
+      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+    },
+    function(err, result)
+    {
+      for(var i = 0; i < result.medias.length; i++)
+      {
+        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+      }
+      res.status(200).json({medias:result.medias});
+    });
+  };
+
+  this.relatedMedia = function(req, res){
+    Media.aggregate(
+      {
+        $match : {
+          categoryId : req.params.categoryId,
+          geography : req.query.geography,
+          toolId : self.toolId,
+          //isActive: 1,
+          urlSlug : { $ne : req.query.urlSlug }
+        }
+      },
+      {
+        $sort : {
+          circulation : -1,
+        }
+      },
+      {$skip : 0}, {$limit: 3},
+      {
+        $project : {
+          '_id' : 1,
+          'newspaperName' : 1,
+          'editionName' : 1,
+          'circulation' : 1,
+          'areaCovered' : 1,
+          'language' : 1,
+          'urlSlug' : 1,
+          'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+          'logo' : 1
+        }
+      },
+      function(err, results)
+      {
+        res.status(200).json({medias:results});
+      }
+    );
+  };
+
+  this.getBestRates = function(req, res){
+    var medias = req.body.medias;//{};
+    var mediaIds = [];
+    for(key in medias) mediaIds.push(key);
+
+    Media.find({_id : {$in : mediaIds}}, function(err, result){
+      totalGrossPrice = 0;
+      totalGrossSaving = 0;
+      result.map(function(media){ 
+        media = media.toObject();
+        for(key in medias[media._id].mediaOptions)
+        {
+          switch(key)
+          {
+            case 'print':
+              for(mo in medias[media._id].mediaOptions.print)
+              {
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
+
                 switch(true)
                 {
-                    case dates[key][eachDate] == 'Everyday':
-                        var dateObj = new Date();
-                        for(i = 1; i <= 10; i++) pubDates.push( dateObj.setDate( dateObj.getDate() + i ).format("dd-m-yy") );
-                        break;
-                    case CommonLib.isNumber(dates[key][eachDate]) == true:
-                        var dateObj = new Date();
-                        var cMonth = dateObj.getMonth();
-                        var cDate = dateObj.getDate();
-                        var cYear = dateObj.getFullYear();
-                        dateObj.setMonth(currMonth);
-                        dateObj.setFullYear(currYear);
-                        dateObj.setDate( parseInt(dates[key][eachDate]) );
-                        if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
-                        else pubDates.push(dateObj.format("dd-m-yy"));
-                        break;
-                    case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
-                        var dateObj = new Date();
-                        if(dateObj.getFullYear != currYear) dateObj.setDate(1);
-                        while(dateObj.getDay() !== 1) dateObj.setDate(dateObj.getDate() + 1);
-                        while(dateObj.getMonth() === currMonth)
-                        {
-                            pubDates.push(new Date(dateObj.getTime()).format("dd-mm-yy"));
-                            dateObj.setDate(dateObj.getDate() + 7);
-                        }
-                        break;
-                    default:
-                        var pubDays = dates[key][eachDate].split(' ');
-                        var week = ['','first','second','third','fourth'];
-                        var weekDay = days.indexOf(pubDays[1]);
-                        var dateObj = new Date();
-                        var cMonth = dateObj.getMonth();
-                        var cDate = dateObj.getDate();
-                        var cYear = dateObj.getFullYear();
-                        dateObj.setMonth(currMonth);
-                        dateObj.setFullYear(currYear);
-                        dateObj.setDate(1);
-                        while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
-                        dateObj.setDate(dateObj.getDate() + (7 * days.indexOf(pubDays[0])) )
-                        if(cMonth == dateObj.getMonth() && cYear == dateObj.getFullYear() && cDate <= dateObj.getDate()){}
-                        else pubDates.push(dateObj.format("dd-m-yy"));
+                  case medias[media._id].mediaOptions.print[mo].qty <= 2:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty <= 6:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty > 6:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
+                    break;
                 }
-                if(currMonth == 12) {currMonth++; currYear++;}
-                else currMonth++;
-            }
+                
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              }
+              break;
+            case 'website':
+              for(mo in medias[media._id].mediaOptions[key])
+              {
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //..............
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log('multiply - ',medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty);
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log(medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice);
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice , medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                //medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                //console.log(medias[media._id].mediaOptions[key][mo]);
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              }
+              break;
+            case 'email':
+              medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+              medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              break;
+          }
         }
-        if(pubDates.length < 10) pubDates = self.formDates(pubDates, dates, currMonth, currYear);
-        return pubDates;
+        medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
+      });
+      res.status(200).json({
+        bestrates:medias,
+        totalGrossPrice:totalGrossPrice,
+        totalGrossSaving:totalGrossSaving
+      });
+    });
+  };
+
+    self.getTenDates = function(dates, frequency){
+      var pubDates = [];
+      var dateObj = new Date();
+      var currMonth = dateObj.getMonth();
+      var currYear = dateObj.getFullYear();
+      
+      return self.formDates(pubDates, dates, currMonth, currYear, frequency)
+    }
+
+    self.formDates = function(pubDates, dates, currMonth, currYear, frequency)
+    {
+      for(key in dates)
+      {
+        currMonth = months.indexOf(key);
+        for(eachDate in dates[key])
+        {
+          dates[key][eachDate] = dates[key][eachDate].trim();
+          switch(true)
+          {
+            case dates[key][eachDate] == 'Everyday':
+              for(i = 1; i <= 10; i++) 
+              {
+                var dateObj = new Date();
+                dateObj.setHours(0,0,0,0);
+                dateObj.setDate( dateObj.getDate() + i );
+                pubDates.push(dateObj);
+              }
+              break;
+            case CommonLib.isNumber(dates[key][eachDate]) == true:
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              dateObj.setDate( parseInt(dates[key][eachDate]) );
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 )pubDates.push(dateObj);
+              break;
+            case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              while(dateObj.getMonth() === currMonth) 
+              {
+                var daysDiff = parseInt( (dateObj - new Date()) / dayConversion ); 
+                if( daysDiff > 0 ) pubDates.push(new Date(dateObj.getTime()));
+                dateObj.setDate(dateObj.getDate() + 7);
+              }
+              break;
+            default:
+              var pubDays = dates[key][eachDate].split(' ');
+              var weekDay = days.indexOf(pubDays[1].toLowerCase());
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);  
+              dateObj.setMonth(currMonth);
+              dateObj.setFullYear(currYear);
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              dateObj.setDate(dateObj.getDate() + (7 * week.indexOf(pubDays[0].toLowerCase())) )
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 ) pubDates.push(dateObj);
+          }
+          if(pubDates.length >= 10) return pubDates;
+        }
+      }
+      
+      currYear++;
+      if(pubDates.length < 10)
+        pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
+      return pubDates;
     }
 };
 
-module.exports.Cinema = Cinema;
+
+
+
+module.exports.Newspaper = Newspaper;

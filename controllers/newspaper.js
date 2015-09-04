@@ -21,7 +21,6 @@ var Newspaper = function()
     self.toolId = result._id.toString();
   });
 
-
   this.getNewspapers = function(req, res){    
     self.params = JSON.parse(req.query.params);
     //return res.status(200).json(self.params);
@@ -49,24 +48,22 @@ var Newspaper = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-
-        'categories' : 'categoryId',
-        'areas' : 'areaCovered',
-        'languages' : 'language',
-        'frequencies' : 'frequency'
-        //'type' : 'newspaperType'
-
+        'categories'  : 'categoryId',
+        'areas'       : 'areaCovered',
+        'languages'   : 'language',
+        'frequencies' : 'frequency',
+        'type'        : 'newspaperType'
       };
       query.projection = {
-        '_id' : 1,
-        'newspaperName' : 1,
-        'editionName' : 1,
-        'areaCovered' : 1,
-        'circulation' : 1,
-        'language' : 1,
-        'geography':1,
-        'mediaOptions.page1' : 1,        
-        'logo' : 1
+        '_id'                 : 1,
+        'newspaperName'       : 1,
+        'editionName'         : 1,
+        'areaCovered'         : 1,
+        'circulation'         : 1,
+        'language'            : 1,
+        'geography'           : 1,
+        'mediaOptions.anyPage': 1,        
+        'logo'                : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -122,28 +119,26 @@ var Newspaper = function()
     };
 
     self.newsPaperRecommend = function(query, callback){
-      query.match = {};
-      query.sortBy = {};
+      /*query.match = {};
+      query.sortBy = {};*/
       async.waterfall([
         function(callbackInner)
         {
-         /* Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
-            console.log(result.newspaper.categoryIds);
-            callbackInner(err, result.newspaper.categoryIds);
-          });*/
+          query.match['categories'][categoryId] = { $exists:1 };
+          query.match['geography'] = query.params.geography;
+          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+          callbackInner(null, query);
         },
         function(categoryId, callbackInner)
         {
-          /*query.match['categories'][categoryId] = { $exists:1 };
-          query.match['geography'] = query.params.geography;
-          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
-          callbackInner(null, query);*/
+          Products.findOne({ _id:self.params.productId },{ newspaper:1 }.lean()).exec(function(err, result){
+            callbackInner(err, result.radio.categoryId);
+          });
+          
         }
       ],
-
       function(err, query)
       {
-        console.log(query);
         Medias.aggregate(
           {$match: query.match}, {$sort: query.sortBy},
           {$skip : 0}, {$limit: 2},
@@ -247,7 +242,7 @@ var Newspaper = function()
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         Geography.findOne()
-        res.status(200).json({radio : results});        
+        res.status(200).json({newspaper : results});        
       }
     );
   }
@@ -257,58 +252,71 @@ var Newspaper = function()
     var catIds = [];
     var project = {
       '_id' : 1,
-      'radioFrequency' : 1,
-      'station' : 1,
-      'urlSlug' : 1,
-      'city' : 1,
+      'newspaperName' : 1,
+      'editionName' : 1,
+      'circulation' : 1,
+      'areaCovered' : 1,
+      'categoryId' :1,
       'language' : 1,
-      'mediaOptions.regularOptions.showRate.allDayPlan' : 1,        
+      'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
       'logo' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
-      var medias = results.map(function(m){
-        m['frequency'] = m.radioFrequency;
-        delete m.radioFrequency;
-        return m.toObject();
-      });
-      res.status(200).json({medias:medias});
+    async.series({
+      medias : function(callback){
+        Media.find({_id: { $in: ids }}, project,function(err, results){
+          var medias = results.map(function(m){
+            catIds.push(m.categoryId);
+            return m.toObject();
+          });
+          callback(err, medias);
+        });
+      },
+      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
+    },
+    function(err, result)
+    {
+      for(var i = 0; i < result.medias.length; i++)
+      {
+        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+      }
+      res.status(200).json({medias:result.medias});
     });
   };
 
   this.relatedMedia = function(req, res){
-    console.log(typeof(req.query.geographyId));
-    console.log(req.query.geographyId);
-    console.log(typeof(req.query.urlSlug));
-    console.log(req.query.urlSlug);
     Media.aggregate(
       {
         $match : {
-          geography : req.query.geographyId,
+          categoryId : req.params.categoryId,
+          geography : req.query.geography,
           toolId : self.toolId,
-          isActive: 1,
+          //isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
+        }
+      },
+      {
+        $sort : {
+          circulation : -1,
         }
       },
       {$skip : 0}, {$limit: 3},
       {
         $project : {
           '_id' : 1,
-          'radioFrequency' : 1,
-          'station' : 1,
-          'geography' : 1,
+          'newspaperName' : 1,
+          'editionName' : 1,
+          'circulation' : 1,
+          'areaCovered' : 1,
           'language' : 1,
-          'mediaOptions.regularOptions' : 1,        
+          'urlSlug' : 1,
+          'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
           'logo' : 1
         }
       },
       function(err, results)
       {
-        if(err) console.log(err);
-        Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
-          for(i in results) results[i].city = geo.city;
-          res.status(200).json({medias:results});
-        });
+        res.status(200).json({medias:results});
       }
     );
   };
