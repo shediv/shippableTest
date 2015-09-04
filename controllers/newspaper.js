@@ -32,7 +32,7 @@ var Newspaper = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.PaperRecommend(self.params,callback);
+        if(self.params.recommended) return self.newsPaperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -121,27 +121,29 @@ var Newspaper = function()
       });
     };
 
-    self.PaperRecommend = function(query, callback){
-
+    self.newsPaperRecommend = function(query, callback){
       query.match = {};
       query.sortBy = {};
       async.waterfall([
         function(callbackInner)
         {
-          Products.findOne({ _id:self.params.productId },{ radio:1 },function(err, result){
-            callbackInner(err, result.radio.categoryId);
-          });
+         /* Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
+            console.log(result.newspaper.categoryIds);
+            callbackInner(err, result.newspaper.categoryIds);
+          });*/
         },
         function(categoryId, callbackInner)
         {
-          query.match['categories'][categoryId] = { $exists:1 };
+          /*query.match['categories'][categoryId] = { $exists:1 };
           query.match['geography'] = query.params.geography;
           query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
-          callbackInner(null, query);
+          callbackInner(null, query);*/
         }
       ],
+
       function(err, query)
       {
+        console.log(query);
         Medias.aggregate(
           {$match: query.match}, {$sort: query.sortBy},
           {$skip : 0}, {$limit: 2},
