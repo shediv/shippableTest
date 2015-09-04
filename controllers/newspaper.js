@@ -97,7 +97,7 @@ var Newspaper = function()
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'circulation': query.sortBy = { 'circulation' : -1}; break;
-            case 'rate': query.sortBy = { 'mediaOptions.page1.<800SqCms.cardRate' : -1}; break;
+            case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
           }
           query.sortBy._id = 1;
 
