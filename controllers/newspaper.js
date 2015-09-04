@@ -21,8 +21,9 @@ var Newspaper = function()
     self.toolId = result._id.toString();
   });
 
-  this.getRadios = function(req, res){    
+  this.getNewspapers = function(req, res){    
     self.params = JSON.parse(req.query.params);
+    //return res.status(200).json(self.params);
     async.waterfall([
       function(callback)
       {
@@ -47,19 +48,21 @@ var Newspaper = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'category..' : 'categoryId',
-        'areaCovered..' : 'areaCovered',
+        'categories' : 'categoryId',
+        'areas' : 'areaCovered',
         'languages' : 'language',
-        'frequency..' : 'frequency',
-        'newspaperType..' : 'newspaperType'
+        'frequencies' : 'frequency'
+        //'type' : 'newspaperType'
       };
       query.projection = {
         '_id' : 1,
-        'radioFrequency' : 1,
-        'station' : 1,
-        'geography' : 1,
+        'newspaperName' : 1,
+        'editionName' : 1,
+        'areaCovered' : 1,
+        'circulation' : 1,
         'language' : 1,
-        'mediaOptions.regularOptions' : 1,        
+        'geography':1,
+        'mediaOptions.page1' : 1,        
         'logo' : 1
       };
 
@@ -68,12 +71,12 @@ var Newspaper = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      query.match.isActive = 1;
+      //query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){
+    self.sortFilteredMedia = function(query, callback){     
       async.parallel({
         count : function(callbackInner)
         {          
@@ -93,8 +96,8 @@ var Newspaper = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': query.sortBy = {}; break;
+            case 'circulation': query.sortBy = { 'circulation' : -1}; break;
+            case 'rate': query.sortBy = { 'mediaOptions.page1.<800SqCms.cardRate' : -1}; break;
           }
           query.sortBy._id = 1;
 
@@ -104,15 +107,7 @@ var Newspaper = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = [];
-              for(i in results) geographyIds.push(results[i].geography);
-              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-                geographies = {};
-                for(i in geos) geographies[geos[i]._id] = geos[i];
-                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(self.params.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
-                callbackInner(err, results);
-              });
+              callbackInner(err, results);
             }
           );
         }
