@@ -1,6 +1,5 @@
 var Radio = function()
 {
-  var nodemailer = require('nodemailer');
   var async = require('async');
   var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
@@ -21,30 +20,6 @@ var Radio = function()
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
-
-  this.mail = function(req, res){
-
-    console.log(CommonLib.transporter);
-
-    // setup e-mail data with unicode symbols
-    var mailOptions = {
-        from: 'The Media Ant <help@themediaant.com>', // sender address
-        to: 'videsh@themediaant.com', // list of receivers
-        subject: 'The Media Ant', // Subject line
-        text: 'Hello world ✔', // plaintext body
-        html: '<b>Hello world ✔</b>' // html body
-    };
-
-
-    // send mail with defined transport object
-    CommonLib.transporter.sendMail(mailOptions, function(error, info){
-        if(error){
-            return console.log(error);
-        }
-        console.log('Message sent: ' + info.response);
-
-    });
-  };
 
   this.getRadios = function(req, res){
     self.params = JSON.parse(req.query.params);
@@ -111,13 +86,13 @@ var Radio = function()
             }
           );
         },
-        radios : function(callbackInner)
+        medias : function(callbackInner)
         {          
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': quer.sortBy = {}; break;
+            case 'city': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
@@ -179,7 +154,7 @@ var Radio = function()
               geographies = {};
               for(i in geos) geographies[geos[i]._id] = geos[i];
               for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-              callback(err, {radios:results});
+              callback(err, {medias:results,count:results.length});
             });
           }
         );
@@ -272,12 +247,11 @@ var Radio = function()
         delete m.radioFrequency;
         return m.toObject();
       });
-      res.status(200).json({radios:medias});
+      res.status(200).json({medias:medias});
     });
   };
 
   this.relatedMedia = function(req, res){
-     // console.log(req.query.geographyId);
     Media.aggregate(
       {
         $match : {
@@ -301,10 +275,9 @@ var Radio = function()
       },
       function(err, results)
       {
-        console.log(results);
         Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
           for(i in results) results[i].city = geo.city;
-          res.status(200).json({radios:results});
+          res.status(200).json({medias:results});
         });
       }
     );

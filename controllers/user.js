@@ -8,7 +8,13 @@ var User = function()
 	var imagick = require('imagemagick');
 	var mkdirp = require('mkdirp');
 
+	var path = require('path');
+  	var EmailTemplate = require('email-templates').EmailTemplate;
+  	var templatesDir = path.resolve(__dirname, '..', 'node_modules/email-templates/examples/templates');
+  	var template = new EmailTemplate(path.join(templatesDir, 'welcome'));
+
 	this.passwordHash = require('password-hash');
+	var md5 = require('md5');
 	this.config = require('../config.js');
 
 	this.params = {};
@@ -22,25 +28,74 @@ var User = function()
 				if (err) throw err;
 				if(result) res.status(500).json("Email Already Exists");
 				else
-				{
-					//Hash Password
-					user.password = self.passwordHash.generate(user.password);
+				{									    
+				    //Hash Password
+					user.password = md5(user.password);
 					user.verified = 0;
-					// create a new Media
+					// create a new User
 					var newUser = User(user);
 
 					// save the Media
 					newUser.save(function(err) {
 						if (err) throw err;
+						var locals = {
+						      email: user.email,
+						      name: {
+						        first: user.firstName,
+						        last: user.lastName
+						      },
+						      userId:newUser._id,
+						      emailHash:md5(user.email)						      
+						    }
+
+						// Send a single email
+					    template.render(locals, function (err, results) {
+					      if (err) {
+					        return console.error(err)
+					      }
+
+					      CommonLib.transporter.sendMail({
+					        from: 'The Media Ant <help@themediaant.com>', // sender address
+					        to: locals.email, // list of receivers
+					        subject: 'Email Address Verification - The Media Ant',
+					        html: results.html,
+					        text: results.text
+					      }, function (err, responseStatus) {
+					        if (err) {
+					          return console.error(err)
+					        }
+					        console.log("responseStatus.message")
+					      })
+					    })						    
 						res.status(200).json({userId:newUser._id});
 						fs.mkdir('./public/images/users/'+newUser._id, function(err){
 							console.log(err);
 						})
-					});
+					});					
 				}
 			}
 		);
 	};
+
+	self.verify = function(req, res){
+		var confirmationCode = req.params.confirmationCode;
+		var confirmationCode = confirmationCode.split(":");
+		var dbEmail = false;
+		
+		User.findOne({_id : confirmationCode[1]}, function(err, result){
+			//dbEmail = result.email;
+			var dbEmailHash = md5(result.email);
+			if(confirmationCode[0] == dbEmailHash){
+				User.findOneAndUpdate({_id : confirmationCode[1]}, {$set: { verified: 1 }}, {upsert:true}, function(err, doc){
+				    if (err) return res.send(500, { error: err });
+				    return res.status(200).json("User's email verified");
+				});
+			}
+			else{
+				return res.status(500).json("not verified");
+			}			
+		})
+	}
 
 	self.facebookSignin = function(req, res){
 		var user = req.body.user;
