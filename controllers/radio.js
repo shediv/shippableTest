@@ -47,7 +47,7 @@ var Radio = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'geography' : 'geography',
+        'geographies' : 'geography',
         'languages' : 'language',
         'stations' : 'station'
       };
