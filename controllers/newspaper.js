@@ -112,7 +112,7 @@ var Newspaper = function()
           );
         }
       },
-      function(err, results) 
+      function(err, results)  
       {
         callback(err, results);
       });
@@ -127,6 +127,7 @@ var Newspaper = function()
           query.match['categories'][categoryId] = { $exists:1 };
           query.match['geography'] = query.params.geography;
           query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+          console.log(query);
           callbackInner(null, query);
         },
         function(categoryId, callbackInner)
