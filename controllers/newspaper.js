@@ -121,6 +121,8 @@ var Newspaper = function()
     self.newsPaperRecommend = function(query, callback){
       /*query.match = {};
       query.sortBy = {};*/
+      console.log(query);
+      process.exit();
       async.waterfall([
         function(callbackInner)
         {
