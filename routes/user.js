@@ -10,7 +10,7 @@ router.post("/signup", function(req, res){UserCtrl.store(req, res);});
 router.get("/verify/:confirmationCode", function(req, res){ UserCtrl.verify(req, res); });
 router.put("/", function(req, res){UserCtrl.update(req, res);});
 router.put("/uploadProfilePic", function(req, res){UserCtrl.uploadProfilePic(req, res);});
-router.post("/signin", function(req, res){UserCtrl.authenticate(req, res);});
+router.post("/localSignin", function(req, res){UserCtrl.authenticate(req, res);});
 router.post("/facebookSignin", function(req, res){UserCtrl.facebookSignin(req, res);});
 router.post("/googleSignin", function(req, res){UserCtrl.googleSignin(req, res);});
 router.post("/current", function(req, res){UserCtrl.getSession(req, res);});

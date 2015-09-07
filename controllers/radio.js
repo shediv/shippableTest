@@ -30,7 +30,7 @@ var Radio = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.radioRecommend(self.params,callback);
+        if(self.params.recommended) return self.radioRecommend(query,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -82,7 +82,7 @@ var Radio = function()
             {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
@@ -127,21 +127,22 @@ var Radio = function()
       async.waterfall([
         function(callbackInner)
         {
-          Products.findOne({ _id:self.params.productId },{ radio:1 },function(err, result){
+          Products.findOne({ _id:self.params.productId },{ radio:1 }).lean().exec(function(err, result){
+            console.log(result.radio.categoryId);
             callbackInner(err, result.radio.categoryId);
           });
         },
         function(categoryId, callbackInner)
-        {
-          query.match['categories'][categoryId] = { $exists:1 };
-          query.match['geography'] = query.params.geography;
-          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+        { 
+         query.match['categories.'+categoryId] = { $exists:1 };
+          query.match['geography'] = self.params.geography;
+          query.sortBy['categories.'+categoryId] = 1;
           callbackInner(null, query);
         }
       ],
       function(err, query)
-      {
-        Medias.aggregate(
+      { 
+        Media.aggregate(
           {$match: query.match}, {$sort: query.sortBy},
           {$skip : 0}, {$limit: 2},
           {$project: query.projection}, 
@@ -151,7 +152,7 @@ var Radio = function()
             for(i in results) geographyIds.push(results[i].geography);
             Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
               geographies = {};
-              for(i in geos) geographies[geos._id] = geos[i];
+              for(i in geos) geographies[geos[i]._id] = geos[i];
               for(i in results) results[i]['city'] = geographies[results[i].geography].city;
               callback(err, {medias:results,count:results.length});
             });
@@ -251,10 +252,6 @@ var Radio = function()
   };
 
   this.relatedMedia = function(req, res){
-    console.log(typeof(req.query.geographyId));
-    console.log(req.query.geographyId);
-    console.log(typeof(req.query.urlSlug));
-    console.log(req.query.urlSlug);
     Media.aggregate(
       {
         $match : {
@@ -278,7 +275,6 @@ var Radio = function()
       },
       function(err, results)
       {
-        if(err) console.log(err);
         Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
           for(i in results) results[i].city = geo.city;
           res.status(200).json({medias:results});

@@ -6,6 +6,7 @@ var express = require('express');
 var router = express.Router();
 var NewspaperCtrl = new (require('../controllers/newspaper')).Newspaper();
 
+
 router.get("/", function(req, res){  NewspaperCtrl.getNewspapers(req, res); });
 router.get("/filters", function(req, res){ NewspaperCtrl.getFilters(req, res); });
 router.post("/bestRates", function(req, res){ NewspaperCtrl.getBestRates(req, res); });

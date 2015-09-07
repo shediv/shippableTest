@@ -31,7 +31,7 @@ var Newspaper = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.radioRecommend(self.params,callback);
+        if(self.params.recommended) return self.newsPaperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -48,22 +48,22 @@ var Newspaper = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'categories' : 'categoryId',
-        'areas' : 'areaCovered',
-        'languages' : 'language',
+        'categories'  : 'categoryId',
+        'areas'       : 'areaCovered',
+        'languages'   : 'language',
         'frequencies' : 'frequency',
-        'type' : 'newspaperType'
+        'type'        : 'newspaperType'
       };
       query.projection = {
-        '_id' : 1,
-        'newspaperName' : 1,
-        'editionName' : 1,
-        'areaCovered' : 1,
-        'circulation' : 1,
-        'language' : 1,
-        'geography':1,
-        'mediaOptions.anyPage' : 1,        
-        'logo' : 1
+        '_id'                 : 1,
+        'newspaperName'       : 1,
+        'editionName'         : 1,
+        'areaCovered'         : 1,
+        'circulation'         : 1,
+        'language'            : 1,
+        'geography'           : 1,
+        'mediaOptions.anyPage': 1,        
+        'logo'                : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -112,28 +112,30 @@ var Newspaper = function()
           );
         }
       },
-      function(err, results) 
+      function(err, results)  
       {
         callback(err, results);
       });
     };
 
-    self.radioRecommend = function(query, callback){
-      query.match = {};
-      query.sortBy = {};
+    self.newsPaperRecommend = function(query, callback){
+      /*query.match = {};
+      query.sortBy = {};*/
       async.waterfall([
         function(callbackInner)
-        {
-          Products.findOne({ _id:self.params.productId },{ radio:1 },function(err, result){
-            callbackInner(err, result.radio.categoryId);
-          });
-        },
-        function(categoryId, callbackInner)
         {
           query.match['categories'][categoryId] = { $exists:1 };
           query.match['geography'] = query.params.geography;
           query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
+          console.log(query);
           callbackInner(null, query);
+        },
+        function(categoryId, callbackInner)
+        {
+          Products.findOne({ _id:self.params.productId },{ newspaper:1 }.lean()).exec(function(err, result){
+            callbackInner(err, result.radio.categoryId);
+          });
+          
         }
       ],
       function(err, query)
