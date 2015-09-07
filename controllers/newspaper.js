@@ -16,10 +16,13 @@ var Newspaper = function()
   this.params = {};
   this.toolName = "newspaper";
   var self = this;
-
+  this.toolId='';
+  
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
+  
+
 
   this.getNewspapers = function(req, res){    
     self.params = JSON.parse(req.query.params);
@@ -76,7 +79,7 @@ var Newspaper = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){     
+    self.sortFilteredMedia = function(query, callback){  
       async.parallel({
         count : function(callbackInner)
         {          
@@ -119,44 +122,39 @@ var Newspaper = function()
     };
 
     self.newsPaperRecommend = function(query, callback){
-      /*query.match = {};
-      query.sortBy = {};*/
-      console.log(query);
-      process.exit();
+      var categoryId ="55d70b748ead0e960c8b4567"; //General interest categoryid
+      query.match = {};
+      query.sortBy = {};
+      query.groupBy={};
+      query.filters={};
       async.waterfall([
         function(callbackInner)
         {
-          query.match['categories'][categoryId] = { $exists:1 };
-          query.match['geography'] = query.params.geography;
-          query.sortBy[ 'categories.'+query.match['categories'][categoryId] ] = 1;
-          console.log(query);
-          callbackInner(null, query);
-        },
-        function(categoryId, callbackInner)
-        {
-          Products.findOne({ _id:self.params.productId },{ newspaper:1 }.lean()).exec(function(err, result){
-            callbackInner(err, result.radio.categoryId);
+          Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
+          if(result.newspaper.categoryIds.indexOf('55d70b748ead0e960c8b4567') == -1)
+            {
+             result.newspaper.categoryIds.push('55d70b748ead0e960c8b4567'); 
+            }  
+            callbackInner(err, result.newspaper.categoryIds);
           });
-          
+        },
+        function(productData,callbackInner)
+        { 
+          query.match['toolId']= self.toolId;
+          query.match['geography'] = query.geographyId;
+          query.match['categoryId'] = { $in : productData };
+          callbackInner(null, query);
         }
       ],
       function(err, query)
       {
-        Medias.aggregate(
-          {$match: query.match}, {$sort: query.sortBy},
-          {$skip : 0}, {$limit: 2},
-          {$project: query.projection}, 
-          function(err, results) 
-          { 
-            var geographyIds = [];
-            for(i in results) geographyIds.push(results[i].geography);
-            Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-              geographies = {};
-              for(i in geos) geographies[geos._id] = geos[i];
-              for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-              callback(err, {medias:results,count:results.length});
-            });
-          }
+        Media.aggregate(
+          { $match: query.match },
+          { $group:  { _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
+          { $sort :  { circulation : -1 } },
+          function(err,results){
+            callback(err,results);
+          }   
         );
       });
     }
