@@ -50,10 +50,10 @@ var Magazine = function()
           var match = {
             "$match" : {
               $or: [
-                {"eliminators.gender" : ProductInfo[0].eliminators.gender},
-                {"eliminators.income" : ProductInfo[0].eliminators.income},
-                {"eliminators.age" : { $in: ProductInfo[0].eliminators.age }},
-                {"eliminators.consumption" : ProductInfo[0].eliminators.consumption }
+                {"eliminators.gender" : ProductInfo[0].magazine.eliminators.gender},
+                {"eliminators.income" : ProductInfo[0].magazine.eliminators.income},
+                {"eliminators.age" : { $in: ProductInfo[0].magazine.eliminators.age }},
+                {"eliminators.consumption" : ProductInfo[0].magazine.eliminators.consumption }
               ]
             }
           };
@@ -80,7 +80,7 @@ var Magazine = function()
         if(ProductInfo[0].keywords){
         for(var i= 0; i < result.medias.length; i++)
         {
-          var check = getMatch(ProductInfo[0].keywords, result.medias[i].keywords);
+          var check = getMatch(ProductInfo[0].magazine.keywords, result.medias[i].keywords);
           if(check.length > 0) CS.push(result.medias[i]);
         }
         }
@@ -102,9 +102,9 @@ var Magazine = function()
         else CS = result.medias; 
 
         //Create Buckets Based on Category
-        for(var i= 0; i < ProductInfo[0].categoryIds.length; i++)
+        for(var i= 0; i < ProductInfo[0].magazine.categoryIds.length; i++)
         {
-          mediacategorybuckets.push(createbucket(CS, ProductInfo[0].categoryIds[i], i));
+          mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazine.categoryIds[i], i));
         }
 
         //Find Medias that does not belong to any category with category 1
