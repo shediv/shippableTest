@@ -150,10 +150,36 @@ var Newspaper = function()
       {
         Media.aggregate(
           { $match: query.match },
-          { $group:  { _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
+          { $project : {  '_id'                 : 1,
+                          'newspaperName'       : 1,
+                          'editionName'         : 1,
+                          'areaCovered'         : 1,
+                          'circulation'         : 1,
+                          'language'            : 1,
+                          'geography'           : 1,
+                          'mediaOptions.anyPage': 1,        
+                          'logo'                : 1,
+                          'categoryId'          : 1, 
+                        } 
+          },
           { $sort :  { circulation : -1 } },
+          { $group:  {count : {$sum : 1}, _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
           function(err,results){
-            callback(err,results);
+            var paperRecommend={}; 
+            console.log(results.length);
+            for(var i=0; i<results.length;i++){
+                
+                if(results[i]._id == categoryId)
+                  {   paperRecommend[categoryId]=[];
+                      paperRecommend[categoryId][0]=results[i].newsPaper[0];
+                      paperRecommend[categoryId][1]=results[i].newsPaper[1];
+                  }
+                  else{
+                  paperRecommend[results[i]._id]=[];
+                  paperRecommend[results[i]._id][0]=results[i].newsPaper[0];
+                }
+            }
+          callback(err,{paper:paperRecommend});
           }   
         );
       });
@@ -323,7 +349,7 @@ var Newspaper = function()
   };
 
   this.getBestRates = function(req, res){
-    var medias = req.body.medias;//{};
+    var medias = req.body.medias;
     var mediaIds = [];
     for(key in medias) mediaIds.push(key);
 
