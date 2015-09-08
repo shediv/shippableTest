@@ -1,4 +1,4 @@
-var Radio = function()
+var Inflight = function()
 {
   var async = require('async');
   var underscore = require('underscore');
@@ -14,14 +14,15 @@ var Radio = function()
   var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "radio";
+  this.toolName = "inflight";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
 
-  this.getRadios = function(req, res){
+  this.getInflight = function(req, res){
+    res.status(200).json("result");
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -48,8 +49,7 @@ var Radio = function()
       query.match = {};
       var filters = {
         'geographies' : 'geography',
-        'languages' : 'language',
-        'stations' : 'station'
+        'mediaOptions' : 'mediaOptions'
       };
       query.projection = {
         '_id' : 1,
@@ -92,7 +92,7 @@ var Radio = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
+            case 'mediaCategory': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
             case 'city': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
@@ -165,9 +165,7 @@ var Radio = function()
   this.getFilters = function(req, res){
     async.parallel({
       geographies : self.getGeographies,
-      stations : self.getStations,
-      languages : self.getLanguages,
-      products  : self.getProducts
+      mediaOptions : self.getMediaOptions
     },
     function(err, results) 
     {
@@ -188,11 +186,11 @@ var Radio = function()
       );
     };
 
-    self.getLanguages = function(callback){
+    self.getMediaOptions = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "language": { $exists: 1} }},
-        {$unwind: '$language'},
-        {$group : { _id : '$language', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "mediaOptions": { $exists: 1} }},
+        //{$unwind: '$mediaOptions'},
+        {$group : { _id : '$mediaOptions', count : {$sum : 1}}},
         function(error, results) 
         {
           callback(error, results);
@@ -200,22 +198,6 @@ var Radio = function()
       );
     };
 
-    self.getStations = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "station": { $exists: 1} }},
-        {$group : { _id : '$station', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
-    };
-
-    self.getProducts = function(callback){
-      Products.find({}, '_id name', function(error, results){
-        callback(error, results);
-      });
-    };
 
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
@@ -446,4 +428,4 @@ var Radio = function()
 
 
 
-module.exports.Radio = Radio;
+module.exports.Inflight = Inflight;
