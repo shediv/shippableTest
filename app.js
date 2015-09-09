@@ -23,6 +23,7 @@ var geography = require('./routes/geography');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
+var router = express.Router();
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -58,7 +59,7 @@ app.use('/media', media);
 app.use('/geography', geography);
 app.use('/parseExcel', parseExcel);
 
-app.use('/isToolExists',CommonLib.isToolExists);
+router.get('/isToolExists',CommonLib.isToolExists);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
