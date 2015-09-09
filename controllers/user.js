@@ -10,7 +10,7 @@ var User = function()
 
 	var path = require('path');
   	var EmailTemplate = require('email-templates').EmailTemplate;
-  	var templatesDir = path.resolve(__dirname, '..', 'node_modules/email-templates/examples/templates');
+  	var templatesDir = path.resolve(__dirname, '..', 'public/templates');
   	var template = new EmailTemplate(path.join(templatesDir, 'welcome'));
 
 	this.passwordHash = require('password-hash');
@@ -22,6 +22,7 @@ var User = function()
 
 	self.store = function(req, res){
 		var user = req.body.user;
+		//return res.status(200).json(user);
 		User.count(
 			{email: user.email},
 			function(err, result){
