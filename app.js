@@ -1,5 +1,7 @@
 var express = require('express');
 var path = require('path');
+var fs = require('fs')
+var FileStreamRotator = require('file-stream-rotator');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
@@ -19,6 +21,16 @@ var geography = require('./routes/geography');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
+var logDirectory = './log';
+fs.existsSync(logDirectory) || fs.mkdirSync(logDirectory);
+
+var dateObj = new Date();
+var date = dateObj.getDate() + '-' + dateObj.getMonth() + '-' + dateObj.getFullYear();
+var accessLogStream = FileStreamRotator.getStream({
+  filename: logDirectory + '/'+date+'.log',
+  frequency: 'daily',
+  verbose: false
+})
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
@@ -35,7 +47,7 @@ app.use(cors({
 
 mongoose.connect(config.mongoUrl);
 
-app.use(logger('dev'));
+app.use(logger('combined', {stream: accessLogStream}))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
