@@ -29,14 +29,6 @@ var Common = function()
 		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
 	}
 
-  this.isToolExists = function(req, res){
-    var toolName = req.query.toolName;
-    Tools.findOne({ name:toolName }, function(err, result){
-      if(!result) return res.status(200);
-      return res.status(404);
-    });
-  }
-
 	// create reusable transporter object using SMTP transport
     this.transporter = nodemailer.createTransport({
         service: 'smtp.mandrillapp.com',

@@ -8,15 +8,11 @@ var cors = require('express-cors');
 var multer = require('multer');
 var config = require('./config.js');
 var routes = require('./routes/index');
-
-var CommonLib = require('../libraries/common').Common;
-
 var user = require('./routes/user');
 var magazine = require('./routes/magazine');
 var cinema = require('./routes/cinema');
 var radio = require('./routes/radio');
 var newspaper = require('./routes/newspaper');
-var inflight = require('./routes/inflight');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
 var parseExcel = require('./routes/parseExcel');
@@ -46,18 +42,16 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(multer({dest: './public/temp/'}).single('file'));
 
-app.use('/', routes);
 app.use('/user', user);
 app.use('/magazine', magazine);
 app.use('/cinema', cinema);
 app.use('/radio', radio);
 app.use('/newspaper', newspaper);
-app.use('/inflight', inflight);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/parseExcel', parseExcel);
 
-app.use('/isToolExists',CommonLib.isToolExists);
+app.use('/', routes);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
