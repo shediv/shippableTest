@@ -222,11 +222,11 @@ var User = function()
 		User.findOne(
 			{email: user.username},
 			function(err, result){
-				result = result.toObject();
 				if (err) throw err;
 				if(!result) res.status(404).json("User Does Not Exist");
 				else
 				{
+					result = result.toObject();
 					//Verify Password
 					if(!self.passwordHash.verify(user.password, result.password)) res.status(401).json("Invalid Password");
 					else if(!result.verified) res.status(401).json("Account Not Verified");
