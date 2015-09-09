@@ -14,7 +14,7 @@ var Inflight = function()
   var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "inflight";
+  this.toolName = "newspaper";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
