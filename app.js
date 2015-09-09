@@ -6,7 +6,6 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
-
 var config = require('./config.js');
 var routes = require('./routes/index');
 var user = require('./routes/user');
@@ -17,7 +16,6 @@ var newspaper = require('./routes/newspaper');
 var inflight = require('./routes/inflight');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
-var isToolExist = require('./routes/isToolExist');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
@@ -54,7 +52,6 @@ app.use('/newspaper', newspaper);
 app.use('/inflight', inflight);
 app.use('/media', media);
 app.use('/geography', geography);
-app.use('/isToolExist', isToolExist);
 app.use('/parseExcel', parseExcel);
 
 // catch 404 and forward to error handler
