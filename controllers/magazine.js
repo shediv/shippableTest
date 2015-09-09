@@ -62,7 +62,7 @@ var Magazine = function()
               "urlSlug" : 1,
               "categoryId" : 1,
               "attributes" : 1,
-              "print.mediaOptions.fullPage.cardRate" : 1,
+              "print" : 1,
               "geography"  : 1,
               "thumbnail" : 1,
               "keywords" : 1,
