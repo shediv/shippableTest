@@ -8,6 +8,9 @@ var cors = require('express-cors');
 var multer = require('multer');
 var config = require('./config.js');
 var routes = require('./routes/index');
+
+var CommonLib = require('../libraries/common').Common;
+
 var user = require('./routes/user');
 var magazine = require('./routes/magazine');
 var cinema = require('./routes/cinema');
@@ -53,6 +56,8 @@ app.use('/inflight', inflight);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/parseExcel', parseExcel);
+
+app.use('/isToolExists',CommonLib.isToolExists);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {
