@@ -10,7 +10,7 @@ var multer = require('multer');
 var config = require('./config.js');
 var routes = require('./routes/index');
 
-var CommonLib = require('../libraries/common').Common;
+var CommonLib = require('./libraries/common').Common;
 
 var user = require('./routes/user');
 var magazine = require('./routes/magazine');
