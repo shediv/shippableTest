@@ -15,6 +15,7 @@ var radio = require('./routes/radio');
 var newspaper = require('./routes/newspaper');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
+var nonTrad = require('./routes/nonTrad');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
@@ -49,6 +50,7 @@ app.use('/radio', radio);
 app.use('/newspaper', newspaper);
 app.use('/media', media);
 app.use('/geography', geography);
+app.use('/nonTrad', nonTrad);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);
