@@ -92,7 +92,7 @@ var Radio = function()
         {          
           switch(query.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
             case 'city': query.sortBy = {}; break;
           }
