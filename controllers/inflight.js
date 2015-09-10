@@ -14,7 +14,7 @@ var Inflight = function()
   var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "radio";
+  this.toolName = "inflight";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -22,8 +22,8 @@ var Inflight = function()
   });
 
   this.getInflight = function(req, res){
-    res.status(200).json("result");
     self.params = JSON.parse(req.query.params);
+    //res.status(200).json(self.params);
     async.waterfall([
       function(callback)
       {
@@ -49,16 +49,15 @@ var Inflight = function()
       query.match = {};
       var filters = {
         'geographies' : 'geography',
-        'mediaOptions' : 'mediaOptions'
+        'mediaOptions' : 'category'
       };
       query.projection = {
         '_id' : 1,
         'urlSlug' : 1,
-        'radioFrequency' : 1,
-        'station' : 1,
-        'geography' : 1,
-        'language' : 1,
-        'mediaOptions.regularOptions' : 1,        
+        'name' : 1,
+        'category' : 1,
+        'mediaOptions' : 1,
+        'geography' : 1,        
         'logo' : 1
       };
 
@@ -72,7 +71,7 @@ var Inflight = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){
+    self.sortFilteredMedia = function(query, callback){      
       async.parallel({
         count : function(callbackInner)
         {          
@@ -92,24 +91,57 @@ var Inflight = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'mediaCategory': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
-            case 'city': query.sortBy = {}; break;
+            case 'mediaSubCategory': query.sortBy = { 'category' : -1}; break;
+            case 'minimumBilling': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
           Media.aggregate(
-            {$match: query.match}, {$sort: query.sortBy},
+            {$match: query.match}, //{$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
               var geographyIds = [];
+              var mediaOptions = [];
+              var firstmediaOptionsKey;
+              var minimumQtyUnit1;
+              var minimumQtyUnit2;
+              var pricingUnit1;
+              var pricingUnit2;
+              var minimumUnit;
+              var minimumBilling; 
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
+                  //To find minimum unit and minimum Billing 
+                  for(i in results){                    
+                    mediaOptions.push(results[i]['mediaOptions']);
+                    firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                    //console.log(results[i].mediaOptions[firstmediaOptionsKey]);
+                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                    
+                    if(minimumQtyUnit2){
+                      minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+                      minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);                     
+                    }
+                    else{
+                      minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+                      minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                    }
+
+                    //results[i]['mediaOptionName'] = results[i].mediaOptions[firstmediaOptionsKey].name;
+                    results[i]['minimumUnit'] = minimumUnit;
+                    results[i]['minimumBilling'] = minimumBilling; 
+                  }                                   
+                  //.................
+
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(self.params.sortBy == 'city') results.sort(function(a,b){ return a.city < b.city });
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
                 callbackInner(err, results);
               });
             }
@@ -122,50 +154,10 @@ var Inflight = function()
       });
     };
 
-    self.radioRecommend = function(query, callback){
-      query.match = {};
-      query.sortBy = {};
-      async.waterfall([
-        function(callbackInner)
-        {
-          Products.findOne({ _id:self.params.productId },{ radio:1 }).lean().exec(function(err, result){
-            console.log(result.radio.categoryId);
-            callbackInner(err, result.radio.categoryId);
-          });
-        },
-        function(categoryId, callbackInner)
-        { 
-         query.match['categories.'+categoryId] = { $exists:1 };
-          query.match['geography'] = self.params.geography;
-          query.sortBy['categories.'+categoryId] = 1;
-          callbackInner(null, query);
-        }
-      ],
-      function(err, query)
-      { 
-        Media.aggregate(
-          {$match: query.match}, {$sort: query.sortBy},
-          {$skip : 0}, {$limit: 2},
-          {$project: query.projection}, 
-          function(err, results) 
-          { 
-            var geographyIds = [];
-            for(i in results) geographyIds.push(results[i].geography);
-            Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-              geographies = {};
-              for(i in geos) geographies[geos[i]._id] = geos[i];
-              for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-              callback(err, {medias:results,count:results.length});
-            });
-          }
-        );
-      });
-    }
-
   this.getFilters = function(req, res){
     async.parallel({
       geographies : self.getGeographies,
-      mediaOptions : self.getMediaOptions
+      mediaOptions : self.getCategory
     },
     function(err, results) 
     {
@@ -186,16 +178,14 @@ var Inflight = function()
       );
     };
 
-    self.getMediaOptions = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "mediaOptions": { $exists: 1} }},
-        //{$unwind: '$mediaOptions'},
-        {$group : { _id : '$mediaOptions', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+    self.getCategory = function(callback){
+      var mediaOptions = [
+        {'_id' : 'airport', 'name' : 'Airport'},
+        {'_id' : 'airport lounge', 'name' : 'Airport Lounge'},
+        {'_id' : 'airline', 'name' : 'Airline'},
+        {'_id' : 'inflight magazine', 'name' : 'Inflight Magazine'}
+      ];
+      callback(null, mediaOptions);
     };
 
 
@@ -210,61 +200,55 @@ var Inflight = function()
     );
   }
 
-  this.compare = function(req, res){
-    var ids = JSON.parse(req.query.params);
-    var catIds = [];
-    var project = {
-      '_id' : 1,
-      'radioFrequency' : 1,
-      'station' : 1,
-      'urlSlug' : 1,
-      'city' : 1,
-      'language' : 1,
-      'mediaOptions.regularOptions.showRate.allDayPlan' : 1,        
-      'logo' : 1
-    };
+  // this.compare = function(req, res){
+  //   var ids = JSON.parse(req.query.params);
+  //   var catIds = [];
+  //   var project = {
+  //     '_id' : 1,
+  //     'urlSlug' : 1,
+  //     'name' : 1,
+  //     'category' : 1,
+  //     'mediaOptions' : 1,
+  //     'geography' : 1,        
+  //     'logo' : 1
+  //   };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
-      var medias = results.map(function(m){
-        m['frequency'] = m.radioFrequency;
-        delete m.radioFrequency;
-        return m.toObject();
-      });
-      res.status(200).json({medias:medias});
-    });
-  };
+  //   Media.find({_id: { $in: ids }}, project,function(err, results){
+  //     res.status(200).json({medias:results});
+  //   });
+  // };
 
-  this.relatedMedia = function(req, res){
-    Media.aggregate(
-      {
-        $match : {
-          geography : req.query.geographyId,
-          toolId : self.toolId,
-          isActive: 1,
-          urlSlug : { $ne : req.query.urlSlug }
-        }
-      },
-      {$skip : 0}, {$limit: 3},
-      {
-        $project : {
-          '_id' : 1,
-          'radioFrequency' : 1,
-          'station' : 1,
-          'geography' : 1,
-          'language' : 1,
-          'mediaOptions.regularOptions' : 1,        
-          'logo' : 1
-        }
-      },
-      function(err, results)
-      {
-        Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
-          for(i in results) results[i].city = geo.city;
-          res.status(200).json({medias:results});
-        });
-      }
-    );
-  };
+  // this.relatedMedia = function(req, res){
+  //   Media.aggregate(
+  //     {
+  //       $match : {
+  //         geography : req.query.geographyId,
+  //         toolId : self.toolId,
+  //         isActive: 1,
+  //         urlSlug : { $ne : req.query.urlSlug }
+  //       }
+  //     },
+  //     {$skip : 0}, {$limit: 3},
+  //     {
+  //       $project : {
+  //         '_id' : 1,
+  //         'radioFrequency' : 1,
+  //         'station' : 1,
+  //         'geography' : 1,
+  //         'language' : 1,
+  //         'mediaOptions.regularOptions' : 1,        
+  //         'logo' : 1
+  //       }
+  //     },
+  //     function(err, results)
+  //     {
+  //       Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
+  //         for(i in results) results[i].city = geo.city;
+  //         res.status(200).json({medias:results});
+  //       });
+  //     }
+  //   );
+  // };
 
   this.getBestRates = function(req, res){
     var medias = req.body.medias;//{};
