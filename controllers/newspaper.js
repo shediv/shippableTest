@@ -141,13 +141,14 @@ var Newspaper = function()
         function(productData,callbackInner)
         { 
           query.match['toolId']= self.toolId;
+          query.match['isActive']= 1;
           query.match['geography'] = query.geographyId;
           query.match['categoryId'] = { $in : productData };
           callbackInner(null, query);
         }
       ],
       function(err, query)
-      {
+      { 
         Media.aggregate(
           { $match: query.match },
           { $project : {  '_id'                 : 1,
@@ -165,21 +166,21 @@ var Newspaper = function()
           { $sort :  { circulation : -1 } },
           { $group:  {count : {$sum : 1}, _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
           function(err,results){
-            var paperRecommend={}; 
+            var paperRecommend=[];
+            var productDataCount=0; 
             console.log(results.length);
             for(var i=0; i<results.length;i++){
-                
                 if(results[i]._id == categoryId)
-                  {   paperRecommend[categoryId]=[];
-                      paperRecommend[categoryId][0]=results[i].newsPaper[0];
-                      paperRecommend[categoryId][1]=results[i].newsPaper[1];
+                  {   
+                      paperRecommend.push(results[i].newsPaper[0]);
+                      paperRecommend.push(results[i].newsPaper[1]);
                   }
                   else{
-                  paperRecommend[results[i]._id]=[];
-                  paperRecommend[results[i]._id][0]=results[i].newsPaper[0];
+                    paperRecommend.push(results[i].newsPaper[0]);
                 }
+            var productDataCount =productDataCount + results[i].newsPaper.length;     
             }
-          callback(err,{paper:paperRecommend});
+          callback(err,{count:productDataCount,media:paperRecommend});
           }   
         );
       });
