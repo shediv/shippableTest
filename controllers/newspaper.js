@@ -190,8 +190,8 @@ var Newspaper = function()
       categories : self.getCategories,
       areas : self.getAreas,
       languages : self.getLanguages,
-      frequency : self.getFrequency,
-      type : self.getNewspaperType,
+      frequencies : self.getFrequency,
+      types : self.getNewspaperType,
       products  : self.getProducts
     },
     function(err, results) 
