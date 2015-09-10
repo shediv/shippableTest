@@ -60,6 +60,7 @@ var Magazine = function()
           var project = {
             "$project" : {
               "urlSlug" : 1,
+              "toolId" : 1,
               "categoryId" : 1,
               "attributes" : 1,
               "print" : 1,

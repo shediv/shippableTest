@@ -53,6 +53,7 @@ var Radio = function()
       };
       query.projection = {
         '_id' : 1,
+        'toolId':1,
         'urlSlug' : 1,
         'radioFrequency' : 1,
         'station' : 1,
