@@ -84,14 +84,12 @@ var Newspaper = function()
       async.parallel({
         count : function(callbackInner)
         {          
-          Media.aggregate(
-            {$match : query.match},
-            {$group: { _id : null, count: {$sum: 1} }},
+          Media.count(query.match,
             function(err, result)
             {
               if(!result) count = 0;
               else count = result[0].count;
-              callbackInner(err, count);
+              callbackInner(err, result);
             }
           );
         },
