@@ -59,7 +59,7 @@ var Newspaper = function()
       };
       query.projection = {
         '_id'                 : 1,
-        'newspaperName'       : 1,
+        'name'       : '$newspaperName',
         'editionName'         : 1,
         'areaCovered'         : 1,
         'circulation'         : 1,
@@ -152,7 +152,7 @@ var Newspaper = function()
         Media.aggregate(
           { $match: query.match },
           { $project : {  '_id'                 : 1,
-                          'newspaperName'       : 1,
+                          'name'       : '$newspaperName',
                           'editionName'         : 1,
                           'areaCovered'         : 1,
                           'circulation'         : 1,
@@ -280,7 +280,7 @@ var Newspaper = function()
     var catIds = [];
     var project = {
       '_id' : 1,
-      'newspaperName' : 1,
+      'name'       : '$newspaperName',
       'editionName' : 1,
       'circulation' : 1,
       'areaCovered' : 1,
@@ -332,7 +332,7 @@ var Newspaper = function()
       {
         $project : {
           '_id' : 1,
-          'newspaperName' : 1,
+          'name'       : '$newspaperName',
           'editionName' : 1,
           'circulation' : 1,
           'areaCovered' : 1,

@@ -156,8 +156,10 @@ var Outdoor = function()
 
   this.getFilters = function(req, res){
     async.parallel({
-      geographies : self.getGeographies,
-      mediaOptions : self.getCategory
+      mediaTypes : self.getMediaType,
+      landmarks : self.getLandmark,
+      sizes : self.getSize,
+      types : self.getTypes
     },
     function(err, results) 
     {
@@ -166,28 +168,45 @@ var Outdoor = function()
     });
   };
 
-    self.getGeographies = function(callback){
-      Media.distinct('geography',
-        { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
-        {
-          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-            callback(error, geos);
-          });
-        }
-      );
-    };
-
-    self.getCategory = function(callback){
+    self.getMediaType = function(callback){
       var mediaOptions = [
-        {'_id' : 'airport', 'name' : 'Airport'},
-        {'_id' : 'airport lounge', 'name' : 'Airport Lounge'},
-        {'_id' : 'airline', 'name' : 'Airline'},
-        {'_id' : 'inflight magazine', 'name' : 'Inflight Magazine'}
+        {'_id' : 'hoarding', 'name' : 'Hoarding'},
+        {'_id' : 'bus shelter', 'name' : 'Bus Shelter'},
+        {'_id' : 'pole kiosk', 'name' : 'Pole Kiosk'}
       ];
       callback(null, mediaOptions);
     };
 
+    self.getSize = function(callback){
+      var mediaOptions = [
+        {'_id' : 'small', 'name' : 'Small'},
+        {'_id' : 'large', 'name' : 'Large'},
+        {'_id' : 'medium', 'name' : 'Medium'}
+      ];
+      callback(null, mediaOptions);
+    };
+
+    self.getLandmark = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "landmark": { $exists: 1} }},
+        {$group : { _id : '$landmark', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getTypes = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "type": { $exists: 1} }},
+        {$group : { _id : '$type', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
 
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
