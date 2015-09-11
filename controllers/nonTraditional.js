@@ -23,7 +23,7 @@ var NonTraditional = function()
   });
   
   this.getNonTraditional = function(req, res){ 
-    res.status(200).json("nontrad route");   
+    //res.status(200).json("nontrad route");   
     self.params = JSON.parse(req.query.params);
     //return res.status(200).json(self.params);
     async.waterfall([
@@ -50,29 +50,22 @@ var NonTraditional = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'categories'  : 'categoryId',
-        'areas'       : 'areaCovered',
-        'languages'   : 'language',
-        'frequencies' : 'frequency',
-        'type'        : 'newspaperType'
+        'categories' : 'category',
+        'productId' : 'product'
       };
       query.projection = {
-        '_id'                 : 1,
-        'newspaperName'       : 1,
-        'editionName'         : 1,
-        'areaCovered'         : 1,
-        'circulation'         : 1,
-        'language'            : 1,
-        'geography'           : 1,
-        'mediaOptions.anyPage': 1,        
-        'logo'                : 1
+        '_id'          : 1,
+        'name'         : 1,
+        'about'        : 1,
+        'mediaOptions' : 1,
       };
-
+    
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
-
+      console.log(query.match);
+      process.exit();
       //query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
@@ -98,8 +91,8 @@ var NonTraditional = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'circulation': query.sortBy = { 'circulation' : -1}; break;
-            case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
+            case 'minimumBilling': query.sortBy = { 'circulation' : -1}; break;
+            case 'mediaName': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
           }
           query.sortBy._id = 1;
 
