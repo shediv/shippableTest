@@ -59,7 +59,7 @@ var Newspaper = function()
       query.projection = {
         '_id'                 : 1,
         'urlSlug'             : 1,
-        'name'       : '$newspaperName',
+        'name'                : '$newspaperName',
         'editionName'         : 1,
         'areaCovered'         : 1,
         'circulation'         : 1,
@@ -73,6 +73,8 @@ var Newspaper = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
+      console.log(query.match);
+      process.exit();
 
       if(self.params.filters["type"]) query.match.newspaperType = self.params.filters["type"];
       query.match.isActive = 1;
