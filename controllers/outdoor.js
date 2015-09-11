@@ -14,7 +14,7 @@ var Outdoor = function()
   var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "inflight";
+  this.toolName = "radio";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -48,16 +48,20 @@ var Outdoor = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'geographies' : 'geography',
-        'mediaOptions' : 'category'
+        'mediaTypes' : 'mediaType',
+        'landmarks' : 'landmark',
+        'sizes' : 'size',
+        'types' : 'type'
       };
       query.projection = {
         '_id' : 1,
         'urlSlug' : 1,
+        'ID' : 1,
         'name' : 1,
         'category' : 1,
         'mediaOptions' : 1,
-        'geography' : 1,        
+        'geography' : 1,
+        'size' : 1,        
         'logo' : 1
       };
 
@@ -91,8 +95,8 @@ var Outdoor = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'mediaSubCategory': query.sortBy = { 'category' : -1}; break;
-            case 'minimumBilling': query.sortBy = {}; break;
+            case 'price': query.sortBy = { 'category' : -1}; break;
+            case 'size': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
@@ -115,30 +119,6 @@ var Outdoor = function()
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
-                  //To find minimum unit and minimum Billing 
-                  for(i in results){                    
-                    mediaOptions.push(results[i]['mediaOptions']);
-                    firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
-                    //console.log(results[i].mediaOptions[firstmediaOptionsKey]);
-                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
-                    
-                    if(minimumQtyUnit2){
-                      minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
-                      minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);                     
-                    }
-                    else{
-                      minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
-                      minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
-                    }
-
-                    //results[i]['mediaOptionName'] = results[i].mediaOptions[firstmediaOptionsKey].name;
-                    results[i]['minimumUnit'] = minimumUnit;
-                    results[i]['minimumBilling'] = minimumBilling; 
-                  }                                   
-                  //.................
 
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
@@ -156,8 +136,10 @@ var Outdoor = function()
 
   this.getFilters = function(req, res){
     async.parallel({
-      geographies : self.getGeographies,
-      mediaOptions : self.getCategory
+      mediaTypes : self.getMediaType,
+      landmarks : self.getLandmark,
+      sizes : self.getSize,
+      types : self.getTypes
     },
     function(err, results) 
     {
@@ -166,28 +148,45 @@ var Outdoor = function()
     });
   };
 
-    self.getGeographies = function(callback){
-      Media.distinct('geography',
-        { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
-        {
-          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-            callback(error, geos);
-          });
-        }
-      );
-    };
-
-    self.getCategory = function(callback){
+    self.getMediaType = function(callback){
       var mediaOptions = [
-        {'_id' : 'airport', 'name' : 'Airport'},
-        {'_id' : 'airport lounge', 'name' : 'Airport Lounge'},
-        {'_id' : 'airline', 'name' : 'Airline'},
-        {'_id' : 'inflight magazine', 'name' : 'Inflight Magazine'}
+        {'_id' : 'hoarding', 'name' : 'Hoarding'},
+        {'_id' : 'bus shelter', 'name' : 'Bus Shelter'},
+        {'_id' : 'pole kiosk', 'name' : 'Pole Kiosk'}
       ];
       callback(null, mediaOptions);
     };
 
+    self.getSize = function(callback){
+      var mediaOptions = [
+        {'_id' : 'small', 'name' : 'Small'},
+        {'_id' : 'large', 'name' : 'Large'},
+        {'_id' : 'medium', 'name' : 'Medium'}
+      ];
+      callback(null, mediaOptions);
+    };
+
+    self.getLandmark = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "landmark": { $exists: 1} }},
+        {$group : { _id : '$landmark', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
+
+    self.getTypes = function(callback){
+      Media.aggregate(
+        {$match: {toolId:self.toolId, "type": { $exists: 1} }},
+        {$group : { _id : '$type', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          callback(error, results);
+        }
+      );
+    };
 
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
@@ -200,55 +199,27 @@ var Outdoor = function()
     );
   }
 
-  // this.compare = function(req, res){
-  //   var ids = JSON.parse(req.query.params);
-  //   var catIds = [];
-  //   var project = {
-  //     '_id' : 1,
-  //     'urlSlug' : 1,
-  //     'name' : 1,
-  //     'category' : 1,
-  //     'mediaOptions' : 1,
-  //     'geography' : 1,        
-  //     'logo' : 1
-  //   };
+  this.compare = function(req, res){
+    var ids = JSON.parse(req.query.params);
+    var catIds = [];
+    var project = {
+      '_id' : 1,
+      'urlSlug' : 1,
+      'name' : 1,
+      'locality' : 1,
+      'landmark' : 1,
+      'price' : 1,
+      'category' : 1,
+      'mediaOptions' : 1,
+      'geography' : 1,        
+      'logo' : 1
+    };
     
-  //   Media.find({_id: { $in: ids }}, project,function(err, results){
-  //     res.status(200).json({medias:results});
-  //   });
-  // };
+    Media.find({_id: { $in: ids }}, project,function(err, results){
+      res.status(200).json({medias:results});
+    });
+  };
 
-  // this.relatedMedia = function(req, res){
-  //   Media.aggregate(
-  //     {
-  //       $match : {
-  //         geography : req.query.geographyId,
-  //         toolId : self.toolId,
-  //         isActive: 1,
-  //         urlSlug : { $ne : req.query.urlSlug }
-  //       }
-  //     },
-  //     {$skip : 0}, {$limit: 3},
-  //     {
-  //       $project : {
-  //         '_id' : 1,
-  //         'radioFrequency' : 1,
-  //         'station' : 1,
-  //         'geography' : 1,
-  //         'language' : 1,
-  //         'mediaOptions.regularOptions' : 1,        
-  //         'logo' : 1
-  //       }
-  //     },
-  //     function(err, results)
-  //     {
-  //       Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
-  //         for(i in results) results[i].city = geo.city;
-  //         res.status(200).json({medias:results});
-  //       });
-  //     }
-  //   );
-  // };
 
   this.getBestRates = function(req, res){
     var medias = req.body.medias;//{};

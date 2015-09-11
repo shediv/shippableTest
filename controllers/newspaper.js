@@ -40,7 +40,7 @@ var Newspaper = function()
     ],
     function (err, result)
     {
-      res.status(200).json(result);
+      res.status(200).json({medias:result.medias, count:result.count});
     });
   };
 
@@ -54,12 +54,12 @@ var Newspaper = function()
         'categories'  : 'categoryId',
         'areas'       : 'areaCovered',
         'languages'   : 'language',
-        'frequencies' : 'frequency',
-        'type'        : 'newspaperType'
+        'frequencies' : 'frequency'
       };
       query.projection = {
         '_id'                 : 1,
-        'newspaperName'       : 1,
+        'urlSlug'             : 1,
+        'name'       : '$newspaperName',
         'editionName'         : 1,
         'areaCovered'         : 1,
         'circulation'         : 1,
@@ -74,7 +74,8 @@ var Newspaper = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      //query.match.isActive = 1;
+      if(self.params.filters["type"]) query.match.newspaperType = self.params.filters["type"];
+      query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
@@ -88,9 +89,9 @@ var Newspaper = function()
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
             {
-              if(result[0] === undefined) count = 0;
+              if(!result) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
@@ -152,7 +153,8 @@ var Newspaper = function()
         Media.aggregate(
           { $match: query.match },
           { $project : {  '_id'                 : 1,
-                          'newspaperName'       : 1,
+                          'urlSlug'             : 1,
+                          'name'       : '$newspaperName',
                           'editionName'         : 1,
                           'areaCovered'         : 1,
                           'circulation'         : 1,
@@ -248,14 +250,11 @@ var Newspaper = function()
     };
 
     self.getNewspaperType = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "newspaperType": { $exists: 1} }},
-        {$group : { _id : '$newspaperType', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+      var ScreenType = [
+        {'_id' : 'supplement', 'name' : 'Supplement'},
+        {'_id' : 'main', 'name' : 'Main'}
+      ];
+      callback(null, ScreenType);
     };
 
     self.getProducts = function(callback){
@@ -280,7 +279,8 @@ var Newspaper = function()
     var catIds = [];
     var project = {
       '_id' : 1,
-      'newspaperName' : 1,
+      'urlSlug' : 1,
+      'name'       : '$newspaperName',
       'editionName' : 1,
       'circulation' : 1,
       'areaCovered' : 1,
@@ -332,7 +332,8 @@ var Newspaper = function()
       {
         $project : {
           '_id' : 1,
-          'newspaperName' : 1,
+          'urlSlug' : 1,
+          'name'       : '$newspaperName',
           'editionName' : 1,
           'circulation' : 1,
           'areaCovered' : 1,

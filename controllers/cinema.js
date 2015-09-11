@@ -195,15 +195,23 @@ var Cinema = function()
     }
 
     self.populateOnScreenData = function(medias, geographies){
-      var totalPrice = 0;
+      var totalPrice10SecMuteSlide = 0;
+      var totalPrice10SecAudioSlide = 0;
+      var totalPrice30SecVideo = 0;
+      var totalPrice60SecVideo = 0;
+
       var cities = [];
       var cinemas = [];
       var reach = 0;
       var totalSeats = 0;
-      console.log(geographies);
+      //console.log(geographies);
       for(i in medias)
       {
-        totalPrice += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+        totalPrice10SecMuteSlide += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+        totalPrice10SecAudioSlide += medias[i].mediaOptions['10SecAudioSlide'][self.params.nextFriday].showRate;
+        totalPrice30SecVideo += medias[i].mediaOptions['30SecVideo'][self.params.nextFriday].showRate;
+        totalPrice60SecVideo += medias[i].mediaOptions['60SecVideo'][self.params.nextFriday].showRate;
+
         totalSeats += medias[i].seats;
         medias[i]['city'] = geographies[medias[i].geography[0]].city;
         medias[i]['state'] = geographies[medias[i].geography[0]].state;
@@ -215,7 +223,10 @@ var Cinema = function()
       var data = {
         count:medias.length, 
         screens:medias, 
-        totalPrice:totalPrice, 
+        totalPrice10SecMuteSlide:totalPrice10SecMuteSlide,
+        totalPrice10SecAudioSlide:totalPrice10SecAudioSlide,
+        totalPrice30SecVideo:totalPrice30SecVideo,
+        totalPrice60SecVideo:totalPrice60SecVideo, 
         cities:{ count:cities.length, values:cities }, 
         cinemas:{ count:cinemas.length, values:cinemas }, 
         reach:(totalSeats * 4 * 7)
@@ -248,10 +259,10 @@ var Cinema = function()
       var cities = [];
       var reach = 0;
       var totalSeats = 0;
-      console.log(medias);
+      //console.log(medias);
       for(i in medias)
       {
-        totalPrice += medias[i].mediaOptions['voucherDistribution'].pricing;
+        totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
         totalSeats += medias[i].seats;
         medias[i]['city'] = geographies[medias[i].geography[0]].city;
         medias[i]['state'] = geographies[medias[i].geography[0]].state;
