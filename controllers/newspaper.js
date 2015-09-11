@@ -55,7 +55,7 @@ var Newspaper = function()
         'areas'       : 'areaCovered',
         'languages'   : 'language',
         'frequencies' : 'frequency',
-        'type'        : 'newspaperType'
+        'types'        : 'newspaperType'
       };
       query.projection = {
         '_id'                 : 1,
