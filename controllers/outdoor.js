@@ -1,4 +1,4 @@
-var Newspaper = function()
+var Outdoor = function()
 {
   var async = require('async');
   var underscore = require('underscore');
@@ -14,19 +14,16 @@ var Newspaper = function()
   var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "newspaper";
+  this.toolName = "inflight";
   var self = this;
-  this.toolId='';
-  
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
-  
 
-
-  this.getNewspapers = function(req, res){    
+  this.getOutdoor = function(req, res){
+        res.status(200).json("self.params");
     self.params = JSON.parse(req.query.params);
-    //return res.status(200).json(self.params);
     async.waterfall([
       function(callback)
       {
@@ -34,7 +31,7 @@ var Newspaper = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.newsPaperRecommend(self.params,callback);
+        if(self.params.recommended) return self.radioRecommend(query,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -51,22 +48,17 @@ var Newspaper = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'categories'  : 'categoryId',
-        'areas'       : 'areaCovered',
-        'languages'   : 'language',
-        'frequencies' : 'frequency',
-        'type'        : 'newspaperType'
+        'geographies' : 'geography',
+        'mediaOptions' : 'category'
       };
       query.projection = {
-        '_id'                 : 1,
-        'newspaperName'       : 1,
-        'editionName'         : 1,
-        'areaCovered'         : 1,
-        'circulation'         : 1,
-        'language'            : 1,
-        'geography'           : 1,
-        'mediaOptions.anyPage': 1,        
-        'logo'                : 1
+        '_id' : 1,
+        'urlSlug' : 1,
+        'name' : 1,
+        'category' : 1,
+        'mediaOptions' : 1,
+        'geography' : 1,        
+        'logo' : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -74,12 +66,12 @@ var Newspaper = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      //query.match.isActive = 1;
+      query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){  
+    self.sortFilteredMedia = function(query, callback){      
       async.parallel({
         count : function(callbackInner)
         {          
@@ -90,7 +82,7 @@ var Newspaper = function()
             {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
@@ -99,101 +91,73 @@ var Newspaper = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'circulation': query.sortBy = { 'circulation' : -1}; break;
-            case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
+            case 'mediaSubCategory': query.sortBy = { 'category' : -1}; break;
+            case 'minimumBilling': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
 
           Media.aggregate(
-            {$match: query.match}, {$sort: query.sortBy},
+            {$match: query.match}, //{$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
-              callbackInner(err, results);
+              var geographyIds = [];
+              var mediaOptions = [];
+              var firstmediaOptionsKey;
+              var minimumQtyUnit1;
+              var minimumQtyUnit2;
+              var pricingUnit1;
+              var pricingUnit2;
+              var minimumUnit;
+              var minimumBilling; 
+              for(i in results) geographyIds.push(results[i].geography);
+              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+                geographies = {};
+                for(i in geos) geographies[geos[i]._id] = geos[i];
+                  //To find minimum unit and minimum Billing 
+                  for(i in results){                    
+                    mediaOptions.push(results[i]['mediaOptions']);
+                    firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                    //console.log(results[i].mediaOptions[firstmediaOptionsKey]);
+                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                    
+                    if(minimumQtyUnit2){
+                      minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+                      minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);                     
+                    }
+                    else{
+                      minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+                      minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                    }
+
+                    //results[i]['mediaOptionName'] = results[i].mediaOptions[firstmediaOptionsKey].name;
+                    results[i]['minimumUnit'] = minimumUnit;
+                    results[i]['minimumBilling'] = minimumBilling; 
+                  }                                   
+                  //.................
+
+                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                callbackInner(err, results);
+              });
             }
           );
         }
       },
-      function(err, results)  
+      function(err, results) 
       {
         callback(err, results);
       });
     };
 
-    self.newsPaperRecommend = function(query, callback){
-      var categoryId ="55d70b748ead0e960c8b4567"; //General interest categoryid
-      query.match = {};
-      query.sortBy = {};
-      query.groupBy={};
-      query.filters={};
-      async.waterfall([
-        function(callbackInner)
-        {
-          Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
-          if(result.newspaper.categoryIds.indexOf('55d70b748ead0e960c8b4567') == -1)
-            {
-             result.newspaper.categoryIds.push('55d70b748ead0e960c8b4567'); 
-            }  
-            callbackInner(err, result.newspaper.categoryIds);
-          });
-        },
-        function(productData,callbackInner)
-        { 
-          query.match['toolId']= self.toolId;
-          query.match['isActive']= 1;
-          query.match['geography'] = query.geographyId;
-          query.match['categoryId'] = { $in : productData };
-          callbackInner(null, query);
-        }
-      ],
-      function(err, query)
-      { 
-        Media.aggregate(
-          { $match: query.match },
-          { $project : {  '_id'                 : 1,
-                          'newspaperName'       : 1,
-                          'editionName'         : 1,
-                          'areaCovered'         : 1,
-                          'circulation'         : 1,
-                          'language'            : 1,
-                          'geography'           : 1,
-                          'mediaOptions.anyPage': 1,        
-                          'logo'                : 1,
-                          'categoryId'          : 1, 
-                        } 
-          },
-          { $sort :  { circulation : -1 } },
-          { $group:  {count : {$sum : 1}, _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
-          function(err,results){
-            var paperRecommend=[];
-            var productDataCount=0; 
-            console.log(results.length);
-            for(var i=0; i<results.length;i++){
-                if(results[i]._id == categoryId)
-                  {   
-                      paperRecommend.push(results[i].newsPaper[0]);
-                      paperRecommend.push(results[i].newsPaper[1]);
-                  }
-                  else{
-                    paperRecommend.push(results[i].newsPaper[0]);
-                }
-            var productDataCount =productDataCount + results[i].newsPaper.length;     
-            }
-          callback(err,{count:productDataCount,media:paperRecommend});
-          }   
-        );
-      });
-    }
-
   this.getFilters = function(req, res){
     async.parallel({
-      categories : self.getCategories,
-      areas : self.getAreas,
-      languages : self.getLanguages,
-      frequencies : self.getFrequency,
-      types : self.getNewspaperType,
-      products  : self.getProducts
+      geographies : self.getGeographies,
+      mediaOptions : self.getCategory
     },
     function(err, results) 
     {
@@ -202,67 +166,28 @@ var Newspaper = function()
     });
   };
 
-    self.getCategories = function(callback){
-      Media.distinct('categoryId',
-        { toolId:self.toolId},
-        function(error, categoryIds) 
+    self.getGeographies = function(callback){
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
         {
-          Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-            callback(error, cats);
+          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            callback(error, geos);
           });
         }
       );
     };
 
-    self.getAreas = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "areaCovered": { $exists: 1} }},
-        {$group : { _id : '$areaCovered', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+    self.getCategory = function(callback){
+      var mediaOptions = [
+        {'_id' : 'airport', 'name' : 'Airport'},
+        {'_id' : 'airport lounge', 'name' : 'Airport Lounge'},
+        {'_id' : 'airline', 'name' : 'Airline'},
+        {'_id' : 'inflight magazine', 'name' : 'Inflight Magazine'}
+      ];
+      callback(null, mediaOptions);
     };
 
-    self.getLanguages = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "language": { $exists: 1} }},
-        {$group : { _id : '$language', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
-    };
-
-    self.getFrequency = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "frequency": { $exists: 1} }},
-        {$group : { _id : '$frequency', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
-    };
-
-    self.getNewspaperType = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "newspaperType": { $exists: 1} }},
-        {$group : { _id : '$newspaperType', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
-    };
-
-    self.getProducts = function(callback){
-      Products.find({}, '_id name', function(error, results){
-        callback(error, results);
-      });
-    };
 
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
@@ -270,87 +195,63 @@ var Newspaper = function()
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         Geography.findOne()
-        res.status(200).json({newspaper : results});        
+        res.status(200).json({radio : results});        
       }
     );
   }
 
-  this.compare = function(req, res){
-    var ids = JSON.parse(req.query.params);
-    var catIds = [];
-    var project = {
-      '_id' : 1,
-      'newspaperName' : 1,
-      'editionName' : 1,
-      'circulation' : 1,
-      'areaCovered' : 1,
-      'categoryId' :1,
-      'language' : 1,
-      'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
-      'logo' : 1
-    };
+  // this.compare = function(req, res){
+  //   var ids = JSON.parse(req.query.params);
+  //   var catIds = [];
+  //   var project = {
+  //     '_id' : 1,
+  //     'urlSlug' : 1,
+  //     'name' : 1,
+  //     'category' : 1,
+  //     'mediaOptions' : 1,
+  //     'geography' : 1,        
+  //     'logo' : 1
+  //   };
     
-    async.series({
-      medias : function(callback){
-        Media.find({_id: { $in: ids }}, project,function(err, results){
-          var medias = results.map(function(m){
-            catIds.push(m.categoryId);
-            return m.toObject();
-          });
-          callback(err, medias);
-        });
-      },
-      categories : function(callback){ CommonLib.getCategoryName(catIds, callback) },
-    },
-    function(err, result)
-    {
-      for(var i = 0; i < result.medias.length; i++)
-      {
-        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
-      }
-      res.status(200).json({medias:result.medias});
-    });
-  };
+  //   Media.find({_id: { $in: ids }}, project,function(err, results){
+  //     res.status(200).json({medias:results});
+  //   });
+  // };
 
-  this.relatedMedia = function(req, res){
-    Media.aggregate(
-      {
-        $match : {
-          categoryId : req.params.categoryId,
-          geography : req.query.geography,
-          toolId : self.toolId,
-          //isActive: 1,
-          urlSlug : { $ne : req.query.urlSlug }
-        }
-      },
-      {
-        $sort : {
-          circulation : -1,
-        }
-      },
-      {$skip : 0}, {$limit: 3},
-      {
-        $project : {
-          '_id' : 1,
-          'newspaperName' : 1,
-          'editionName' : 1,
-          'circulation' : 1,
-          'areaCovered' : 1,
-          'language' : 1,
-          'urlSlug' : 1,
-          'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
-          'logo' : 1
-        }
-      },
-      function(err, results)
-      {
-        res.status(200).json({medias:results});
-      }
-    );
-  };
+  // this.relatedMedia = function(req, res){
+  //   Media.aggregate(
+  //     {
+  //       $match : {
+  //         geography : req.query.geographyId,
+  //         toolId : self.toolId,
+  //         isActive: 1,
+  //         urlSlug : { $ne : req.query.urlSlug }
+  //       }
+  //     },
+  //     {$skip : 0}, {$limit: 3},
+  //     {
+  //       $project : {
+  //         '_id' : 1,
+  //         'radioFrequency' : 1,
+  //         'station' : 1,
+  //         'geography' : 1,
+  //         'language' : 1,
+  //         'mediaOptions.regularOptions' : 1,        
+  //         'logo' : 1
+  //       }
+  //     },
+  //     function(err, results)
+  //     {
+  //       Geography.findOne({ _id:req.query.geographyId }, 'city').lean().exec(function(err, geo){
+  //         for(i in results) results[i].city = geo.city;
+  //         res.status(200).json({medias:results});
+  //       });
+  //     }
+  //   );
+  // };
 
   this.getBestRates = function(req, res){
-    var medias = req.body.medias;
+    var medias = req.body.medias;//{};
     var mediaIds = [];
     for(key in medias) mediaIds.push(key);
 
@@ -511,4 +412,4 @@ var Newspaper = function()
 
 
 
-module.exports.Newspaper = Newspaper;
+module.exports.Outdoor = Outdoor;
