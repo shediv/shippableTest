@@ -40,7 +40,7 @@ var Newspaper = function()
     ],
     function (err, result)
     {
-      res.status(200).json(result);
+      res.status(200).json({medias:result.medias, count:result.count});
     });
   };
 
@@ -90,7 +90,7 @@ var Newspaper = function()
             {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
