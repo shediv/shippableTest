@@ -262,7 +262,7 @@ var Cinema = function()
       //console.log(medias);
       for(i in medias)
       {
-        totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedPrice;
+        totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
         totalSeats += medias[i].seats;
         medias[i]['city'] = geographies[medias[i].geography[0]].city;
         medias[i]['state'] = geographies[medias[i].geography[0]].state;
