@@ -328,7 +328,7 @@ var Newspaper = function()
           categoryId : req.params.categoryId,
           geography : req.query.geography,
           toolId : self.toolId,
-          //isActive: 1,
+          isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
         }
       },
