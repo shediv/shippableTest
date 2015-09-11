@@ -78,7 +78,7 @@ var Magazine = function()
       {
         //Match the keywords
         if(ProductInfo[0].keywords){
-        for(var i= 0; i < result.medias.length; i++)
+        for(i in result.medias)
         {
           var check = getMatch(ProductInfo[0].magazine.keywords, result.medias[i].keywords);
           if(check.length > 0) CS.push(result.medias[i]);
@@ -102,19 +102,19 @@ var Magazine = function()
         else CS = result.medias; 
 
         //Create Buckets Based on Category
-        for(var i= 0; i < ProductInfo[0].magazine.categoryIds.length; i++)
+        for(i in ProductInfo[0].magazine.categoryIds)
         {
           mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazine.categoryIds[i], i));
         }
 
         //Find Medias that does not belong to any category with category 1
         var NonCatCS0 = [];
-        for (var i = 0; i < CS.length; i++) 
+        for (i in CS)
         {
           var match = false; // we haven't found it yet
           if(mediacategorybuckets[0])
           {
-            for (var j = 0; j < Object.keys(mediacategorybuckets[0]).length; j++) 
+            for (j in Object.keys(mediacategorybuckets[0])) 
             {
               if (CS[i].categoryId !== mediacategorybuckets[0][j].categoryId) 
                 // we have found a[i] in b, so we can stop searching
@@ -128,12 +128,12 @@ var Magazine = function()
 
         //Find Medias that does not belong to any category with category 2
         var NonCatCS1 = [];
-        for (var i = 0; i < NonCatCS0.length; i++) 
+        for (i in NonCatCS0) 
         {
           var match = false; // we haven't found it yet
           if(mediacategorybuckets[1])
           {
-            for (var j = 0; j < Object.keys(mediacategorybuckets[1]).length; j++) 
+            for (j in Object.keys(mediacategorybuckets[1])) 
             {
               if (NonCatCS0[i].categoryId !== mediacategorybuckets[1][j].categoryId)
                   // we have found a[i] in b, so we can stop searching
@@ -147,12 +147,12 @@ var Magazine = function()
 
         //Find Medias that does not belong to any category with category 3
         var NonCatCS2 = [];
-        for (var i = 0; i < NonCatCS1.length; i++) 
+        for (i in NonCatCS1) 
         {
           var match = false; // we haven't found it yet
           if(mediacategorybuckets[2])
           {
-            for (var j = 0; j < Object.keys(mediacategorybuckets[2]).length; j++) 
+            for (j in Object.keys(mediacategorybuckets[2])) 
             {
               if (NonCatCS1[i].categoryId !== mediacategorybuckets[2][j].categoryId) 
                 // we have found a[i] in b, so we can stop searching
@@ -166,12 +166,12 @@ var Magazine = function()
                 
         //Find Medias that does not belong to any category with category 4
         var NonCatCS = [];
-        for (var i = 0; i < NonCatCS2.length; i++) 
+        for (i in NonCatCS2) 
         {
           var match = false; // we haven't found it yet
           if(mediacategorybuckets[3])
           {
-            for (var j = 0; j < Object.keys(mediacategorybuckets[3]).length; j++) 
+            for (j in Object.keys(mediacategorybuckets[3])) 
             {
               if (NonCatCS2[i].categoryId !== mediacategorybuckets[3][j].categoryId) 
                 // we have found a[i] in b, so we can stop searching
@@ -189,7 +189,7 @@ var Magazine = function()
         var mediaCategoryBuckets1_nonGeo = [];
         if(mediacategorybuckets[0])
         {
-          for(var i= 0; i < Object.keys(mediacategorybuckets[0]).length; i++)
+          for(i in Object.keys(mediacategorybuckets[0]))
           {
             if(mediacategorybuckets[0][i].geography == self.params.geography)
             {
@@ -207,7 +207,7 @@ var Magazine = function()
         var mediaCategoryBuckets2_nonGeo = [];
         if(mediacategorybuckets[1])
         {
-          for(var i= 0; i < Object.keys(mediacategorybuckets[1]).length; i++)
+          for(i in Object.keys(mediacategorybuckets[1]))
           {
             if(mediacategorybuckets[1][i].geography == self.params.geography)
             {
@@ -225,7 +225,7 @@ var Magazine = function()
         var mediaCategoryBuckets3_nonGeo = [];
         if(mediacategorybuckets[2])
         {
-          for(var i= 0; i < Object.keys(mediacategorybuckets[2]).length; i++)
+          for(i in Object.keys(mediacategorybuckets[2]))
           {
             if(mediacategorybuckets[2][i].geography == self.params.geography){
               mediaCategoryBuckets3_Geo.push(mediacategorybuckets[2][i]);
@@ -242,7 +242,7 @@ var Magazine = function()
         var mediaCategoryBuckets4_nonGeo = [];
         if(mediacategorybuckets[3])
         {
-          for(var i= 0; i < Object.keys(mediacategorybuckets[3]).length; i++)
+          for(i in Object.keys(mediacategorybuckets[3]))
           {
             if(mediacategorybuckets[3][i].geography == self.params.geography)
             {
@@ -347,13 +347,14 @@ var Magazine = function()
             }
 
             var catIds = [];
-            for ( var i = 0; i < FinalData.length; i++ ) 
+            for (i in FinalData) 
             {
             catIds.push(FinalData[i].categoryId);
             }
 
             CommonLib.getCategoryName(catIds, function(err, catNames){
-              for(var i=0; i<FinalData.length;i++){
+              for(i in FinalData)
+              {
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
               res.status(200).json({count:FinalData.length, medias:FinalData});
@@ -462,13 +463,14 @@ var Magazine = function()
             }
             
             var catIds = [];
-            for ( var i = 0; i < FinalData.length; i++ ) 
+            for (i in FinalData ) 
             {
             catIds.push(FinalData[i].categoryId);
             }
 
             CommonLib.getCategoryName(catIds, function(err, catNames){
-              for(var i=0; i<FinalData.length;i++){
+              for(i in FinalData)
+              {
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
               res.status(200).json({count:FinalData.length, medias:FinalData});
@@ -482,7 +484,7 @@ var Magazine = function()
           var mediaNonCategoryBuckets_nonGeoRest = [];
           if(NonCatCS)
           {
-            for(var i= 0; i < NonCatCS.length; i++)
+            for(i in NonCatCS)
             {
               if(NonCatCS[i].geography == "All India")
               {
@@ -499,7 +501,7 @@ var Magazine = function()
           var NonIRSCode = [];
           if(mediaNonCategoryBuckets_GeoAllIndia.length > 0)
           {
-            for(var i= 0; i < mediaNonCategoryBuckets_GeoAllIndia.length; i++)
+            for(i in mediaNonCategoryBuckets_GeoAllIndia)
             {
               if(mediaNonCategoryBuckets_GeoAllIndia[i].IRSCode == 'Yes')
               {
@@ -521,7 +523,7 @@ var Magazine = function()
           //Add Sorted Magazines with IRS Code based on Readership to Finaldata
           if(IRSCode.length > 0)
           {
-            for(var i= 0; i < IRSCode.length; i++)
+            for(i in IRSCode)
             {
               if(CountOfMedia < 9) 
               {
@@ -565,13 +567,14 @@ var Magazine = function()
           }
           
           var catIds = [];
-            for ( var i = 0; i < FinalData.length; i++ ) 
+            for(i in FinalData) 
             {
             catIds.push(FinalData[i].categoryId);
             }
 
             CommonLib.getCategoryName(catIds, function(err, catNames){
-              for(var i=0; i<FinalData.length;i++){
+              for(i in FinalData)
+              {
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
               res.status(200).json({count:FinalData.length, medias:FinalData});
@@ -616,9 +619,9 @@ var Magazine = function()
     function getMatch(a, b) 
     {
       var matches = [];
-      for ( var i = 0; i < a.length; i++ ) 
+      for (i in a) 
       {
-        for ( var e = 0; e < b.length; e++ ) 
+        for (e in b) 
         {
           if ( a[i] === b[e] ) matches.push( a[i] );
         }
@@ -676,7 +679,7 @@ var Magazine = function()
       minFullPage = minFullPage[minFullPage.length - 1];
       minFullPage = minFullPage.print.mediaOptions.fullPage['1-2'];
 
-      for(var i= 0; i < mediaCategoryBuckets_nonGeo.length; i++)
+      for(i in mediaCategoryBuckets_nonGeo)
       {
         var tmp = [];
         tmp['_id'] = mediaCategoryBuckets_nonGeo[i]._id;
@@ -777,12 +780,12 @@ var Magazine = function()
             function(err, results) 
             {
               var catIds = [];
-              for ( var i = 0; i < results.length; i++ ) 
+              for(i in results) 
               {
                 catIds.push(results[i].categoryId);
               }
               CommonLib.getCategoryName(catIds, function(err, catNames){
-                for(var i=0; i<results.length;i++)
+                for(i in results)
                   results[i].categoryName = catNames[results[i].categoryId];
                 callbackInner(err, results);
               });
@@ -941,7 +944,7 @@ var Magazine = function()
     },
     function(err, result)
     {
-      for(var i = 0; i < result.medias.length; i++)
+      for(i in result.medias)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
         result.medias[i].frequency = result.medias[i].attributes.frequency.value;
@@ -999,7 +1002,7 @@ var Magazine = function()
     },
     function(err, result)
     {
-      for(var i = 0; i < result.medias.length; i++)
+      for(i in result.medias)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
       }
@@ -1064,7 +1067,7 @@ var Magazine = function()
         {
           async.each(results, function (group ,callback_each){
             self.yForumala(group.medias, function (err, res){
-              for(var i=0; i < res.length; i++)
+              for(i in res)
                 magazines.push(res[i]);    
               callback_each(err);
             });
@@ -1072,10 +1075,10 @@ var Magazine = function()
           function(err)
           {
             var categoryIds=[];
-            for(var i=0 ;i<magazines.length ; i++)
+            for(i in magazines)
               categoryIds.push(magazines[i].categoryId);
             CommonLib.getCategoryName(categoryIds, function(err, catNames){
-              for(var i=0; i<magazines.length;i++)
+              for(i in magazines)
                 magazines[i].categoryName = catNames[magazines[i].categoryId];
               switch(query.sortBy)
               {
@@ -1101,7 +1104,7 @@ var Magazine = function()
                     break;
               }
               if(magazines.length>query.offset) {
-                for (var i = query.offset; i<(query.offset + query.limit); i++) {
+                for(i = query.offset; i<(query.offset + query.limit); i++) {
                   if(magazines[i] != undefined) {
                     magazine.push(magazines[i]);
                   }

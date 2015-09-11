@@ -23,8 +23,7 @@ var Newspaper = function()
   });
   
 
-
-  this.getNewspapers = function(req, res){    
+  this.getNewspapers = function(req, res){
     self.params = JSON.parse(req.query.params);
     //return res.status(200).json(self.params);
     async.waterfall([
@@ -80,7 +79,7 @@ var Newspaper = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){  
+    self.sortFilteredMedia = function(query, callback){
       async.parallel({
         count : function(callbackInner)
         {          
@@ -119,7 +118,7 @@ var Newspaper = function()
     };
 
     self.newsPaperRecommend = function(query, callback){
-      var categoryId ="55d70b748ead0e960c8b4567"; //General interest categoryid
+      var categoryId = "";
       query.match = {};
       query.sortBy = {};
       query.groupBy={};
@@ -127,20 +126,29 @@ var Newspaper = function()
       async.waterfall([
         function(callbackInner)
         {
-          Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
-          if(result.newspaper.categoryIds.indexOf('55d70b748ead0e960c8b4567') == -1)
-            {
-             result.newspaper.categoryIds.push('55d70b748ead0e960c8b4567'); 
-            }  
-            callbackInner(err, result.newspaper.categoryIds);
+          Category.findOne({ name:'General Interest'},'_id').lean().exec(function(err, cat){
+            categoryId = cat._id;
+            callbackInner(err, categoryId);
           });
         },
-        function(productData,callbackInner)
+        function(categoryId, callbackInner)
+        {
+          Products.findOne({ _id:self.params.productId },{ newspaper:1 }).lean().exec(function(err, result){
+            var categoryIds = [];
+            if(result.newspaper.categoryIds.indexOf(categoryId) == -1)
+            {
+              categoryIds.push(categoryId); 
+            }
+            for(i in categoryIds) categoryIds[i] = categoryIds[i].toString();
+            callbackInner(err, categoryIds);
+          });
+        },
+        function(categoryIds, callbackInner)
         { 
           query.match['toolId']= self.toolId;
           query.match['isActive']= 1;
-          query.match['geography'] = query.geographyId;
-          query.match['categoryId'] = { $in : productData };
+          query.match['geography'] = query.geography;
+          query.match['categoryId'] = { $in : categoryIds };
           callbackInner(null, query);
         }
       ],
@@ -163,22 +171,27 @@ var Newspaper = function()
           },
           { $sort :  { circulation : -1 } },
           { $group:  {count : {$sum : 1}, _id : "$categoryId",newsPaper:{ $push :'$$ROOT' }}},
-          function(err,results){
+          function(err,results)
+          {
             var paperRecommend=[];
             var productDataCount=0; 
-            console.log(results.length);
-            for(var i=0; i<results.length;i++){
-                if(results[i]._id == categoryId)
-                  {   
-                      paperRecommend.push(results[i].newsPaper[0]);
-                      paperRecommend.push(results[i].newsPaper[1]);
-                  }
-                  else{
-                    paperRecommend.push(results[i].newsPaper[0]);
-                }
-            var productDataCount =productDataCount + results[i].newsPaper.length;     
+
+            for(i in results)
+            {
+              if(results[i]._id == categoryId)
+              {   
+                results[i].newsPaper = results[i].newsPaper.slice(0,2);
+                paperRecommend = paperRecommend.concat(results[i].newsPaper);
+              }
+              else
+              {
+                results[i].newsPaper = results[i].newsPaper.slice(0,1);
+                paperRecommend = paperRecommend.concat(results[i].newsPaper);
+              }
+              var productDataCount =productDataCount + results[i].newsPaper.length;     
+
             }
-          callback(err,{count:productDataCount,media:paperRecommend});
+            callback(err,{count:productDataCount,medias:paperRecommend});
           }   
         );
       });
@@ -189,9 +202,11 @@ var Newspaper = function()
       categories : self.getCategories,
       areas : self.getAreas,
       languages : self.getLanguages,
-      frequencies : self.getFrequency,
-      types : self.getNewspaperType,
-      products  : self.getProducts
+
+      frequencies : self.getFrequencies,
+      types : self.getNewspaperTypes,
+      products  : self.getProducts,
+      geographies  : self.getGeographies
     },
     function(err, results) 
     {
@@ -234,7 +249,7 @@ var Newspaper = function()
       );
     };
 
-    self.getFrequency = function(callback){
+    self.getFrequencies = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "frequency": { $exists: 1} }},
         {$group : { _id : '$frequency', count : {$sum : 1}}},
@@ -245,7 +260,7 @@ var Newspaper = function()
       );
     };
 
-    self.getNewspaperType = function(callback){
+    self.getNewspaperTypes = function(callback){
       var ScreenType = [
         {'_id' : 'supplement', 'name' : 'Supplement'},
         {'_id' : 'main', 'name' : 'Main'}
@@ -504,8 +519,5 @@ var Newspaper = function()
       return pubDates;
     }
 };
-
-
-
 
 module.exports.Newspaper = Newspaper;

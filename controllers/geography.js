@@ -14,7 +14,6 @@ var Geography = function()
     // save the Media
     newGeography.save(function(err) {
       if (err) throw err;
-      //console.log('User created!');
       res.status(200).json(newGeography);
     });
   };
@@ -27,7 +26,6 @@ var Geography = function()
       localities : function(callback){ self.searchByKey('locality', qString, callback); }
     },
     function(err, results){
-      //console.log(results);
       if(err) throw err;
       var geographies = [];
       geographies = geographies.concat(results.states, results.cities, results.localities);
