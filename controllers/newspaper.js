@@ -191,7 +191,8 @@ var Newspaper = function()
       languages : self.getLanguages,
       frequencies : self.getFrequency,
       types : self.getNewspaperType,
-      products  : self.getProducts
+      products  : self.getProducts,
+      geographies  : self.getGeographies
     },
     function(err, results) 
     {
@@ -199,6 +200,18 @@ var Newspaper = function()
       res.status(200).json({filters:results});
     });
   };
+
+    self.getGeographies = function(callback){
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
+        {
+          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            callback(error, geos);
+          });
+        }
+      );
+    };
 
     self.getCategories = function(callback){
       Media.distinct('categoryId',
