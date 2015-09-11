@@ -6,10 +6,10 @@ var express = require('express');
 var router = express.Router();
 var CinemaCtrl = new (require('../controllers/cinema')).Cinema();
 
-router.get("/", function(req, res){  CinemaCtrl.getCinemas(req, res); });
-router.get("/screens", function(req, res){  CinemaCtrl.showCinemas(req, res); });
-router.get("/filters", function(req, res){ CinemaCtrl.getFilters(req, res); });
-router.get("/upcomingMovies", function(req, res){ CinemaCtrl.upcomingMovies(req, res); });
-router.post("/bestRates", function(req, res){ CinemaCtrl.getFilters(req, res); });
+router.get("/", CinemaCtrl.getCinemas);
+router.get("/screens", CinemaCtrl.showCinemas);
+router.get("/filters", CinemaCtrl.getFilters);
+router.get("/upcomingMovies", CinemaCtrl.upcomingMovies);
+router.post("/bestRates", CinemaCtrl.getFilters);
 
 module.exports = router;

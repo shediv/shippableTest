@@ -7,6 +7,6 @@ router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
 });
 
-router.get('/isToolExists', function(req, res){ CommonCtrl.isToolExists(req, res); });
+router.get('/isToolExists', CommonCtrl.isToolExists);
 
 module.exports = router;
