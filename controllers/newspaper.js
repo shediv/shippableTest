@@ -248,14 +248,11 @@ var Newspaper = function()
     };
 
     self.getNewspaperType = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, "newspaperType": { $exists: 1} }},
-        {$group : { _id : '$newspaperType', count : {$sum : 1}}},
-        function(error, results) 
-        {
-          callback(error, results);
-        }
-      );
+      var ScreenType = [
+        {'_id' : 'supplement', 'name' : 'Supplement'},
+        {'_id' : 'main', 'name' : 'Main'}
+      ];
+      callback(null, ScreenType);
     };
 
     self.getProducts = function(callback){
