@@ -87,11 +87,9 @@ var Newspaper = function()
         count : function(callbackInner)
         {          
           Media.count(query.match,
-            function(err, result)
+            function(err, count)
             {
-              if(!result) count = 0;
-              else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
