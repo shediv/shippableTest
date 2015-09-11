@@ -9,20 +9,17 @@ var User = function()
 	var mkdirp = require('mkdirp');
 
 	var path = require('path');
-  	var EmailTemplate = require('email-templates').EmailTemplate;
-  	var templatesDir = path.resolve(__dirname, '..', 'public/templates');
-  	var template = new EmailTemplate(path.join(templatesDir, 'welcome'));
+	var EmailTemplate = require('email-templates').EmailTemplate;
+	var templatesDir = path.resolve(__dirname, '..', 'public/templates');
+	var template = new EmailTemplate(path.join(templatesDir, 'welcome'));
 
-	this.passwordHash = require('password-hash');
 	var md5 = require('md5');
-	this.config = require('../config.js');
 
 	this.params = {};
 	var self = this;
 
 	self.store = function(req, res){
 		var user = req.body.user;
-		//return res.status(200).json(user);
 		User.count(
 			{email: user.email},
 			function(err, result){
@@ -30,10 +27,9 @@ var User = function()
 				if(result) res.status(500).json("Email Already Exists");
 				else
 				{									    
-				    //Hash Password
 					user.password = md5(user.password);
 					user.verified = 0;
-					// create a new User
+					
 					var newUser = User(user);
 
 					// save the Media

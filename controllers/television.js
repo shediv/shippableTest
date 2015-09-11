@@ -1,20 +1,15 @@
 var Television = function()
 {
   var async = require('async');
-  var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
-  var months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-  var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-  var week = ['first','second','third','fourth'];
-  var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
-  this.toolName = "inflight";
+  this.toolName = "television";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -22,7 +17,6 @@ var Television = function()
   });
 
   this.getTelevision = function(req, res){
-        res.status(200).json("self.Television");
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -31,7 +25,6 @@ var Television = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.radioRecommend(query,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -201,7 +194,6 @@ var Television = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne()
         res.status(200).json({radio : results});        
       }
     );
@@ -227,10 +219,6 @@ var Television = function()
       res.status(200).json({medias:results});
     });
   };
-
 };
-
-
-
 
 module.exports.Television = Television;

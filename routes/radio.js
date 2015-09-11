@@ -8,7 +8,6 @@ var RadioCtrl = new (require('../controllers/radio')).Radio();
 
 router.get("/", RadioCtrl.getRadios);
 router.get("/filters", RadioCtrl.getFilters);
-router.post("/bestRates", RadioCtrl.getBestRates);
 router.get("/compare", RadioCtrl.compare);
 router.get("/related", RadioCtrl.relatedMedia);
 router.get("/:urlSlug", RadioCtrl.show);
