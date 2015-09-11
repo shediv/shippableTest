@@ -115,30 +115,6 @@ var Outdoor = function()
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
-                  //To find minimum unit and minimum Billing 
-                  for(i in results){                    
-                    mediaOptions.push(results[i]['mediaOptions']);
-                    firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
-                    //console.log(results[i].mediaOptions[firstmediaOptionsKey]);
-                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                    if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
-                    
-                    if(minimumQtyUnit2){
-                      minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
-                      minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);                     
-                    }
-                    else{
-                      minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
-                      minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
-                    }
-
-                    //results[i]['mediaOptionName'] = results[i].mediaOptions[firstmediaOptionsKey].name;
-                    results[i]['minimumUnit'] = minimumUnit;
-                    results[i]['minimumBilling'] = minimumBilling; 
-                  }                                   
-                  //.................
 
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
