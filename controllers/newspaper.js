@@ -54,8 +54,7 @@ var Newspaper = function()
         'categories'  : 'categoryId',
         'areas'       : 'areaCovered',
         'languages'   : 'language',
-        'frequencies' : 'frequency',
-        'type'        : 'newspaperType'
+        'frequencies' : 'frequency'
       };
       query.projection = {
         '_id'                 : 1,
@@ -75,7 +74,8 @@ var Newspaper = function()
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
 
-      //query.match.isActive = 1;
+      if(self.params.filters["type"]) query.match.newspaperType = self.params.filters["type"];
+      query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
@@ -89,7 +89,7 @@ var Newspaper = function()
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
             {
-              if(result[0] === undefined) count = 0;
+              if(!result) count = 0;
               else count = result[0].count;
               callbackInner(err, count);
             }
