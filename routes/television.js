@@ -8,8 +8,7 @@ var TelevisionCtrl = new (require('../controllers/television')).Television();
 
 router.get("/", TelevisionCtrl.getTelevision);
 router.get("/filters", TelevisionCtrl.getFilters);
-router.post("/bestRates", TelevisionCtrl.getBestRates);
-router.get("/compare", InflightCtrl.compare);
+router.get("/compare", TelevisionCtrl.compare);
 router.get("/:urlSlug", TelevisionCtrl.show);
 
 module.exports = router;
