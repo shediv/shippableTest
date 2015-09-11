@@ -7,6 +7,6 @@ var router = express.Router();
 var MediaCtrl = new (require('../controllers/media')).Media();
 
 //API :- http://localhost:3000/media
-router.post("/store", function(req, res){MediaCtrl.store(req, res);});
+router.post("/store", MediaCtrl.store);
 
 module.exports = router;

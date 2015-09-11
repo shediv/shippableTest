@@ -6,14 +6,14 @@ var express = require('express');
 var router = express.Router();
 var UserCtrl = new (require('../controllers/user')).User();
 
-router.post("/signup", function(req, res){UserCtrl.store(req, res);});
-router.get("/verify/:confirmationCode", function(req, res){ UserCtrl.verify(req, res); });
-router.put("/", function(req, res){UserCtrl.update(req, res);});
-router.put("/uploadProfilePic", function(req, res){UserCtrl.uploadProfilePic(req, res);});
-router.post("/localSignin", function(req, res){UserCtrl.authenticate(req, res);});
-router.post("/facebookSignin", function(req, res){UserCtrl.facebookSignin(req, res);});
-router.post("/googleSignin", function(req, res){UserCtrl.googleSignin(req, res);});
-router.post("/current", function(req, res){UserCtrl.getSession(req, res);});
-router.post("/logout", function(req, res){UserCtrl.logout(req, res);});
+router.post("/signup", UserCtrl.store);
+router.get("/verify/:confirmationCode", UserCtrl.verify);
+router.put("/", UserCtrl.update);
+router.put("/uploadProfilePic", UserCtrl.uploadProfilePic);
+router.post("/localSignin", UserCtrl.authenticate);
+router.post("/facebookSignin", UserCtrl.facebookSignin);
+router.post("/googleSignin", UserCtrl.googleSignin);
+router.post("/current", UserCtrl.getSession);
+router.post("/logout", UserCtrl.logout);
 
 module.exports = router;
