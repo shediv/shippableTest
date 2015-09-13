@@ -306,10 +306,10 @@ var Newspaper = function()
     
     async.series({
       medias : function(callback){
-        Media.find({_id: { $in: ids }}, project,function(err, results){
+        Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
           var medias = results.map(function(m){
             catIds.push(m.categoryId);
-            return m.toObject();
+            return m;
           });
           callback(err, medias);
         });

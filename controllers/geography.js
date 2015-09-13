@@ -54,8 +54,7 @@ var Geography = function()
             break;
           case 'city':
             async.each(results, function(result, callbackInner){
-              Geography.findOne({city:result,state:{$exists:1}},function(err, result){
-                result = result.toObject();
+              Geography.findOne({city:result,state:{$exists:1}}).lean().exec(function(err, result){
                 var geo = {}
                 geo.state = result.state;
                 geo.city = result.city;
@@ -70,9 +69,8 @@ var Geography = function()
             break;
           case 'locality':
             async.each(results, function(result, callbackInner){
-              Geography.find({locality:result,state:{$exists:1},city:{$exists:1}},function(err, results){
+              Geography.find({locality:result,state:{$exists:1},city:{$exists:1}}).lean().exec(function(err, results){
                 results.map(function(result){
-                  result = result.toObject();
                   var geo = {}
                   geo.state = result.state;
                   geo.city = result.city;

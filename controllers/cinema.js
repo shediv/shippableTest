@@ -83,12 +83,11 @@ var Cinema = function()
       async.series([
         function(callbackInner){
           Geography.distinct('pincode', match, function(err, pincodes){
-            Geography.find({pincode:{$in:pincodes}}, function(err, results){
+            Geography.find({pincode:{$in:pincodes}}).lean().exec(function(err, results){
               var geographies = [];
               if(!results) return callbackInner(err, geographies);
               for(i in results)
               {
-                results[i] = results[i].toObject();
                 geographies[results[i]._id.toString()] = results[i];
                 self.params.geographyIds.push(results[i]._id.toString());
               }
