@@ -33,8 +33,6 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-        console.log(query);
-        process.exit();
         if(self.params.recommended) return self.newsPaperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }

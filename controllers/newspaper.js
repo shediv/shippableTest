@@ -1,23 +1,31 @@
 var Newspaper = function()
 {
   var async = require('async');
+  var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
+  var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
+  var week = ['first','second','third','fourth'];
+  var dayConversion = (24 * 60 * 60 * 1000);
   
   this.params = {};
   this.toolName = "newspaper";
   var self = this;
+  this.toolId='';
   
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
   
+
   this.getNewspapers = function(req, res){
     self.params = JSON.parse(req.query.params);
+    //return res.status(200).json(self.params);
     async.waterfall([
       function(callback)
       {
@@ -86,7 +94,7 @@ var Newspaper = function()
         {          
           switch(query.sortBy)
           {
-            case 'views': query.sortBy = { 'views' : -1 }; break;
+            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
             case 'circulation': query.sortBy = { 'circulation' : -1}; break;
             case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
           }
@@ -167,6 +175,7 @@ var Newspaper = function()
           {
             var paperRecommend=[];
             var productDataCount=0; 
+
             for(i in results)
             {
               if(results[i]._id == categoryId)
@@ -180,6 +189,7 @@ var Newspaper = function()
                 paperRecommend = paperRecommend.concat(results[i].newsPaper);
               }
               var productDataCount =productDataCount + results[i].newsPaper.length;     
+
             }
             callback(err,{count:productDataCount,medias:paperRecommend});
           }   
@@ -192,6 +202,7 @@ var Newspaper = function()
       categories : self.getCategories,
       areas : self.getAreas,
       languages : self.getLanguages,
+
       frequencies : self.getFrequencies,
       types : self.getNewspaperTypes,
       products  : self.getProducts,
@@ -203,18 +214,6 @@ var Newspaper = function()
       res.status(200).json({filters:results});
     });
   };
-
-    self.getGeographies = function(callback){
-      Media.distinct('geography',
-        { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
-        {
-          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-            callback(error, geos);
-          });
-        }
-      );
-    };
 
     self.getCategories = function(callback){
       Media.distinct('categoryId',
@@ -280,10 +279,8 @@ var Newspaper = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Category.findOne({ _id:results.categoryId }).lean().exec(function(err, cat){
-          if(cat) results['categoryName'] = cat.name;
-          res.status(200).json({newspaper : results});
-        });
+        Geography.findOne()
+        res.status(200).json({newspaper : results});        
       }
     );
   }
@@ -318,7 +315,7 @@ var Newspaper = function()
     },
     function(err, result)
     {
-      for(i in result.medias)
+      for(var i = 0; i < result.medias.length; i++)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
       }
@@ -333,7 +330,7 @@ var Newspaper = function()
           categoryId : req.params.categoryId,
           geography : req.query.geography,
           toolId : self.toolId,
-          isActive: 1,
+          //isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
         }
       },
@@ -363,6 +360,164 @@ var Newspaper = function()
       }
     );
   };
+
+  this.getBestRates = function(req, res){
+    var medias = req.body.medias;
+    var mediaIds = [];
+    for(key in medias) mediaIds.push(key);
+
+    Media.find({_id : {$in : mediaIds}}, function(err, result){
+      totalGrossPrice = 0;
+      totalGrossSaving = 0;
+      result.map(function(media){ 
+        media = media.toObject();
+        for(key in medias[media._id].mediaOptions)
+        {
+          switch(key)
+          {
+            case 'print':
+              for(mo in medias[media._id].mediaOptions.print)
+              {
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media.print.mediaOptions[mo].cardRate;
+
+                switch(true)
+                {
+                  case medias[media._id].mediaOptions.print[mo].qty <= 2:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty <= 6:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
+                    break;
+                  case medias[media._id].mediaOptions.print[mo].qty > 6:
+                    medias[media._id].mediaOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
+                    break;
+                }
+                
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              }
+              break;
+            case 'website':
+              for(mo in medias[media._id].mediaOptions[key])
+              {
+                medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions[mo].pricing;
+                medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //..............
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log('multiply - ',medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty);
+                medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //console.log(medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice , medias[media._id].mediaOptions[key][mo].qty);
+                //console.log(medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice);
+                medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice , medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                //medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+                //medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+                medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                //console.log(medias[media._id].mediaOptions[key][mo]);
+                totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+                totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              }
+              break;
+            case 'email':
+              medias[media._id].mediaOptions[key][mo].originalUnitPrice = media[key].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].dicsountedUnitPrice = media[key].mediaOptions.pricing;
+              medias[media._id].mediaOptions[key][mo].originalGrossPrice = medias[media._id].mediaOptions[key][mo].originalUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].discountedGrossPrice = medias[media._id].mediaOptions[key][mo].discountedUnitPrice * medias[media._id].mediaOptions[key][mo].qty;
+              medias[media._id].mediaOptions[key][mo].unitSaving = medias[media._id].mediaOptions[key][mo].originalUnitPrice - medias[media._id].mediaOptions[key][mo].discountedUnitPrice;
+              medias[media._id].mediaOptions[key][mo].grossSaving = medias[media._id].mediaOptions[key][mo].originalGrossPrice - medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossPrice = totalGrossPrice + medias[media._id].mediaOptions[key][mo].discountedGrossPrice;
+              totalGrossSaving = totalGrossSaving + medias[media._id].mediaOptions[key][mo].grossSaving;
+              break;
+          }
+        }
+        medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
+      });
+      res.status(200).json({
+        bestrates:medias,
+        totalGrossPrice:totalGrossPrice,
+        totalGrossSaving:totalGrossSaving
+      });
+    });
+  };
+
+    self.getTenDates = function(dates, frequency){
+      var pubDates = [];
+      var dateObj = new Date();
+      var currMonth = dateObj.getMonth();
+      var currYear = dateObj.getFullYear();
+      
+      return self.formDates(pubDates, dates, currMonth, currYear, frequency)
+    }
+
+    self.formDates = function(pubDates, dates, currMonth, currYear, frequency)
+    {
+      for(key in dates)
+      {
+        currMonth = months.indexOf(key);
+        for(eachDate in dates[key])
+        {
+          dates[key][eachDate] = dates[key][eachDate].trim();
+          switch(true)
+          {
+            case dates[key][eachDate] == 'Everyday':
+              for(i = 1; i <= 10; i++) 
+              {
+                var dateObj = new Date();
+                dateObj.setHours(0,0,0,0);
+                dateObj.setDate( dateObj.getDate() + i );
+                pubDates.push(dateObj);
+              }
+              break;
+            case CommonLib.isNumber(dates[key][eachDate]) == true:
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              dateObj.setDate( parseInt(dates[key][eachDate]) );
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 )pubDates.push(dateObj);
+              break;
+            case days.indexOf(dates[key][eachDate].toLowerCase()) > -1:
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);
+              dateObj.setFullYear(currYear);
+              dateObj.setMonth(currMonth);
+              var weekDay = days.indexOf(dates[key][eachDate].toLowerCase());
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              while(dateObj.getMonth() === currMonth) 
+              {
+                var daysDiff = parseInt( (dateObj - new Date()) / dayConversion ); 
+                if( daysDiff > 0 ) pubDates.push(new Date(dateObj.getTime()));
+                dateObj.setDate(dateObj.getDate() + 7);
+              }
+              break;
+            default:
+              var pubDays = dates[key][eachDate].split(' ');
+              var weekDay = days.indexOf(pubDays[1].toLowerCase());
+              var dateObj = new Date();
+              dateObj.setHours(0,0,0,0);  
+              dateObj.setMonth(currMonth);
+              dateObj.setFullYear(currYear);
+              dateObj.setDate(1);
+              while(dateObj.getDay() !== weekDay) dateObj.setDate(dateObj.getDate() + 1);
+              dateObj.setDate(dateObj.getDate() + (7 * week.indexOf(pubDays[0].toLowerCase())) )
+              var daysDiff = parseInt( (dateObj - new Date()) / dayConversion );
+              if( daysDiff > 0 ) pubDates.push(dateObj);
+          }
+          if(pubDates.length >= 10) return pubDates;
+        }
+      }
+      
+      currYear++;
+      if(pubDates.length < 10)
+        pubDates = self.formDates(pubDates, dates, currMonth, currYear, frequency);
+      return pubDates;
+    }
 };
 
 module.exports.Newspaper = Newspaper;
