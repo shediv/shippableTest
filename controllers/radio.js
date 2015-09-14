@@ -236,11 +236,11 @@ var Radio = function()
       'logo' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       var medias = results.map(function(m){
         m['frequency'] = m.radioFrequency;
         delete m.radioFrequency;
-        return m.toObject();
+        return m;
       });
       res.status(200).json({medias:medias});
     });

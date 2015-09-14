@@ -38,8 +38,8 @@ var Magazine = function()
       
       async.series({
         product : function(callback){
-          Products.findOne({_id: self.params.productId}, function(err, result){
-            ProductInfo.push(result.toObject());
+          Products.findOne({_id: self.params.productId}).lean().exec(function(err, result){
+            ProductInfo.push(result);
             callback(err, result);
           });
         },
@@ -932,10 +932,10 @@ var Magazine = function()
     };
     async.series({
       medias : function(callback){
-        Media.find({_id: { $in: ids }}, project,function(err, results){
+        Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
           var medias = results.map(function(m){
             catIds.push(m.categoryId);
-            return m.toObject();
+            return m;
           });
           callback(err, medias);
         });
@@ -1127,11 +1127,10 @@ var Magazine = function()
     var mediaIds = [];
     for(key in medias) mediaIds.push(key);
 
-    Media.find({_id : {$in : mediaIds}}, function(err, result){
+    Media.find({_id : {$in : mediaIds}}).lean().exec(function(err, result){
       totalGrossPrice = 0;
       totalGrossSaving = 0;
       result.map(function(media){ 
-        media = media.toObject();
         for(key in medias[media._id].mediaOptions)
         {
           switch(key)

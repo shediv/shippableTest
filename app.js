@@ -21,6 +21,7 @@ var newspaper = require('./routes/newspaper');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
 var nonTraditional = require('./routes/nonTraditional');
+var bestRates = require('./routes/bestRates');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
@@ -59,6 +60,7 @@ app.use('/television', television);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/nonTraditional', nonTraditional);
+app.use('/bestRates', bestRates);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);

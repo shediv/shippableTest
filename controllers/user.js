@@ -215,14 +215,11 @@ var User = function()
 
 	self.authenticate = function(req, res){
 		var user = req.body.user;
-		User.findOne(
-			{email: user.username},
-			function(err, result){
+		User.findOne({email: user.username}).lean().exec(function(err, result){
 				if (err) throw err;
 				if(!result) res.status(404).json("User Does Not Exist");
 				else
 				{
-					result = result.toObject();
 					//Verify Password
 					if(!self.passwordHash.verify(user.password, result.password)) res.status(401).json("Invalid Password");
 					else if(!result.verified) res.status(401).json("Account Not Verified");
