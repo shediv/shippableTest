@@ -21,6 +21,7 @@ var newspaper = require('./routes/newspaper');
 var media = require('./routes/media');
 var geography = require('./routes/geography');
 var nonTraditional = require('./routes/nonTraditional');
+var digital = require('./routes/digital');
 var bestRates = require('./routes/bestRates');
 var parseExcel = require('./routes/parseExcel');
 
@@ -57,6 +58,7 @@ app.use('/inflight', inflight);
 app.use('/newspaper', newspaper);
 app.use('/outdoor', outdoor);
 app.use('/television', television);
+app.use('/digital', digital);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/nonTraditional', nonTraditional);
