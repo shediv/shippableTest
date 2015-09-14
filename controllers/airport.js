@@ -1,4 +1,4 @@
-var Inflight = function()
+var Airport = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
@@ -16,7 +16,7 @@ var Inflight = function()
     self.toolId = result._id.toString();
   });
 
-  this.getInflight = function(req, res){
+  this.getAirport = function(req, res){
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -195,4 +195,4 @@ var Inflight = function()
   }
 };
 
-module.exports.Inflight = Inflight;
+module.exports.Airport = Airport;

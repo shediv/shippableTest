@@ -86,7 +86,7 @@ var Newspaper = function()
         {          
           switch(query.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'circulation': query.sortBy = { 'circulation' : -1}; break;
             case 'rate': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
           }
@@ -190,11 +190,11 @@ var Newspaper = function()
     }
 
   this.getFilters = function(req, res){
+
     async.parallel({
       categories : self.getCategories,
       areas : self.getAreas,
       languages : self.getLanguages,
-
       frequencies : self.getFrequencies,
       types : self.getNewspaperTypes,
       products  : self.getProducts,
@@ -266,13 +266,27 @@ var Newspaper = function()
       });
     };
 
+    self.getGeographies = function(callback){
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
+        {
+          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            callback(error, geos);
+          });
+        }
+      );
+    };
+
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne()
-        res.status(200).json({newspaper : results});        
+        Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
+          if(cat) results['categoryName'] = cat.name;
+          res.status(200).json({newspaper : results});
+        });
       }
     );
   }
@@ -322,7 +336,7 @@ var Newspaper = function()
           categoryId : req.params.categoryId,
           geography : req.query.geography,
           toolId : self.toolId,
-          //isActive: 1,
+          isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
         }
       },
