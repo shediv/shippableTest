@@ -190,11 +190,11 @@ var Newspaper = function()
     }
 
   this.getFilters = function(req, res){
+
     async.parallel({
       categories : self.getCategories,
       areas : self.getAreas,
       languages : self.getLanguages,
-
       frequencies : self.getFrequencies,
       types : self.getNewspaperTypes,
       products  : self.getProducts,
@@ -264,6 +264,18 @@ var Newspaper = function()
       Products.find({}, '_id name', function(error, results){
         callback(error, results);
       });
+    };
+
+    self.getGeographies = function(callback){
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
+        {
+          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            callback(error, geos);
+          });
+        }
+      );
     };
 
   this.show = function(req, res){
