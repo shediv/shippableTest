@@ -6,7 +6,7 @@ var Cinema = function()
   var Tools = require('../models/tool').Tools;
   var Category = require('../models/category').Category;
   var Geography = require('../models/geography').Geography;
-  var UpcomingMovies = require('../models/geography').UpcomingMovies;
+  var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
   
   this.params = {};
   this.toolName = "cinema";
