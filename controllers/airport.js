@@ -120,12 +120,12 @@ var Airport = function()
                   
                   if(minimumQtyUnit2)
                   {
-                    minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+                    minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
                     minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
                   }
                   else
                   {
-                    minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+                    minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
                     minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                   }
                   results[i]['mediaOptions'] = results[i].mediaOptions[firstmediaOptionsKey].name;
@@ -214,12 +214,12 @@ var Airport = function()
         
         if(minimumQtyUnit2)
         {
-          minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+          minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
           minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
         }
         else
         {
-          minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+          minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
           minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
         }
 
