@@ -182,6 +182,55 @@ var Airport = function()
       callback(null, categories);
     };
 
+  this.compare = function(req, res){
+    var ids = JSON.parse(req.query.params);
+    var catIds = [];
+    var project = {
+      '_id' : 1,
+      'name' : 1,
+      'urlSlug' : 1,
+      'thumbnail' : 1
+    };
+      
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
+      
+      var geographyIds = [];
+      var mediaOptions = [];
+      var firstmediaOptionsKey;
+      var minimumQtyUnit1;
+      var minimumQtyUnit2;
+      var pricingUnit1;
+      var pricingUnit2;
+      var minimumUnit;
+      var minimumBilling; 
+
+      for(i in results)
+      {
+        mediaOptions.push(results[i]['mediaOptions']);
+        firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+        
+        if(minimumQtyUnit2)
+        {
+          minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+          minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+        }
+        else
+        {
+          minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+          minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+        }
+
+        results[i]['minimumUnit'] = minimumUnit;
+        results[i]['minimumBilling'] = minimumBilling;
+        results[i]['mediaOption'] = firstmediaOptionsKey;
+      }                                   
+      res.status(200).json({medias:results});
+    });
+  };
 
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
