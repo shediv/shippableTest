@@ -194,4 +194,4 @@ var Airport = function()
   }
 };
 
-module.exports.Inflight = Inflight;
+module.exports.Airport = Airport;
