@@ -50,8 +50,9 @@ var NonTraditional = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'categories' : 'category',
-        'productId' : 'product'
+        'categories'  : 'category',
+        // 'geographies' : 'geography',
+        // 'hyperlocal'  : ''
       };
       query.projection = {
         '_id'          : 1,
@@ -69,7 +70,7 @@ var NonTraditional = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){  
+    self.sortFilteredMedia = function(query, callback){ 
       async.parallel({
         count : function(callbackInner)
         {          
@@ -89,8 +90,9 @@ var NonTraditional = function()
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'minimumBilling': query.sortBy = { 'circulation' : -1}; break;
-            case 'mediaName': query.sortBy = { 'mediaOptions.anyPage.<800SqCms.cardRate' : -1}; break;
+            case 'mediaName': query.sortBy = { 'name' : -1 }; break;
+            case 'minimumBilling': query.sortBy = {}; break;
+            
           }
           query.sortBy._id = 1;
 
@@ -100,7 +102,49 @@ var NonTraditional = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              callbackInner(err, results);
+              var geographyIds = [];
+              var mediaOptions = [];
+              var firstmediaOptionsKey;
+              var minimumQtyUnit1;
+              var minimumQtyUnit2;
+              var pricingUnit1;
+              var pricingUnit2;
+              var minimumUnit;
+              var minimumBilling; 
+              for(i in results) geographyIds.push(results[i].geography);
+              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+                geographies = {};
+                for(i in geos) geographies[geos[i]._id] = geos[i];
+
+                //To find minimum unit and minimum Billing 
+                for(i in results)
+                {
+                  mediaOptions.push(results[i]['mediaOptions']);
+                  firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                  if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                  if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+                  if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                  if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                  
+                  if(minimumQtyUnit2)
+                  {
+                    minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+                    minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+                  }
+                  else
+                  {
+                    minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+                    minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                  }
+
+                  results[i]['minimumUnit'] = minimumUnit;
+                  results[i]['minimumBilling'] = minimumBilling; 
+                }                                   
+
+                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                callbackInner(err, results);
+              });
             }
           );
         }
@@ -138,7 +182,7 @@ var NonTraditional = function()
     self.getReaches = function(callback){
       var MediaType = [
         {'_id' : 'hyperlocal', 'name' : 'Hyperlocal'},
-        {'_id' : 'mass', 'name' : 'Mass'}
+        /*{'_id' : 'mass', 'name' : 'Mass'}*/
       ];
       callback(null, MediaType);
     };

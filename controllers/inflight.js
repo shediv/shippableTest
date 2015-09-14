@@ -9,7 +9,7 @@ var Inflight = function()
   var Category = require('../models/category').Category;
   
   this.params = {};
-  this.toolName = "inflight";
+  this.toolName = "airport";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -58,8 +58,6 @@ var Inflight = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
-      console.log(query.match);
-      process.exit();
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
@@ -107,6 +105,8 @@ var Inflight = function()
               var minimumBilling; 
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+                console.log(geos);
+                process.exit();
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
 
