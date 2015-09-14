@@ -1,4 +1,4 @@
-var Inflight = function()
+var Airport = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
@@ -9,14 +9,14 @@ var Inflight = function()
   var Category = require('../models/category').Category;
   
   this.params = {};
-  this.toolName = "inflight";
+  this.toolName = "airport";
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
 
-  this.getInflight = function(req, res){
+  this.getAirport = function(req, res){
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
