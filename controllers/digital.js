@@ -70,7 +70,7 @@ var Digital = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){      
+    self.sortFilteredMedia = function(query, callback){ 
       async.parallel({
         count : function(callbackInner)
         {          
@@ -106,11 +106,12 @@ var Digital = function()
               for(i in results) {              
                 results[i]['reach'] = results[i]['reach'] + results[i]['unit'];
                 
-                // mediaOptions.push(results[i]['mediaOptions']);
-                // firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
-
-                // if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                // if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }
+                mediaOptions.push(results[i]['mediaOptions']);
+                firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }
+                minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                results[i]['minimumBilling'] = minimumBilling;
               }  
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 geographies = {};
@@ -212,9 +213,9 @@ var Digital = function()
       '_id' : 1,
       'urlSlug' : 1,
       'name' : 1,
-      'locality' : 1,
-      'landmark' : 1,
-      'price' : 1,
+      'medium' : 1,
+      'reach' : 1,
+      'unit' : 1,
       'category' : 1,
       'mediaOptions' : 1,
       'geography' : 1,        
