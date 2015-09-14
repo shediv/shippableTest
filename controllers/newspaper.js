@@ -283,8 +283,10 @@ var Newspaper = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne()
-        res.status(200).json({newspaper : results});        
+        Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
+          if(cat) results['categoryName'] = cat.name;
+          res.status(200).json({newspaper : results});
+        });
       }
     );
   }
@@ -334,7 +336,7 @@ var Newspaper = function()
           categoryId : req.params.categoryId,
           geography : req.query.geography,
           toolId : self.toolId,
-          //isActive: 1,
+          isActive: 1,
           urlSlug : { $ne : req.query.urlSlug }
         }
       },
