@@ -194,7 +194,7 @@ var Television = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({radio : results});        
+        res.status(200).json({television : results});        
       }
     );
   }
