@@ -129,7 +129,7 @@ var Airport = function()
                     minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
                     minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                   }
-
+                  results[i]['mediaOptions'] = results[i].mediaOptions[firstmediaOptionsKey].name;
                   results[i]['minimumUnit'] = minimumUnit;
                   results[i]['minimumBilling'] = minimumBilling; 
                 }                                   
