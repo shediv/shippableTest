@@ -112,8 +112,7 @@ var Airport = function()
                 //To find minimum unit and minimum Billing 
                 for(i in results)
                 {
-                  mediaOptions.push(results[i]['mediaOptions']);
-                  firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                  firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
                   if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
@@ -189,7 +188,8 @@ var Airport = function()
       '_id' : 1,
       'name' : 1,
       'urlSlug' : 1,
-      'thumbnail' : 1
+      'thumbnail' : 1,
+      'mediaOptions': 1
     };
       
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
@@ -206,8 +206,7 @@ var Airport = function()
 
       for(i in results)
       {
-        mediaOptions.push(results[i]['mediaOptions']);
-        firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+        firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
         if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
         if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
         if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
@@ -226,7 +225,8 @@ var Airport = function()
 
         results[i]['minimumUnit'] = minimumUnit;
         results[i]['minimumBilling'] = minimumBilling;
-        results[i]['mediaOption'] = firstmediaOptionsKey;
+        results[i]['mediaOption'] = results[i].mediaOptions[firstmediaOptionsKey].name;
+        delete results[i].mediaOptions;
       }                                   
       res.status(200).json({medias:results});
     });
