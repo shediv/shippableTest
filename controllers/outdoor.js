@@ -44,14 +44,14 @@ var Outdoor = function()
         'mediaTypes' : 'mediaType',
         'landmarks' : 'landmark',
         'sizes' : 'size',
-        'types' : 'type'
+        'types' : 'litType'
       };
       query.projection = {
         '_id' : 1,
         'urlSlug' : 1,
-        'ID' : 1,
+        'uniqueId' : 1,
         'name' : 1,
-        'category' : 1,
+        'mediaType' : 1,
         'mediaOptions' : 1,
         'geography' : 1,
         'size' : 1,        
@@ -131,7 +131,7 @@ var Outdoor = function()
       mediaTypes : self.getMediaTypes,
       landmarks : self.getLandmarks,
       sizes : self.getSizes,
-      types : self.getTypes
+      litTypes : self.getLitTypes
     },
     function(err, results) 
     {
@@ -141,21 +141,21 @@ var Outdoor = function()
   };
 
     self.getMediaTypes = function(callback){
-      var mediaOptions = [
+      var mediaTypes = [
         {'_id' : 'hoarding', 'name' : 'Hoarding'},
         {'_id' : 'bus shelter', 'name' : 'Bus Shelter'},
         {'_id' : 'pole kiosk', 'name' : 'Pole Kiosk'}
       ];
-      callback(null, mediaOptions);
+      callback(null, mediaTypes);
     };
 
     self.getSizes = function(callback){
-      var mediaOptions = [
+      var sizes = [
         {'_id' : 'small', 'name' : 'Small'},
         {'_id' : 'large', 'name' : 'Large'},
         {'_id' : 'medium', 'name' : 'Medium'}
       ];
-      callback(null, mediaOptions);
+      callback(null, sizes);
     };
 
     self.getLandmarks = function(callback){
@@ -169,10 +169,10 @@ var Outdoor = function()
       );
     };
 
-    self.getTypes = function(callback){
+    self.getLitTypes = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "type": { $exists: 1} }},
-        {$group : { _id : '$type', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "littype": { $exists: 1} }},
+        {$group : { _id : '$litType', count : {$sum : 1}}},
         function(error, results) 
         {
           callback(error, results);
@@ -197,10 +197,9 @@ var Outdoor = function()
       '_id' : 1,
       'urlSlug' : 1,
       'name' : 1,
-      'locality' : 1,
       'landmark' : 1,
       'price' : 1,
-      'category' : 1,
+      'mediaType' : 1,
       'mediaOptions' : 1,
       'geography' : 1,        
       'logo' : 1
