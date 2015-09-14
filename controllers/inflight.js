@@ -58,7 +58,8 @@ var Inflight = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
-
+      console.log(query.match);
+      process.exit();
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
