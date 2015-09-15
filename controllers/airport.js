@@ -94,7 +94,7 @@ var Airport = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = [];
+              var geographyIds = []; 
               var mediaOptions = [];
               var firstmediaOptionsKey;
               var minimumQtyUnit1;
@@ -106,7 +106,7 @@ var Airport = function()
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
                 console.log(geos);
-                process.exit();
+                
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
 
@@ -142,6 +142,7 @@ var Airport = function()
             }
           );
         }
+       callback(err, results); 
       },
       function(err, results) 
       {

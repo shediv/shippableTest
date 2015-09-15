@@ -102,6 +102,7 @@ var NonTraditional = function()
             {$project: query.projection}, 
             function(err, results) 
             {
+               callback(err, results); 
               var geographyIds = [];
               var mediaOptions = [];
               var firstmediaOptionsKey;
@@ -113,8 +114,8 @@ var NonTraditional = function()
               var minimumBilling; 
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-                geographies = {};
-                for(i in geos) geographies[geos[i]._id] = geos[i];
+                geographies = {}; 
+                for(i in geos) geographies[geos[i]._id] = geos[i];  
 
                 //To find minimum unit and minimum Billing 
                 for(i in results)
