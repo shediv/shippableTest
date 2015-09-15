@@ -142,18 +142,18 @@ var Outdoor = function()
 
     self.getMediaTypes = function(callback){
       var mediaTypes = [
-        {'_id' : 'hoarding', 'name' : 'Hoarding'},
-        {'_id' : 'bus shelter', 'name' : 'Bus Shelter'},
-        {'_id' : 'pole kiosk', 'name' : 'Pole Kiosk'}
+        {'_id' : 'Hoarding', 'name' : 'Hoarding'},
+        {'_id' : 'Bus Shelters', 'name' : 'Bus Shelters'},
+        {'_id' : 'Pole Kiosk', 'name' : 'Pole Kiosk'}
       ];
       callback(null, mediaTypes);
     };
 
     self.getSizes = function(callback){
       var sizes = [
-        {'_id' : 'small', 'name' : 'Small'},
-        {'_id' : 'large', 'name' : 'Large'},
-        {'_id' : 'medium', 'name' : 'Medium'}
+        {'_id' : 'Small', 'name' : 'Small'},
+        {'_id' : 'Large', 'name' : 'Large'},
+        {'_id' : 'Medium', 'name' : 'Medium'}
       ];
       callback(null, sizes);
     };
