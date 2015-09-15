@@ -8,6 +8,7 @@ var OutdoorCtrl = new (require('../controllers/outdoor')).Outdoor();
 
 router.get("/", OutdoorCtrl.getOutdoor);
 router.get("/filters", OutdoorCtrl.getFilters);
+router.get("/compare", OutdoorCtrl.compare);
 router.get("/:urlSlug", OutdoorCtrl.show);
 
 module.exports = router;

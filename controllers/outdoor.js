@@ -198,9 +198,9 @@ var Outdoor = function()
       'urlSlug' : 1,
       'name' : 1,
       'landmark' : 1,
-      'price' : 1,
       'mediaType' : 1,
-      'mediaOptions' : 1,
+      'mediaOptions.ratePerSquareFeet' : 1,
+      'mediaOptions.showRate' : 1,
       'geography' : 1,        
       'logo' : 1
     };
