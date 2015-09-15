@@ -42,9 +42,9 @@ var Outdoor = function()
       query.match = {};
       var filters = {
         'mediaTypes' : 'mediaType',
-        'landmarks' : 'landmark',
+        //'landmarks' : 'landmark',
         'sizes' : 'size',
-        'types' : 'litType'
+        'litTypes' : 'litType'
       };
       query.projection = {
         '_id' : 1,
