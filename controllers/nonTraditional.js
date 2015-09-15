@@ -95,14 +95,12 @@ var NonTraditional = function()
             
           }
           query.sortBy._id = 1;
-
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
-               callback(err, results); 
               var geographyIds = [];
               var mediaOptions = [];
               var firstmediaOptionsKey;
@@ -120,7 +118,6 @@ var NonTraditional = function()
                 //To find minimum unit and minimum Billing 
                 for(i in results)
                 {
-                  mediaOptions.push(results[i]['mediaOptions']);
                   firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
@@ -156,17 +153,17 @@ var NonTraditional = function()
       });
     };
 
-  this.getFilters = function(req, res){
-    async.parallel({
-      categories: self.getCategories,
-      reach: self.getReaches
-    },
-    function(err, results) 
-    {
-      if(err) res.status(500).json({err:err});
-      res.status(200).json({filters:results});
-    });
-  };
+    this.getFilters = function(req, res){
+      async.parallel({
+        categories: self.getCategories,
+        reach: self.getReaches
+      },
+      function(err, results) 
+      {
+        if(err) res.status(500).json({err:err});
+        res.status(200).json({filters:results});
+      });
+    };
 
     self.getCategories = function(callback){
       Media.distinct('categoryId',
@@ -188,25 +185,25 @@ var NonTraditional = function()
       callback(null, MediaType);
     };
 
-  this.getSubCategories = function(req, res){
-    var categoryId = req.query.categoryId;
-    SubCategory.find({ categoryId:categoryId },'name').lean().exec(function(err, subCats){
-      res.status(200).json({subCategories:subCats});
-    })
-  }
+    this.getSubCategories = function(req, res){
+      var categoryId = req.query.categoryId;
+      SubCategory.find({ categoryId:categoryId },'name').lean().exec(function(err, subCats){
+        res.status(200).json({subCategories:subCats});
+      })
+    }
 
-  this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
-      {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
-          if(geo) result['geographyData'] = geo;
-          res.status(200).json({nonTraditional : results});
-        });
-      }
-    );
-  }
+    this.show = function(req, res){
+      Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+        function(err, results)
+        {
+          if(!results) res.status(404).json({error : 'No Such Media Found'});
+          Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
+            if(geo) result['geographyData'] = geo;
+            res.status(200).json({nonTraditional : results});
+          });
+        }
+      );
+    }
 
 };
 

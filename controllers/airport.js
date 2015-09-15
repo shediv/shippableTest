@@ -58,6 +58,7 @@ var Airport = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
+
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
@@ -94,7 +95,7 @@ var Airport = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = []; 
+              var geographyIds = [];
               var mediaOptions = [];
               var firstmediaOptionsKey;
               var minimumQtyUnit1;
@@ -105,8 +106,6 @@ var Airport = function()
               var minimumBilling; 
               for(i in results) geographyIds.push(results[i].geography);
               Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-                console.log(geos);
-                
                 geographies = {};
                 for(i in geos) geographies[geos[i]._id] = geos[i];
 
@@ -141,7 +140,6 @@ var Airport = function()
             }
           );
         }
-       callback(err, results); 
       },
       function(err, results) 
       {
