@@ -185,7 +185,10 @@ var Outdoor = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({outdoor : results});        
+        Geography.findOne({ _id:results.geography }).lean().exec(function(err, geo){
+          if(geo) results['geographyData'] = geo;
+          res.status(200).json({outdoor : results});
+        });
       }
     );
   }
