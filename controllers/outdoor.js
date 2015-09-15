@@ -42,9 +42,9 @@ var Outdoor = function()
       query.match = {};
       var filters = {
         'mediaTypes' : 'mediaType',
-        'landmarks' : 'landmark',
+        //'landmarks' : 'landmark',
         'sizes' : 'size',
-        'types' : 'litType'
+        'litTypes' : 'litType'
       };
       query.projection = {
         '_id' : 1,
@@ -129,7 +129,7 @@ var Outdoor = function()
   this.getFilters = function(req, res){
     async.parallel({
       mediaTypes : self.getMediaTypes,
-      landmarks : self.getLandmarks,
+      //landmarks : self.getLandmarks,
       sizes : self.getSizes,
       litTypes : self.getLitTypes
     },
@@ -142,18 +142,18 @@ var Outdoor = function()
 
     self.getMediaTypes = function(callback){
       var mediaTypes = [
-        {'_id' : 'hoarding', 'name' : 'Hoarding'},
-        {'_id' : 'bus shelter', 'name' : 'Bus Shelter'},
-        {'_id' : 'pole kiosk', 'name' : 'Pole Kiosk'}
+        {'_id' : 'Hoarding', 'name' : 'Hoarding'},
+        {'_id' : 'Bus Shelters', 'name' : 'Bus Shelters'},
+        {'_id' : 'Pole Kiosk', 'name' : 'Pole Kiosk'}
       ];
       callback(null, mediaTypes);
     };
 
     self.getSizes = function(callback){
       var sizes = [
-        {'_id' : 'small', 'name' : 'Small'},
-        {'_id' : 'large', 'name' : 'Large'},
-        {'_id' : 'medium', 'name' : 'Medium'}
+        {'_id' : 'Small', 'name' : 'Small'},
+        {'_id' : 'Large', 'name' : 'Large'},
+        {'_id' : 'Medium', 'name' : 'Medium'}
       ];
       callback(null, sizes);
     };
@@ -171,7 +171,7 @@ var Outdoor = function()
 
     self.getLitTypes = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "littype": { $exists: 1} }},
+        {$match: {toolId:self.toolId, "litType": { $exists: 1} }},
         {$group : { _id : '$litType', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -185,7 +185,10 @@ var Outdoor = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({outdoor : results});        
+        Geography.findOne({ _id:results.geography }).lean().exec(function(err, geo){
+          if(geo) results['geographyData'] = geo;
+          res.status(200).json({outdoor : results});
+        });
       }
     );
   }
@@ -198,9 +201,9 @@ var Outdoor = function()
       'urlSlug' : 1,
       'name' : 1,
       'landmark' : 1,
-      'price' : 1,
       'mediaType' : 1,
-      'mediaOptions' : 1,
+      'mediaOptions.ratePerSquareFeet' : 1,
+      'mediaOptions.showRate' : 1,
       'geography' : 1,        
       'logo' : 1
     };

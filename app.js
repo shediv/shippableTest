@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
+var RoutesCollection = require('./models/routesCollection').RoutesCollection;
 
 var config = require('./config.js');
 
@@ -50,6 +51,18 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use(multer({dest: './public/temp/'}).single('file'));
 
+// check if login required
+app.use(function(req, res, next) {
+
+  RoutesCollection.findOne({url:'/nonTraditional/filters'}).lean().exec(
+      function(err, results)
+      {
+        console.log(results);        
+      }
+    );
+  next();
+});
+
 app.use('/user', user);
 app.use('/magazine', magazine);
 app.use('/cinema', cinema);
@@ -66,13 +79,6 @@ app.use('/bestRates', bestRates);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);
-
-// catch 404 and forward to error handler
-app.use(function(req, res, next) {
-  var err = new Error('Not Found');
-  err.status = 404;
-  next(err);
-});
 
 // error handlers
 // development error handler
