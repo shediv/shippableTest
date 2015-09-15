@@ -129,7 +129,7 @@ var Outdoor = function()
   this.getFilters = function(req, res){
     async.parallel({
       mediaTypes : self.getMediaTypes,
-      landmarks : self.getLandmarks,
+      //landmarks : self.getLandmarks,
       sizes : self.getSizes,
       litTypes : self.getLitTypes
     },
@@ -171,7 +171,7 @@ var Outdoor = function()
 
     self.getLitTypes = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "littype": { $exists: 1} }},
+        {$match: {toolId:self.toolId, "litType": { $exists: 1} }},
         {$group : { _id : '$litType', count : {$sum : 1}}},
         function(error, results) 
         {
