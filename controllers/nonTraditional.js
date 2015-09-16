@@ -117,7 +117,7 @@ var NonTraditional = function()
       
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
-      //query.match['hyperLocal'] = self.params.filters.hyperLocal;
+      query.match['hyperLocal'] = self.params.filters.hyperLocal;
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
       

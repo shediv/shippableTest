@@ -128,7 +128,7 @@ var Airport = function()
                     minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
                     minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                   }
-                  results[i]['mediaOptions'] = results[i].mediaOptions[firstmediaOptionsKey].name;
+                  results[i]['firstMediaOption'] = results[i].mediaOptions[firstmediaOptionsKey].name;
                   results[i]['minimumUnit'] = minimumUnit;
                   results[i]['minimumBilling'] = minimumBilling; 
                 }                                   
@@ -225,8 +225,7 @@ var Airport = function()
 
         results[i]['minimumUnit'] = minimumUnit;
         results[i]['minimumBilling'] = minimumBilling;
-        results[i]['mediaOption'] = results[i].mediaOptions[firstmediaOptionsKey].name;
-        delete results[i].mediaOptions;
+        results[i]['firstMediaOption'] = results[i].mediaOptions[firstmediaOptionsKey].name;
       }                                   
       res.status(200).json({medias:results});
     });
