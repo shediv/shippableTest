@@ -1,7 +1,6 @@
 var NonTraditional = function()
 {
   var async = require('async');
-  var underscore = require('underscore');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
@@ -9,11 +8,6 @@ var NonTraditional = function()
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
   var SubCategory = require('../models/subCategory').SubCategory;
-  var months = ['january','february','march','april','may','june','july','august','september','october','november','december'];
-  var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
-  var week = ['first','second','third','fourth'];
-  var dayConversion = (24 * 60 * 60 * 1000);
-	var mongoose = require('mongoose');
   
   this.params = {};
   this.toolName = "nonTraditional";
@@ -24,13 +18,16 @@ var NonTraditional = function()
   });
   
   this.getNonTraditional = function(req, res){ 
-    //res.status(200).json("nontrad route");   
+    console.log(req.query.params);
     self.params = JSON.parse(req.query.params);
-    //return res.status(200).json(self.params);
     async.waterfall([
       function(callback)
       {
-        callback(null, self.applyFilters());
+        self.buildGeographyQuery(callback);
+      },
+      function(geographies, callback)
+      {
+        callback(null, self.applyFilters(geographies));
       },
       function(query, callback)
       {
@@ -43,34 +40,85 @@ var NonTraditional = function()
     });
   };
 
-    self.applyFilters = function(){
+    self.buildGeographyQuery = function(callback){
+      var or = [];
+      self.params.geographyIds = [];
+      if(!self.params.filters.geographies.length)
+      {
+       delete self.params.filters.geographies;
+       return callback(null, []); 
+      }
+      for(key in self.params.filters.geographies)
+      {
+        switch(self.params.filters.geographies[key].place)
+        {
+          case 'state' : 
+            or.push(
+              { $and : [{ state :self.params.filters.geographies[key].state}] }
+            ); 
+            break;                  
+          case 'city' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city}
+              ] 
+            }); 
+            break;          
+          case 'locality' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city},
+                { locality : self.params.filters.geographies[key].locality}
+              ] 
+            });          
+        }
+      }      
+
+      var match = { $or:or, pincode : { $exists:1 } };
+
+      async.series([
+        function(callbackInner){
+          Geography.distinct('pincode', match, function(err, pincodes){
+            Geography.find({pincode:{$in:pincodes}}).lean().exec(function(err, results){
+              var geographies = [];
+              if(!results) return callbackInner(err, geographies);
+              for(i in results)
+              {
+                geographies[results[i]._id.toString()] = results[i];
+                self.params.geographyIds.push(results[i]._id.toString());
+              }
+              callbackInner(err, geographies); 
+            });
+          });
+        }
+      ],
+      function(err, geographies)
+      {
+        callback(err, geographies[0]);
+      });
+    };
+
+    self.applyFilters = function(geographies){
       var query = {};
       query.sortBy = self.params.sortBy || 'views';
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
-      var filters = {
-        'categories'  : 'categoryId',
-        'geographies' : 'geography',
-        'hyperlocal'  : ''
-      };
       query.projection = {
         '_id'          : 1,
         'name'         : 1,
         'about'        : 1,
-        'categoryId'   : 1,
-        'subCategoryId': 1,  
-        'geography'    : 1,
         'mediaOptions' : 1,
-        'logo'         : 1
       };
-    
-      Object.keys(filters).map(function(value){
-        if(self.params.filters[value].length)
-          query.match[filters[value]] = {'$in': self.params.filters[value]};
-      });
+      
+      if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
+      if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
+      query.match['hyperLocal'] = self.params.filters.hyperLocal;
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
+      
       return query;
     };
 
@@ -82,23 +130,23 @@ var NonTraditional = function()
             {$match : query.match},
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
-            { 
+            {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              return callbackInner(err, result);
+              callbackInner(err, result);
             }
           );
         },
         medias : function(callbackInner)
-        { 
+        {          
           switch(query.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'mediaName': query.sortBy = { 'name' : -1 }; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;
+            case 'name': query.sortBy = { 'name' : -1 }; break;
             case 'minimumBilling': query.sortBy = {}; break;
             
           }
-          //query.sortBy._id = 1;
+          query.sortBy._id = 1;
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
@@ -143,10 +191,9 @@ var NonTraditional = function()
                   results[i]['minimumBilling'] = minimumBilling; 
                 }                                   
 
-                //for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(self.params.sortBy == 'minimumBilling')
-                 results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                 callbackInner(err, results);
+                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                callbackInner(err, results);
               });
             }
           );
@@ -158,83 +205,77 @@ var NonTraditional = function()
       });
     };
 
-    this.getFilters = function(req, res){
-      async.parallel({
-        categories: self.getCategories,
-        reach: self.getReaches
-      },
-      function(err, results) 
-      {
-        if(err) res.status(500).json({err:err});
-        res.status(200).json({filters:results});
-      });
-    };
+  this.getFilters = function(req, res){
+    async.parallel({
+      categories: self.getCategories,
+      reach: self.getReaches
+    },
+    function(err, results) 
+    {
+      if(err) res.status(500).json({err:err});
+      res.status(200).json({filters:results});
+    });
+  };
 
     self.getCategories = function(callback){
-		async.parallel({
-			categories: function(callbackInner){
-				Media.distinct('categoryId',
-					{ toolId:self.toolId},
-					function(error, categoryIds)
-					{
-						Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-							callbackInner(err, cats);
-						});
-					}
-				);
-			},
-			subCategories: function(callbackInner){
-				Media.distinct('subCategoryId',
-					{ toolId:self.toolId},
-					function(error, subCategoryIds)
-					{
-						SubCategory.aggregate(
-							{$match: {_id: {$in: subCategoryIds.map(function(id){ return new mongoose.Types.ObjectId(id); })}}},function(err, result){
-								var subObj = {};
-								for(i in result){
-									if(!subObj[result[i].categoryId]) subObj[result[i].categoryId] = [];
-									subObj[result[i].categoryId].push(result[i]);
-								}
-								callbackInner(err, subObj);
-							});
-					}
-				);
-			}
-		}, function(err, result){
-			for(i in result.categories){
-				result.categories[i].subCategories = result.subCategories[result.categories[i]._id];
-			}
-			callback(err, result.categories);
-		});
+      async.parallel({
+        categories: function(callbackInner){
+          Media.distinct('categoryId',
+           { toolId:self.toolId },
+           function(error, categoryIds)
+           {
+             Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
+              callbackInner(err, cats);
+            });
+           }
+          );
+        },
+        subCategories: function(callbackInner){
+          Media.distinct('subCategoryId',
+            { toolId:self.toolId },
+            function(error, subCategoryIds)
+            {
+              SubCategory.find({ _id:{ $in:subCategoryIds } }).lean().exec(function(err, result){
+                var subObj = {};
+                for(i in result)
+                {
+                  if(!subObj[result[i].categoryId]) subObj[result[i].categoryId] = [];
+                  subObj[result[i].categoryId].push(result[i]);
+                }
+                callbackInner(err, subObj);
+              });
+            }
+          );
+        }
+      }, 
+      function(err, result)
+      {
+        for(i in result.categories)
+          result.categories[i].subCategories = result.subCategories[result.categories[i]._id];
+        callback(err, result.categories);
+      });
     };
 
     self.getReaches = function(callback){
       var MediaType = [
         {'_id' : 'hyperlocal', 'name' : 'Hyperlocal'},
-        /*{'_id' : 'mass', 'name' : 'Mass'}*/
+        //{'_id' : 'mass', 'name' : 'Mass'}
       ];
       callback(null, MediaType);
     };
 
-    self.getSubCategories = function(req, res){
-      var categoryId = req.query.categoryId;
-      SubCategory.find({ categoryId:categoryId },'name').lean().exec(function(err, subCats){
-      res.status(200).json({subCategories:subCats});
-      })
-    }
-
-    this.show = function(req, res){
-      Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-        function(err, results)
-        {
-          if(!results) res.status(404).json({error : 'No Such Media Found'});
-          Geography.findOne({ _id:results.geography}).lean().exec(function(err, geo){
-            if(geo) result['geographyData'] = geo;
-            res.status(200).json({nonTraditional : results});
-          });
-        }
-      );
-    }
+  this.show = function(req, res){
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+      function(err, result)
+      {
+        if(!result) res.status(404).json({error : 'No Such Media Found'});
+        Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
+          if(geo) result['geographyData'] = geo;
+          res.status(200).json({nonTraditional : result});
+        });
+      }
+    );
+  }
 
 };
 

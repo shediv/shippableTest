@@ -8,7 +8,6 @@ var NonTraditional = new (require('../controllers/nonTraditional')).NonTradition
 
 router.get("/", NonTraditional.getNonTraditional);
 router.get("/filters", NonTraditional.getFilters);
-router.get("/subCategories", NonTraditional.getSubCategories);
 router.get("/:urlSlug", NonTraditional.show);
 
 module.exports = router;
