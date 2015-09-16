@@ -185,10 +185,10 @@ var NonTraditional = function()
       callback(null, MediaType);
     };
 
-    this.getSubCategories = function(req, res){
+    self.getSubCategories = function(req, res){
       var categoryId = req.query.categoryId;
       SubCategory.find({ categoryId:categoryId },'name').lean().exec(function(err, subCats){
-        res.status(200).json({subCategories:subCats});
+      res.status(200).json({subCategories:subCats});
       })
     }
 
