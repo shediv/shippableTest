@@ -111,11 +111,13 @@ var NonTraditional = function()
         'name'         : 1,
         'about'        : 1,
         'mediaOptions' : 1,
+        'geography'    : 1,
+        'urlSlug'      : 1
       };
       
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
-      query.match['hyperLocal'] = self.params.filters.hyperLocal;
+      //query.match['hyperLocal'] = self.params.filters.hyperLocal;
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
       
@@ -162,11 +164,10 @@ var NonTraditional = function()
               var pricingUnit2;
               var minimumUnit;
               var minimumBilling; 
-              for(i in results) geographyIds.push(results[i].geography);
-              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+              for(i in results) geographyIds = geographyIds.concat(results[i].geography);
+              Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
                 geographies = {}; 
                 for(i in geos) geographies[geos[i]._id] = geos[i];  
-
                 //To find minimum unit and minimum Billing 
                 for(i in results)
                 {
@@ -178,20 +179,20 @@ var NonTraditional = function()
                   
                   if(minimumQtyUnit2)
                   {
-                    minimumUnit = minimumQtyUnit1 + pricingUnit1 + '/' + minimumQtyUnit2 + pricingUnit2;
+                    minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
                     minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
                   }
                   else
                   {
-                    minimumUnit =  minimumQtyUnit1 +  pricingUnit1;
+                    minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
                     minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                   }
 
                   results[i]['minimumUnit'] = minimumUnit;
                   results[i]['minimumBilling'] = minimumBilling; 
+                  results[i]['firstMediaOption'] = firstmediaOptionsKey; 
                 }                                   
-
-                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                for(i in results) results[i]['geography'] = geographies[results[i].geography];
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
                 callbackInner(err, results);
               });
