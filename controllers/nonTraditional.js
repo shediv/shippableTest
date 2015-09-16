@@ -13,6 +13,7 @@ var NonTraditional = function()
   var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   var week = ['first','second','third','fourth'];
   var dayConversion = (24 * 60 * 60 * 1000);
+	var mongoose = require('mongoose');
   
   this.params = {};
   this.toolName = "nonTraditional";
@@ -166,15 +167,52 @@ var NonTraditional = function()
     };
 
     self.getCategories = function(callback){
-      Media.distinct('categoryId',
-        { toolId:self.toolId},
-        function(error, categoryIds) 
-        {
-          Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-            callback(error, cats);
-          });
-        }
-      );
+		async.parallel({
+			categories: function(callbackInner){
+				Media.distinct('categoryId',
+					{ toolId:self.toolId},
+					function(error, categoryIds)
+					{
+						Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
+							callbackInner(err, cats);
+						});
+					}
+				);
+			},
+			subCategories: function(callbackInner){
+				Media.distinct('subCategoryId',
+					{ toolId:self.toolId},
+					function(error, subCategoryIds)
+					{
+						SubCategory.aggregate(
+							{$match: {_id: {$in: subCategoryIds.map(function(id){ return new mongoose.Types.ObjectId(id); })}}},function(err, result){
+								var subObj = {};
+								for(i in result){
+									if(!subObj[result[i].categoryId]) subObj[result[i].categoryId] = [];
+									subObj[result[i].categoryId].push(result[i]);
+								}
+								callbackInner(err, subObj);
+							});
+					}
+				);
+			}
+		}, function(err, result){
+			for(i in result.categories){
+				result.categories[i].subCategories = result.subCategories[result.categories[i]._id];
+			}
+			callback(err, result.categories);
+		});
+
+/*		Media.distinct('categoryId',
+			{ toolId:self.toolId},
+			function(error, categoryIds)
+			{
+				Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
+					callback(error, cats);
+				});
+			}
+		);*/
+
     };
 
     self.getReaches = function(callback){
