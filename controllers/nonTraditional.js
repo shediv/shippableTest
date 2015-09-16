@@ -232,12 +232,12 @@ var NonTraditional = function()
 
     this.show = function(req, res){
       Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-        function(err, results)
+        function(err, result)
         {
-          if(!results) res.status(404).json({error : 'No Such Media Found'});
+          if(!result) res.status(404).json({error : 'No Such Media Found'});
           Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
             if(geo) result['geographyData'] = geo;
-            res.status(200).json({nonTraditional : results});
+            res.status(200).json({nonTraditional : result});
           });
         }
       );
