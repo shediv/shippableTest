@@ -135,7 +135,7 @@ var NonTraditional = function()
             {
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              callbackInner(err, count);
             }
           );
         },
