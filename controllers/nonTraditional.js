@@ -34,7 +34,6 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-        if(self.params.recommended) return self.newsPaperRecommend(self.params,callback);
         self.sortFilteredMedia(query, callback);
       }
     ],
@@ -51,22 +50,26 @@ var NonTraditional = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'categories'  : 'category',
-        // 'geographies' : 'geography',
-        // 'hyperlocal'  : ''
+        'categories'  : 'categoryId',
+        'geographies' : 'geography',
+        'hyperlocal'  : ''
       };
       query.projection = {
         '_id'          : 1,
         'name'         : 1,
         'about'        : 1,
+        'categoryId'   : 1,
+        'subCategoryId': 1,  
+        'geography'    : 1,
         'mediaOptions' : 1,
+        'logo'         : 1
       };
     
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
-      //query.match.isActive = 1;
+      query.match.isActive = 1;
       query.match.toolId = self.toolId;
       return query;
     };
@@ -79,15 +82,15 @@ var NonTraditional = function()
             {$match : query.match},
             {$group: { _id : null, count: {$sum: 1} }},
             function(err, result)
-            {
+            { 
               if(result[0] === undefined) count = 0;
               else count = result[0].count;
-              callbackInner(err, result);
+              return callbackInner(err, result);
             }
           );
         },
         medias : function(callbackInner)
-        {          
+        { 
           switch(query.sortBy)
           {
             case 'topSearched': query.sortBy = { 'views' : -1 }; break;
@@ -95,7 +98,7 @@ var NonTraditional = function()
             case 'minimumBilling': query.sortBy = {}; break;
             
           }
-          query.sortBy._id = 1;
+          //query.sortBy._id = 1;
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
@@ -119,7 +122,7 @@ var NonTraditional = function()
                 //To find minimum unit and minimum Billing 
                 for(i in results)
                 {
-                  firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                  firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
                   if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
                   if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
@@ -140,9 +143,10 @@ var NonTraditional = function()
                   results[i]['minimumBilling'] = minimumBilling; 
                 }                                   
 
-                for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                callbackInner(err, results);
+                //for(i in results) results[i]['city'] = geographies[results[i].geography].city;
+                if(self.params.sortBy == 'minimumBilling')
+                 results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                 callbackInner(err, results);
               });
             }
           );
@@ -202,17 +206,6 @@ var NonTraditional = function()
 			}
 			callback(err, result.categories);
 		});
-
-/*		Media.distinct('categoryId',
-			{ toolId:self.toolId},
-			function(error, categoryIds)
-			{
-				Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-					callback(error, cats);
-				});
-			}
-		);*/
-
     };
 
     self.getReaches = function(callback){
@@ -235,7 +228,7 @@ var NonTraditional = function()
         function(err, results)
         {
           if(!results) res.status(404).json({error : 'No Such Media Found'});
-          Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
+          Geography.findOne({ _id:results.geography}).lean().exec(function(err, geo){
             if(geo) result['geographyData'] = geo;
             res.status(200).json({nonTraditional : results});
           });
