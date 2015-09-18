@@ -194,7 +194,7 @@ var NonTraditional = function()
                 }                                   
                 for(i in results) results[i]['geography'] = geographies[results[i].geography];
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                callbackInner(err, results);
+                callbackInner(err, query);
               });
             }
           );

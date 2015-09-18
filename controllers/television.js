@@ -226,15 +226,15 @@ var Television = function()
       '_id' : 1,
       'urlSlug' : 1,
       'name' : 1,
-      'languages' : 1,
+      'language' : 1,
       'mediaOptions'  : 1
     };
     
     Media.find({_id: { $in: ids }}, project,function(err, results){
       async.each(results, function(result, callback){
         Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
-          result.genres = [];
-          for(i in genres) result.genres.push(genres[i].name);
+          results.genres = [];
+          for(i in genres) results.genres.push(genres[i].name);
           callback(err);
         })
       }, function(err){
