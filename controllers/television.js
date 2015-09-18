@@ -227,14 +227,15 @@ var Television = function()
       'urlSlug' : 1,
       'name' : 1,
       'language' : 1,
-      'mediaOptions'  : 1
+      'mediaOptions'  : 1,
+      'categoryId' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       async.each(results, function(result, callback){
         Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
-          results.genres = [];
-          for(i in genres) results.genres.push(genres[i].name);
+          result.genres = [];
+          for(i in genres) result.genres.push(genres[i].name);
           callback(err);
         })
       }, function(err){
