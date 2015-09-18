@@ -4,29 +4,23 @@ var _12thCross = function()
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
+  var Model12thCross = require('../models/12thCross').Model12thCross;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
   var SubCategory = require('../models/subCategory').SubCategory;
   
   this.params = {};
-  this.toolName = "nonTraditional";
   var self = this;
   
-  Tools.findOne({name: this.toolName}, function(err, result){
+  /*Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
-  });
+  });*/
   
   this.get12thCross = function(req, res){ 
-    res.status(200).json("12thCross function");
-    console.log(req.query.params);
     self.params = JSON.parse(req.query.params);
     async.waterfall([
-      function(callback)
-      {
-        self.buildGeographyQuery(callback);
-      },
-      function(geographies, callback)
+      function( callback)
       {
         callback(null, self.applyFilters(geographies));
       },
@@ -151,13 +145,13 @@ var _12thCross = function()
 
     this.getFilters = function(req, res){
       async.parallel({
-        adMaking : self.getAdMaking,
-        planning : self.getPlanning,
+        Categories : self.serviceProvided
+        /*planning : self.getPlanning,
         design : self.getDesign,
         marketingServices : self.getMarketingServices,
-        mediaBuying : self.getmediaBuying,
+        mediaBuying : self.getmediaBuying,*/
 
-      },
+      },                                                                                      
       function(err, results) 
       {
         if(err) res.status(500).json({err:err});
@@ -165,24 +159,34 @@ var _12thCross = function()
       });
     };
 
-    self.getAdMaking = function(callback){
-      
-    };
+    self.serviceProvided = function(callback){
+      Model12thCross.aggregate(
+        {$match : {categoryId: { $exists: 1}, isActive : 1}},
+        {$unwind: '$categoryId'},
+        {$group : { _id : '$categoryId', count : {$sum : 1}}},
+        function(err,results){
+          var catgoryIds = [];
+          results.map(function(o){ catgoryIds.push(o._id); });
+          Category.find({_id : {$in: catgoryIds}},'name').lean().exec(function(err, cats){
+            callback(err, cats);
+          });
+        });
+      };
 
     
 
-  this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, result)
-      {
-        if(!result) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
-          if(geo) result['geographyData'] = geo;
-          res.status(200).json({nonTraditional : result});
-        });
-      }
-    );
-  }
+    this.show = function(req, res){
+      Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+        function(err, result)
+        {
+          if(!result) res.status(404).json({error : 'No Such Media Found'});
+          Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
+            if(geo) result['geographyData'] = geo;
+            res.status(200).json({nonTraditional : result});
+          });
+        }
+      );
+    };
 
 };
 
