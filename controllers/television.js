@@ -155,7 +155,17 @@ var Television = function()
         function(error, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
-            callback(error, geos);
+            var geographies = [];
+            for(i in geos)
+            {
+              var key = Object.keys(geos[i])
+              var key = key[key.length - 1];
+              geographies.push({
+                '_id' : geos[i]._id,
+                'name' : geos[i][key]
+              });
+            }
+            callback(error, geographies);
           });
         }
       );
