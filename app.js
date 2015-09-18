@@ -23,6 +23,7 @@ var media = require('./routes/media');
 var geography = require('./routes/geography');
 var nonTraditional = require('./routes/nonTraditional');
 var digital = require('./routes/digital');
+var _12thCross = require('./routes/12thCross');
 var bestRates = require('./routes/bestRates');
 var parseExcel = require('./routes/parseExcel');
 
@@ -75,6 +76,7 @@ app.use('/digital', digital);
 app.use('/media', media);
 app.use('/geography', geography);
 app.use('/nonTraditional', nonTraditional);
+app.use('/12thCross', _12thCross);
 app.use('/bestRates', bestRates);
 app.use('/parseExcel', parseExcel);
 
