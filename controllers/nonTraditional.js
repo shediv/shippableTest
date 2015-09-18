@@ -219,36 +219,36 @@ var NonTraditional = function()
   };
 
     self.getCategories = function(callback){
-		  async.parallel({
+      async.parallel({
         categories: function(callbackInner){
-				  Media.distinct('categoryId',
-					 { toolId:self.toolId },
-					 function(error, categoryIds)
-					 {
-					   Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-						  callbackInner(err, cats);
-						});
-					 }
-				  );
+          Media.distinct('categoryId',
+           { toolId:self.toolId },
+           function(error, categoryIds)
+           {
+             Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
+              callbackInner(err, cats);
+            });
+           }
+          );
         },
         subCategories: function(callbackInner){
-				  Media.distinct('subCategoryId',
+          Media.distinct('subCategoryId',
             { toolId:self.toolId },
             function(error, subCategoryIds)
             {
               SubCategory.find({ _id:{ $in:subCategoryIds } }).lean().exec(function(err, result){
-								var subObj = {};
-								for(i in result)
+                var subObj = {};
+                for(i in result)
                 {
-									if(!subObj[result[i].categoryId]) subObj[result[i].categoryId] = [];
-									subObj[result[i].categoryId].push(result[i]);
-								}
-								callbackInner(err, subObj);
-							});
+                  if(!subObj[result[i].categoryId]) subObj[result[i].categoryId] = [];
+                  subObj[result[i].categoryId].push(result[i]);
+                }
+                callbackInner(err, subObj);
+              });
             }
-				  );
+          );
         }
-		  }, 
+      }, 
       function(err, result)
       {
         for(i in result.categories)
