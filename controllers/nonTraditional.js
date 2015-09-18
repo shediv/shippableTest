@@ -18,7 +18,6 @@ var NonTraditional = function()
   });
   
   this.getNonTraditional = function(req, res){ 
-    console.log(req.query.params);
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -31,7 +30,7 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-        self.sortFilteredMedia(query, callback);
+		  self.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result)
@@ -117,17 +116,17 @@ var NonTraditional = function()
       
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
-      query.match['hyperLocal'] = self.params.filters.hyperLocal;
+      if(self.params.filters.hyperlocal) query.match['hyperLocal'] = self.params.filters.hyperlocal;
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
-      
+
       return query;
     };
 
     self.sortFilteredMedia = function(query, callback){ 
       async.parallel({
         count : function(callbackInner)
-        {          
+        {
           Media.aggregate(
             {$match : query.match},
             {$group: { _id : null, count: {$sum: 1} }},
@@ -194,7 +193,7 @@ var NonTraditional = function()
                 }                                   
                 for(i in results) results[i]['geography'] = geographies[results[i].geography];
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                callbackInner(err, query);
+                callbackInner(err, results);
               });
             }
           );

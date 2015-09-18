@@ -58,7 +58,7 @@ app.use(function(req, res, next) {
   RoutesCollection.findOne({url:'/nonTraditional/filters'}).lean().exec(
       function(err, results)
       {
-        console.log(results);        
+        //console.log(results);
       }
     );
   next();
