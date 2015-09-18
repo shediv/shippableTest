@@ -41,22 +41,21 @@ var Television = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'channelGenres' : 'channelGenre',
+        'channelGenres' : 'categoryId',
         'languages' : 'language',
         'networks' : 'network',
-        'channelNames' : 'channelName',
+        'channelNames' : 'name',
         'geographies' : 'geography'
       };
       query.projection = {
         '_id' : 1,
         'urlSlug' : 1,
-        'name'       : '$channelName',
-        'channelGenre' : 1,
-        'category' : 1,
+        'name'       : 1,
         'mediaOptions' : 1,
         'geography' : 1,
         'language' : 1,        
-        'logo' : 1
+        'logo' : 1,
+        'categoryId' : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -69,7 +68,7 @@ var Television = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){      
+    self.sortFilteredMedia = function(query, callback){
       async.parallel({
         count : function(callbackInner)
         {          
@@ -88,24 +87,25 @@ var Television = function()
         {          
           switch(query.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
-            case 'channelGenre': query.sortBy = { 'channelGenre' : -1}; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;
+            //case 'channelGenre': query.sortBy = { 'channelGenre' : -1}; break;
             //case 'lowest10sec': query.sortBy = { 'channelGenre' : -1}; break;
           }
           query.sortBy._id = 1;
 
           Media.aggregate(
-            {$match: query.match}, //{$sort: query.sortBy},
+            {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = [];                            
-              for(i in results) geographyIds.push(results[i].geography);
-              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-                geographies = {};
-                for(i in geos) geographies[geos[i]._id] = geos[i];
-                for(i in results) results[i]['city'] = geographies[results[i].geography].city;                
+              async.each(results, function(result, callback){
+                Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
+                  result.genres = [];
+                  for(i in genres) result.genres.push(genres[i].name);
+                  callback(err);
+                })
+              }, function(err){
                 callbackInner(err, results);
               });
             }
@@ -120,9 +120,9 @@ var Television = function()
 
   this.getFilters = function(req, res){
     async.parallel({
-      channelGenres : self.getChannelGenres,
-      languages : self.getLanguages,
+      channelGenres : self.getCategories,
       channelNames : self.getChannelNames,
+      languages : self.getLanguages,
       networks : self.getNetworks,
       geographies : self.getGeographies
     },
@@ -133,13 +133,18 @@ var Television = function()
     });
   };
 
-    self.getChannelGenres = function(callback){
+    self.getCategories = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "channelGenre": { $exists: 1} }},
-        {$group : { _id : '$channelGenre', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, categoryId: { $exists: 1}, isActive : 1}},
+        {$unwind: '$categoryId'},
+        {$group : { _id : '$categoryId', count : {$sum : 1}}},
         function(error, results) 
         {
-          callback(error, results);
+          var catIds = [];
+          results.map(function(o){ catIds.push(o._id); });
+          Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
+            callback(error, cats);
+          });
         }
       );
     };
@@ -149,7 +154,7 @@ var Television = function()
         { toolId:self.toolId , isActive:1 },
         function(error, geographyIds) 
         {
-          Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+          Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
             callback(error, geos);
           });
         }
@@ -169,8 +174,8 @@ var Television = function()
 
     self.getChannelNames = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "channelName": { $exists: 1} }},
-        {$group : { _id : '$channelName', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, "name": { $exists: 1} }},
+        {$group : { _id : '$name', count : {$sum : 1}}},
         function(error, results) 
         {
           callback(error, results);
@@ -181,6 +186,7 @@ var Television = function()
     self.getLanguages = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
+        {$unwind: '$language'},
         {$group : { _id : '$language', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -194,7 +200,11 @@ var Television = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({television : results});        
+        Category.find({ _id:{ $in:results.categoryId } },'name').lean().exec(function(err, genres){
+          results.genres = [];
+          for(i in genres) results.genres.push(genres[i].name);
+          res.status(200).json({television : results});
+        })
       }
     );
   }
@@ -206,17 +216,20 @@ var Television = function()
       '_id' : 1,
       'urlSlug' : 1,
       'name' : 1,
-      'locality' : 1,
-      'landmark' : 1,
-      'price' : 1,
-      'category' : 1,
-      'mediaOptions' : 1,
-      'geography' : 1,        
-      'logo' : 1
+      'languages' : 1,
+      'mediaOptions'  : 1
     };
     
     Media.find({_id: { $in: ids }}, project,function(err, results){
-      res.status(200).json({medias:results});
+      async.each(results, function(result, callback){
+        Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
+          result.genres = [];
+          for(i in genres) result.genres.push(genres[i].name);
+          callback(err);
+        })
+      }, function(err){
+        res.status(200).json({medias:results});
+      });
     });
   };
 };
