@@ -1,6 +1,7 @@
 var Television = function()
 {
   var async = require('async');
+  var underscore = require('underscore')._;
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
@@ -103,6 +104,12 @@ var Television = function()
                 Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
                   result.genres = [];
                   for(i in genres) result.genres.push(genres[i].name);
+                  if(result.mediaOptions !== undefined)
+                  {
+                    var price = [];
+                    for(i in result.mediaOptions) price.push(result.mediaOptions[i].cardRate)
+                    result.rate = underscore.min(price)
+                  }
                   callback(err);
                 })
               }, function(err){
@@ -236,6 +243,12 @@ var Television = function()
         Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
           result.genres = [];
           for(i in genres) result.genres.push(genres[i].name);
+          if(result.mediaOptions !== undefined)
+          {
+            var price = [];
+            for(i in result.mediaOptions) price.push(result.mediaOptions[i].cardRate)
+            result.rate = underscore.min(price)
+          }
           callback(err);
         })
       }, function(err){
