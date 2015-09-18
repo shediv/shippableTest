@@ -92,47 +92,7 @@ var _12thCross = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = [];
-              var mediaOptions = [];
-              var firstmediaOptionsKey;
-              var minimumQtyUnit1;
-              var minimumQtyUnit2;
-              var pricingUnit1;
-              var pricingUnit2;
-              var minimumUnit;
-              var minimumBilling; 
-              for(i in results) geographyIds = geographyIds.concat(results[i].geography);
-              Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
-                geographies = {}; 
-                for(i in geos) geographies[geos[i]._id] = geos[i];  
-                //To find minimum unit and minimum Billing 
-                for(i in results)
-                {
-                  firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
-                  if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-                  if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-                  if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                  if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
-                  
-                  if(minimumQtyUnit2)
-                  {
-                    minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
-                    minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
-                  }
-                  else
-                  {
-                    minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
-                    minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
-                  }
-
-                  results[i]['minimumUnit'] = minimumUnit;
-                  results[i]['minimumBilling'] = minimumBilling; 
-                  results[i]['firstMediaOption'] = firstmediaOptionsKey; 
-                }                                   
-                for(i in results) results[i]['geography'] = geographies[results[i].geography];
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                callbackInner(err, results);
-              });
+              callbackInner(err,results);
             }
           );
         }
@@ -168,7 +128,7 @@ var _12thCross = function()
           var catgoryIds = [];
           results.map(function(o){ catgoryIds.push(o._id); });
           Category.find({_id : {$in: catgoryIds}},'name').lean().exec(function(err, cats){
-            callback(err, cats);
+          callback(err, cats);
           });
         });
       };
