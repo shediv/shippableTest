@@ -91,7 +91,7 @@ var Airport = function()
 
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
-            {$skip : query.offset}, {$limit: query.limit},
+            //{$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
@@ -135,7 +135,7 @@ var Airport = function()
 
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                //results = results.slice(self.params.offset, self.params.limit);
+                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
             }
