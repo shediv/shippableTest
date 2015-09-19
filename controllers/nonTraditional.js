@@ -111,7 +111,8 @@ var NonTraditional = function()
         'about'        : 1,
         'mediaOptions' : 1,
         'geography'    : 1,
-        'urlSlug'      : 1
+        'urlSlug'      : 1,
+        'logo'         : 1
       };
       
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
