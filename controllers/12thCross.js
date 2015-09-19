@@ -120,7 +120,7 @@ var _12thCross = function()
     };
 
     self.serviceProvided = function(callback){
-      Model12thCross.aggregate(
+      /*Model12thCross.aggregate(
         {$match : {categoryId: { $exists: 1}, isActive : 1}},
         {$unwind: '$categoryId'},
         {$group : { _id : '$categoryId', count : {$sum : 1}}},
@@ -128,10 +128,46 @@ var _12thCross = function()
           var catgoryIds = [];
           results.map(function(o){ catgoryIds.push(o._id); });
           Category.find({_id : {$in: catgoryIds}},'name').lean().exec(function(err, cats){
+
           callback(err, cats);
           });
-        });
-      };
+        });*/
+        async.parallel({
+        categories: function(callbackInner){
+          Model12thCross.aggregate(
+            {$match : {categoryId: { $exists: 1}, isActive : 1}},
+            {$unwind: '$categoryId'},
+            {$group : { _id : '$categoryId', count : {$sum : 1}}},
+            function(err,results){
+              var catgoryIds = [];
+              results.map(function(o){ catgoryIds.push(o._id); });
+              Category.find({_id : {$in: catgoryIds}},'name').lean().exec(function(err, cats){
+              callbackInner(err, cats);
+              });
+            }
+          );
+        },
+        subCategories: function(callbackInner){
+          Model12thCross.aggregate(
+            {$match : {subCategoryId: { $exists: 1}, isActive : 1}},
+            {$unwind: '$subCategoryId'},
+            {$group : { _id : '$subCategoryId'}},
+            /*{$project : {'subCategoryId' : 1}},*/
+            function(err,results){
+              console.log(results);
+              callbackInner(err,results);
+            } 
+          );
+        }
+      }, 
+      function(err, result)
+      {
+        /*for(i in result.categories)
+          result.categories[i].subCategories = result.subCategories[result.categories[i]._id];
+        callback(err, result.categories);*/
+        callback(err,result);
+      });
+    };
 
     
 
