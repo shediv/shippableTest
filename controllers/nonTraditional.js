@@ -150,7 +150,7 @@ var NonTraditional = function()
           query.sortBy._id = 1;
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
-            //{$skip : query.offset}, {$limit: query.limit},
+            {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
@@ -193,7 +193,7 @@ var NonTraditional = function()
                 }                                   
                 for(i in results) results[i]['geography'] = geographies[results[i].geography];
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
+                //results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
             }
