@@ -166,6 +166,7 @@ var Airport = function()
         function(error, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            for(i in geos) if(geos[i].city === undefined) geos[i].city = 'All India';
             callback(error, geos);
           });
         }
