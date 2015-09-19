@@ -1,6 +1,7 @@
 var Television = function()
 {
   var async = require('async');
+  var underscore = require('underscore')._;
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
@@ -103,6 +104,12 @@ var Television = function()
                 Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
                   result.genres = [];
                   for(i in genres) result.genres.push(genres[i].name);
+                  if(result.mediaOptions !== undefined)
+                  {
+                    var price = [];
+                    for(i in result.mediaOptions) price.push(result.mediaOptions[i].cardRate)
+                    result.rate = underscore.min(price)
+                  }
                   callback(err);
                 })
               }, function(err){
@@ -155,7 +162,17 @@ var Television = function()
         function(error, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
-            callback(error, geos);
+            var geographies = [];
+            for(i in geos)
+            {
+              var key = Object.keys(geos[i])
+              var key = key[key.length - 1];
+              geographies.push({
+                '_id' : geos[i]._id,
+                'name' : geos[i][key]
+              });
+            }
+            callback(error, geographies);
           });
         }
       );
@@ -216,15 +233,22 @@ var Television = function()
       '_id' : 1,
       'urlSlug' : 1,
       'name' : 1,
-      'languages' : 1,
-      'mediaOptions'  : 1
+      'language' : 1,
+      'mediaOptions'  : 1,
+      'categoryId' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       async.each(results, function(result, callback){
         Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
           result.genres = [];
           for(i in genres) result.genres.push(genres[i].name);
+          if(result.mediaOptions !== undefined)
+          {
+            var price = [];
+            for(i in result.mediaOptions) price.push(result.mediaOptions[i].cardRate)
+            result.rate = underscore.min(price)
+          }
           callback(err);
         })
       }, function(err){

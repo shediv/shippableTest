@@ -91,7 +91,7 @@ var Airport = function()
 
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
-            {$skip : query.offset}, {$limit: query.limit},
+            //{$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
@@ -135,6 +135,7 @@ var Airport = function()
 
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
                 if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
             }
@@ -165,6 +166,7 @@ var Airport = function()
         function(error, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
+            for(i in geos) if(geos[i].city === undefined) geos[i].city = 'All India';
             callback(error, geos);
           });
         }
