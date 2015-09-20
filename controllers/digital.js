@@ -16,8 +16,7 @@ var Digital = function()
     self.toolId = result._id.toString();
   });
 
-  this.getTelevision = function(req, res){
-    //res.status(200).json("result");
+  this.getDigital = function(req, res){
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function(callback)
@@ -42,22 +41,25 @@ var Digital = function()
       query.limit = self.params.limit || 9;
       query.match = {};
       var filters = {
-        'geoTargets' : 'geoTarget',
+        'geoTargets' : 'geoTagging',
         'languages' : 'language',
-        'categories' : 'category',
+        'categories' : 'categoryId',
         'pricingModels' : 'pricingModel',
         'mediums' : 'medium'
       };
       query.projection = {
         '_id' : 1,
         'urlSlug' : 1,
-        'name'       : 1,
+        'name' : 1,
         'medium' : 1,
-        'category' : 1,
         'mediaOptions' : 1,
-        'geography' : 1,
         'language' : 1,        
-        'logo' : 1
+        'logo' : 1,
+        'geoTagging' : 1,
+        'reach1' : 1,
+        'reach2' : 1,
+        'unit1' : 1,
+        'unit2' : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -89,7 +91,7 @@ var Digital = function()
         {          
           switch(query.sortBy)
           {
-            case 'topSearched': query.sortBy = { 'views' : -1 }; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'medium': query.sortBy = { 'medium' : -1}; break;
             //case 'lowest10sec': query.sortBy = { 'channelGenre' : -1}; break;
           }
@@ -97,28 +99,45 @@ var Digital = function()
 
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
-            {$skip : query.offset}, {$limit: query.limit},
+            //{$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
-              var geographyIds = [];                            
-              for(i in results) geographyIds.push(results[i].geography);
-              for(i in results) {              
-                results[i]['reach'] = results[i]['reach'] + results[i]['unit'];
+              var firstmediaOptionsKey;
+              var minimumQtyUnit1;
+              var minimumQtyUnit2;
+              var pricingUnit1;
+              var pricingUnit2;
+              var minimumUnit;
+              var minimumBilling; 
+              for(i in results) 
+              {
+                if(results[i]['reach1'] !== undefined && results[i]['unit1'])
+                  results[i]['reach1'] = results[i]['reach1'] + ' ' + results[i]['unit1'];
+                if(results[i]['reach2'] !== undefined && results[i]['unit2'])
+                  results[i]['reach2'] = results[i]['reach2'] + ' ' + results[i]['unit2'];
                 
-                mediaOptions.push(results[i]['mediaOptions']);
-                firstmediaOptionsKey = Object.keys(mediaOptions[i])[0];
+                firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
+                if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
                 if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }
-                minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                
+                if(minimumQtyUnit2)
+                {
+                  minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
+                  minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+                }
+                else
+                {
+                  minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
+                  minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                }
                 results[i]['minimumBilling'] = minimumBilling;
               }  
-              Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-                geographies = {};
-                for(i in geos) geographies[geos[i]._id] = geos[i];
-                for(i in results) results[i]['city'] = geographies[results[i].geography].city;                
-                callbackInner(err, results);
-              });
+              if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+              results = results.slice(self.params.offset, self.params.limit + self.params.offset);
+              callbackInner(err, results);
             }
           );
         }
@@ -146,11 +165,15 @@ var Digital = function()
 
     self.getCategories = function(callback){
       Media.aggregate(
-        {$match: {toolId:self.toolId, "category": { $exists: 1} }},
-        {$group : { _id : '$category', count : {$sum : 1}}},
+        {$match: {toolId:self.toolId, isActive : 1}},
+        {$group : { _id : '$categoryId', count : {$sum : 1}}},
         function(error, results) 
         {
-          callback(error, results);
+          var catIds = [];
+          results.map(function(o){ catIds.push(o._id); });
+          Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
+            callback(error, cats);
+          });
         }
       );
     };
@@ -168,8 +191,8 @@ var Digital = function()
 
     self.getGeoTargets = function(callback){
       var geoTargets = [
-        {'_id' : 'yes', 'name' : 'Yes'},
-        {'_id' : 'no', 'name' : 'No'}
+        {'_id' : true, 'name' : 'Yes'},
+        {'_id' : false, 'name' : 'No'}
       ];
       callback(null, geoTargets);
     };
@@ -177,6 +200,7 @@ var Digital = function()
     self.getPricingModels = function(callback){
       Media.aggregate(
         {$match: {toolId:self.toolId, "pricingModel": { $exists: 1} }},
+        {$unwind: '$pricingModel'},
         {$group : { _id : '$pricingModel', count : {$sum : 1}}},
         function(error, results) 
         {
@@ -201,7 +225,10 @@ var Digital = function()
       function(err, results)
       {
         if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({digital : results});        
+        Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
+          if(cat) results.categoryName = cat.name;
+          res.status(200).json({digital : results});        
+        });
       }
     );
   }
@@ -214,15 +241,49 @@ var Digital = function()
       'urlSlug' : 1,
       'name' : 1,
       'medium' : 1,
-      'reach' : 1,
-      'unit' : 1,
-      'category' : 1,
       'mediaOptions' : 1,
-      'geography' : 1,        
-      'logo' : 1
+      'language' : 1,        
+      'logo' : 1,
+      'geoTagging' : 1,
+      'reach1' : 1,
+      'reach2' : 1,
+      'unit1' : 1,
+      'unit2' : 1
     };
     
     Media.find({_id: { $in: ids }}, project,function(err, results){
+      var firstmediaOptionsKey;
+      var minimumQtyUnit1;
+      var minimumQtyUnit2;
+      var pricingUnit1;
+      var pricingUnit2;
+      var minimumUnit;
+      var minimumBilling; 
+      for(i in results) 
+      {
+        if(results[i]['reach1'] !== undefined && results[i]['unit1'])
+          results[i]['reach1'] = results[i]['reach1'] + ' ' + results[i]['unit1'];
+        if(results[i]['reach2'] !== undefined && results[i]['unit2'])
+          results[i]['reach2'] = results[i]['reach2'] + ' ' + results[i]['unit2'];
+        
+        firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
+        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+        
+        if(minimumQtyUnit2)
+        {
+          minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
+          minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+        }
+        else
+        {
+          minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
+          minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+        }
+        results[i]['minimumBilling'] = minimumBilling;
+      }
       res.status(200).json({medias:results});
     });
   };
