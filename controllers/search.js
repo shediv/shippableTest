@@ -29,7 +29,8 @@ var Search = function()
         'name' : 1,
         'urlSlug' : 1,
         'logo' : 1,
-        'toolId' : 1
+        'toolId' : 1,
+        'views' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
       Media.aggregate( 
@@ -41,6 +42,7 @@ var Search = function()
           async.each(results, function(result, callbackEach){
             Tools.findOne({ _id:result._id },'name').lean().exec(function(err, tool){
               if(tool) result['toolName'] = tool.name;
+              result['medias'] = result['medias'].slice(0, 10);
               callbackEach(err);
             });
           }, function(err){
@@ -56,7 +58,7 @@ var Search = function()
         'urlSlug' : 1,
         'logo' : 1
       };
-      TwelthCross.find({ searchKeyWords:{ $in:query } }, project).lean().exec(function(err, results){
+      TwelthCross.find({ searchKeyWords:{ $in:query } }, project).skip(0).limit(10).lean().exec(function(err, results){
         callback(err, results);
       });
     }
