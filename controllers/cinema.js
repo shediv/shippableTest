@@ -351,6 +351,7 @@ var Cinema = function()
           if(geos) results.geography = geos;
           if(results.type == 'onScreen')
           {
+            dateObj = new Date();
             dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
             var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                               + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'

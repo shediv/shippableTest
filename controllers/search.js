@@ -33,6 +33,7 @@ var Search = function()
         'views' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
+      var finalResults = [];
       Media.aggregate( 
         { $match:match },
         { $project:project },
