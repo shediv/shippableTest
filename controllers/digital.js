@@ -251,7 +251,7 @@ var Digital = function()
       'unit2' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       var firstmediaOptionsKey;
       var minimumQtyUnit1;
       var minimumQtyUnit2;
