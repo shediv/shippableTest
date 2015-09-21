@@ -30,23 +30,46 @@ var Search = function()
         'urlSlug' : 1,
         'logo' : 1,
         'toolId' : 1,
-        'views' : 1
+        'views' : 1,
+        'theatreName' : 1,
+        'resultMallName' : 1,
+        'cinemaChain' : 1,
+        'mallName' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
+      var finalResults = [];
       Media.aggregate( 
         { $match:match },
         { $project:project },
         { $group:{ _id:'$toolId', medias:{ $push:'$$ROOT' } } },
         function(err, results)
         {
+          results.sort(function(a,b){ return a.medias.length < b.medias.length });
           async.each(results, function(result, callbackEach){
             Tools.findOne({ _id:result._id },'name').lean().exec(function(err, tool){
-              if(tool) result['toolName'] = tool.name;
               result['medias'] = result['medias'].slice(0, 10);
+              for(i in result['medias'])
+              {
+                result['medias'][i].toolName = tool.name;
+                if(result['medias'][i].resultMallName !== undefined)
+                {
+                  result['medias'][i].name = result['medias'][i].theatreName + ', ' + result['medias'][i].resultMallName;
+                  delete result['medias'][i].theatreName;
+                  delete result['medias'][i].resultMallName;
+                  delete result['medias'][i].cinemaChain;
+                }
+                if(result['medias'][i].mallName !== undefined)
+                {
+                  result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
+                  delete result['medias'][i].mallName;
+                  delete result['medias'][i].cinemaChain;
+                }
+                finalResults.push(result['medias'][i]);
+              }
               callbackEach(err);
             });
           }, function(err){
-            callback(err, results);
+            callback(err, finalResults);
           });
         }
       );
@@ -56,7 +79,8 @@ var Search = function()
       var project = {
         'name' : 1,
         'urlSlug' : 1,
-        'logo' : 1
+        'logo' : 1,
+        'views' : 1,
       };
       TwelthCross.find({ searchKeyWords:{ $in:query } }, project).skip(0).limit(10).lean().exec(function(err, results){
         callback(err, results);

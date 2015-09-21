@@ -59,7 +59,8 @@ var Digital = function()
         'reach1' : 1,
         'reach2' : 1,
         'unit1' : 1,
-        'unit2' : 1
+        'unit2' : 1,
+        'categoryId' : 1
       };
 
       Object.keys(filters).map(function(value){
@@ -102,41 +103,38 @@ var Digital = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var firstmediaOptionsKey;
-              var minimumQtyUnit1;
-              var minimumQtyUnit2;
-              var pricingUnit1;
-              var pricingUnit2;
-              var minimumUnit;
-              var minimumBilling; 
-              for(i in results) 
-              {
-                if(results[i]['reach1'] !== undefined && results[i]['unit1'])
-                  results[i]['reach1'] = results[i]['reach1'] + ' ' + results[i]['unit1'];
-                if(results[i]['reach2'] !== undefined && results[i]['unit2'])
-                  results[i]['reach2'] = results[i]['reach2'] + ' ' + results[i]['unit2'];
+              async.each(results, function(result, callback){
+                if(result['reach1'] !== undefined && result['unit1'])
+                  result['reach1'] = result['reach1'] + ' ' + result['unit1'];
+                if(result['reach2'] !== undefined && result['unit2'])
+                  result['reach2'] = result['reach2'] + ' ' + result['unit2'];
                 
-                firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
-                if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-                if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                firstmediaOptionsKey = Object.keys(result['mediaOptions'])[0];
+                if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+                if(result.mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = result.mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                if(result.mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = result.mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
                 
                 if(minimumQtyUnit2)
                 {
                   minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
-                  minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+                  minimumBilling = (result.mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
                 }
                 else
                 {
                   minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
-                  minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                  minimumBilling =  result.mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                 }
-                results[i]['minimumBilling'] = minimumBilling;
-              }  
-              if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
-              results = results.slice(self.params.offset, self.params.limit + self.params.offset);
-              callbackInner(err, results);
+                result['minimumBilling'] = minimumBilling;
+                Category.findOne({ _id:result.categoryId },'name').lean().exec(function(err, cat){
+                  if(cat) result.categoryName = cat.name;
+                  callback(err);
+                });
+              }, function(err){
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
+                callbackInner(err, results);
+              }); 
             }
           );
         }
@@ -247,43 +245,41 @@ var Digital = function()
       'reach1' : 1,
       'reach2' : 1,
       'unit1' : 1,
-      'unit2' : 1
+      'unit2' : 1,
+      'categoryId' : 1
     };
     
-    Media.find({_id: { $in: ids }}, project,function(err, results){
-      var firstmediaOptionsKey;
-      var minimumQtyUnit1;
-      var minimumQtyUnit2;
-      var pricingUnit1;
-      var pricingUnit2;
-      var minimumUnit;
-      var minimumBilling; 
-      for(i in results) 
-      {
-        if(results[i]['reach1'] !== undefined && results[i]['unit1'])
-          results[i]['reach1'] = results[i]['reach1'] + ' ' + results[i]['unit1'];
-        if(results[i]['reach2'] !== undefined && results[i]['unit2'])
-          results[i]['reach2'] = results[i]['reach2'] + ' ' + results[i]['unit2'];
+    Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
+      async.each(results, function(result, callback){
+        if(result['reach1'] !== undefined && result['unit1'])
+          result['reach1'] = result['reach1'] + ' ' + result['unit1'];
+        if(result['reach2'] !== undefined && result['unit2'])
+          result['reach2'] = result['reach2'] + ' ' + result['unit2'];
         
-        firstmediaOptionsKey = Object.keys(results[i]['mediaOptions'])[0];
-        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-        if(results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = results[i].mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-        if(results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = results[i].mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+        firstmediaOptionsKey = Object.keys(result['mediaOptions'])[0];
+        if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+        if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+        if(result.mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = result.mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+        if(result.mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = result.mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
         
         if(minimumQtyUnit2)
         {
           minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
-          minimumBilling = (results[i].mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+          minimumBilling = (result.mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
         }
         else
         {
           minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
-          minimumBilling =  results[i].mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+          minimumBilling =  result.mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
         }
-        results[i]['minimumBilling'] = minimumBilling;
-      }
-      res.status(200).json({medias:results});
+        result['minimumBilling'] = minimumBilling;
+        Category.findOne({ _id:result.categoryId },'name').lean().exec(function(err, cat){
+          if(cat) result.categoryName = cat.name;
+          callback(err);
+        });
+      }, function(err){
+        res.status(200).json({medias:results});  
+      });
     });
   };
 };
