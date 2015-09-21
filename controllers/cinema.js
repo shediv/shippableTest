@@ -349,6 +349,11 @@ var Cinema = function()
         if(!results) res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
+          dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
+          var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
+                            + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
+                            + dateObj.getFullYear();
+          result.nextFriday = nextFriday;
           res.status(200).json({cinema : results});
         });
       }
