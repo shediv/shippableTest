@@ -30,7 +30,11 @@ var Search = function()
         'urlSlug' : 1,
         'logo' : 1,
         'toolId' : 1,
-        'views' : 1
+        'views' : 1,
+        'theatreName' : 1,
+        'resultMallName' : 1,
+        'cinemaChain' : 1,
+        'mallName' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
       var finalResults = [];
@@ -47,6 +51,19 @@ var Search = function()
               for(i in result['medias'])
               {
                 result['medias'][i].toolName = tool.name;
+                if(result['medias'][i].resultMallName !== undefined)
+                {
+                  result['medias'][i].name = result['medias'][i].theatreName + ', ' + result['medias'][i].resultMallName;
+                  delete result['medias'][i].theatreName;
+                  delete result['medias'][i].resultMallName;
+                  delete result['medias'][i].cinemaChain;
+                }
+                if(result['medias'][i].mallName !== undefined)
+                {
+                  result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
+                  delete result['medias'][i].mallName;
+                  delete result['medias'][i].cinemaChain;
+                }
                 finalResults.push(result['medias'][i]);
               }
               callbackEach(err);
