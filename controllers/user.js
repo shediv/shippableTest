@@ -278,7 +278,7 @@ var User = function()
 		        service: 'Gmail',
 		        auth: {
 		          user: 'hk8049@gmail.com',
-		          pass: '03he8310'
+		          pass: ''
 		        }
 		      });
 		      var mailOptions = {
