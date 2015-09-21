@@ -40,6 +40,7 @@ var Search = function()
         { $group:{ _id:'$toolId', medias:{ $push:'$$ROOT' } } },
         function(err, results)
         {
+          results.sort(function(a,b){ return a.medias.length < b.medias.length });
           async.each(results, function(result, callbackEach){
             Tools.findOne({ _id:result._id },'name').lean().exec(function(err, tool){
               result['medias'] = result['medias'].slice(0, 10);
@@ -61,7 +62,8 @@ var Search = function()
       var project = {
         'name' : 1,
         'urlSlug' : 1,
-        'logo' : 1
+        'logo' : 1,
+        'views' : 1,
       };
       TwelthCross.find({ searchKeyWords:{ $in:query } }, project).skip(0).limit(10).lean().exec(function(err, results){
         callback(err, results);
