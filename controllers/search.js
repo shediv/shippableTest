@@ -42,12 +42,16 @@ var Search = function()
         {
           async.each(results, function(result, callbackEach){
             Tools.findOne({ _id:result._id },'name').lean().exec(function(err, tool){
-              if(tool) result['toolName'] = tool.name;
               result['medias'] = result['medias'].slice(0, 10);
+              for(i in result['medias'])
+              {
+                result['medias'][i].toolName = tool.name;
+                finalResults.push(result['medias'][i]);
+              }
               callbackEach(err);
             });
           }, function(err){
-            callback(err, results);
+            callback(err, finalResults);
           });
         }
       );
