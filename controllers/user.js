@@ -295,10 +295,12 @@ var User = function()
 		        done(err, 'done');
 		      });
 		    }
-		  ], function(err) {
+		  ], 
+		  function(err) {
 		  		if(err)res.status(200).json("mail not sent"+ err);
-		    res.status(200).json("mail sent");
-		  });
+		    	res.status(200).json("mail sent");
+		  }
+		);
 	}	
 }
 
