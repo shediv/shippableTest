@@ -342,6 +342,19 @@ var Cinema = function()
     );
   };
 
+  this.show = function(req, res){
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+      function(err, results)
+      {
+        if(!results) res.status(404).json({error : 'No Such Media Found'});
+        Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
+          if(geos) results.geography = geos;
+          res.status(200).json({cinema : results});
+        });
+      }
+    );
+  }
+
 };
 
 module.exports.Cinema = Cinema;
