@@ -11,5 +11,6 @@ router.get("/screens", CinemaCtrl.showCinemas);
 router.get("/filters", CinemaCtrl.getFilters);
 router.get("/upcomingMovies", CinemaCtrl.upcomingMovies);
 router.post("/bestRates", CinemaCtrl.getFilters);
+router.get("/:urlSlug", CinemaCtrl.show);
 
 module.exports = router;
