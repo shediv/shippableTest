@@ -104,7 +104,7 @@ var Digital = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              ascync.each(results, function(result, callback){
+              async.each(results, function(result, callback){
                 if(result['reach1'] !== undefined && result['unit1'])
                   result['reach1'] = results[i]['reach1'] + ' ' + result[i]['unit1'];
                 if(result['reach2'] !== undefined && result['unit2'])
@@ -251,9 +251,9 @@ var Digital = function()
     };
     
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
-      ascync.each(results, function(result, callback){
+      async.each(results, function(result, callback){
         if(result['reach1'] !== undefined && result['unit1'])
-          result['reach1'] = results[i]['reach1'] + ' ' + result[i]['unit1'];
+          result['reach1'] = result['reach1'] + ' ' + result['unit1'];
         if(result['reach2'] !== undefined && result['unit2'])
           result['reach2'] = result['reach2'] + ' ' + result['unit2'];
         
