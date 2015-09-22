@@ -36,7 +36,9 @@ var Search = function()
         'cinemaChain' : 1,
         'mallName' : 1,
         'station' : 1,
-        'city' : 1
+        'city' : 1,
+        'type' : 1,
+        'areaCovered' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
       var finalResults = [];
@@ -53,24 +55,32 @@ var Search = function()
               for(i in result['medias'])
               {
                 result['medias'][i].toolName = tool.name;
-                if(result['medias'][i].resultMallName !== undefined)
+                switch(tool.name)
                 {
-                  result['medias'][i].name = result['medias'][i].theatreName + ', ' + result['medias'][i].resultMallName;
-                  delete result['medias'][i].theatreName;
-                  delete result['medias'][i].resultMallName;
-                  delete result['medias'][i].cinemaChain;
-                }
-                if(result['medias'][i].mallName !== undefined)
-                {
-                  result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
-                  delete result['medias'][i].mallName;
-                  delete result['medias'][i].cinemaChain;
-                }
-                if(result['medias'][i].station !== undefined)
-                {
-                  result['medias'][i].name = result['medias'][i].station + ', ' + result['medias'][i].city;
-                  delete result['medias'][i].station;
-                  delete result['medias'][i].city; 
+                  case 'cinema':
+                    if(result['medias'][i].type == 'onScreen')
+                    {
+                      result['medias'][i].name = result['medias'][i].theatreName + ', ' + result['medias'][i].resultMallName;
+                      delete result['medias'][i].theatreName;
+                      delete result['medias'][i].resultMallName;
+                    }
+                    else
+                    {
+                      result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
+                      delete result['medias'][i].mallName;
+                    }
+                    delete result['medias'][i].cinemaChain;
+                    delete result['medias'][i].type;
+                    break;
+                  case 'radio':
+                    result['medias'][i].name = result['medias'][i].station + ', ' + result['medias'][i].city;
+                    delete result['medias'][i].station;
+                    delete result['medias'][i].city;
+                    break;
+                  case 'newspaper':
+                    result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].areaCovered;
+                    delete result['medias'][i].areaCovered;
+                    break;
                 }
                 finalResults.push(result['medias'][i]);
               }
