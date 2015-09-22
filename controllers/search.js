@@ -34,7 +34,9 @@ var Search = function()
         'theatreName' : 1,
         'resultMallName' : 1,
         'cinemaChain' : 1,
-        'mallName' : 1
+        'mallName' : 1,
+        'station' : 1,
+        'city' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
       var finalResults = [];
@@ -63,6 +65,12 @@ var Search = function()
                   result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
                   delete result['medias'][i].mallName;
                   delete result['medias'][i].cinemaChain;
+                }
+                if(result['medias'][i].station !== undefined)
+                {
+                  result['medias'][i].name = result['medias'][i].station + ', ' + result['medias'][i].city;
+                  delete result['medias'][i].station;
+                  delete result['medias'][i].city; 
                 }
                 finalResults.push(result['medias'][i]);
               }
