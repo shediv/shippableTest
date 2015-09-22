@@ -90,7 +90,7 @@ var Search = function()
         'logo' : 1,
         'views' : 1,
       };
-      TwelthCross.find({ searchKeyWords:{ $in:query } }, project).skip(0).limit(10).lean().exec(function(err, results){
+      TwelthCross.find({ searchKeyWords:{ $all:query } }, project).skip(0).limit(10).lean().exec(function(err, results){
         callback(err, results);
       });
     }
