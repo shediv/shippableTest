@@ -89,7 +89,7 @@ var Digital = function()
           );
         },
         medias : function(callbackInner)
-        {          
+        { 
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
@@ -97,7 +97,6 @@ var Digital = function()
             //case 'lowest10sec': query.sortBy = { 'channelGenre' : -1}; break;
           }
           query.sortBy._id = 1;
-
           Media.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
             //{$skip : query.offset}, {$limit: query.limit},

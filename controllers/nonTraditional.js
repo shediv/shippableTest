@@ -237,6 +237,7 @@ var NonTraditional = function()
             { toolId:self.toolId },
             function(error, subCategoryIds)
             {
+              console.log(subCategoryIds);
               SubCategory.find({ _id:{ $in:subCategoryIds } }).lean().exec(function(err, result){
                 var subObj = {};
                 for(i in result)

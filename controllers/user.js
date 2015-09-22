@@ -7,6 +7,9 @@ var User = function()
 	var fs = require('fs');
 	var imagick = require('imagemagick');
 	var mkdirp = require('mkdirp');
+	var nodeMailer = require('nodemailer');
+	var crypto =require('crypto');
+	
 
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
@@ -246,6 +249,59 @@ var User = function()
 	self.logout = function(req, res){
 		res.status(200).json("success");
 	};
+
+	self.forgotPassword	= function(req,res){
+		async.waterfall([
+		    function(done) {
+		      crypto.randomBytes(20, function(err, buf) {
+		        var token = buf.toString('hex');
+		        done(err, token);
+		      });
+		    },
+		    function(token, done) {
+		      User.findOne({ email: req.body.email },{ email : 1 }, function(err, user) {
+		        if (!user) {
+		          console.log('error', 'No account with that email address exists.');
+		          return res.redirect('/forgotPassword');
+		        }
+
+		        user.resetPasswordToken = token;
+		        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
+
+		        user.save(function(err) {
+		          done(err, token, user);
+		        });
+		      });
+		    },
+		    function(token, user, done) {
+		      var smtpTransport = nodeMailer.createTransport({
+		        service: 'Gmail',
+		        auth: {
+		          user: 'hk8049@gmail.com',
+		          pass: ''
+		        }
+		      });
+		      var mailOptions = {
+		        to: user.email,
+		        from: 'harish@themediaant.com',
+		        subject: 'TMA Password Reset',
+		        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
+		          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
+		          'http://' + req.headers.host + '/reset/' + token + ':'+	user._id +'\n\n' +
+		          'If you did not request this, please ignore this email and your password will remain unchanged.\n'
+		      };
+		      smtpTransport.sendMail(mailOptions, function(err) {
+		        console.log('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
+		        done(err, 'done');
+		      });
+		    }
+		  ], 
+		  function(err) {
+		  		if(err)res.status(200).json("mail not sent"+ err);
+		    	res.status(200).json("mail sent");
+		  }
+		);
+	}	
 }
 
 module.exports.User = User;
