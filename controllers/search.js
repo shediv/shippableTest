@@ -31,14 +31,18 @@ var Search = function()
         'logo' : 1,
         'toolId' : 1,
         'views' : 1,
+        //For Cinema
         'theatreName' : 1,
         'resultMallName' : 1,
         'cinemaChain' : 1,
         'mallName' : 1,
+        //For Radio
         'station' : 1,
         'city' : 1,
         'type' : 1,
-        'areaCovered' : 1
+        //For Newspaper
+        'areaCovered' : 1,
+        'editionName' : 1
       };
       var match = { searchKeyWords:{ $all:query } };
       var finalResults = [];
@@ -78,8 +82,10 @@ var Search = function()
                     delete result['medias'][i].city;
                     break;
                   case 'newspaper':
+                    result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].editionName;
                     result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].areaCovered;
                     delete result['medias'][i].areaCovered;
+                    delete result['medias'][i].editionName;
                     break;
                 }
                 finalResults.push(result['medias'][i]);
