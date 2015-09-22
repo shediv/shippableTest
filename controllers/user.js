@@ -252,28 +252,26 @@ var User = function()
 
 	self.forgotPassword	= function(req,res){
 		async.waterfall([
-		    function(done) {
+		    function(callback) {
 		      crypto.randomBytes(20, function(err, buf) {
 		        var token = buf.toString('hex');
-		        done(err, token);
+		        callback(err, token);
 		      });
 		    },
-		    function(token, done) {
+		    function(token, callback) {
 		      User.findOne({ email: req.body.email },{ email : 1 }, function(err, user) {
 		        if (!user) {
-		          console.log('error', 'No account with that email address exists.');
-		          return res.redirect('/forgotPassword');
+		          return res.status(404).json("No account with that email address exists.");
 		        }
 
 		        user.resetPasswordToken = token;
 		        user.resetPasswordExpires = Date.now() + 3600000; // 1 hour
-
-		        user.save(function(err) {
-		          done(err, token, user);
-		        });
+						
+		        callback(err, token, user);
+		        
 		      });
 		    },
-		    function(token, user, done) {
+		    function(token, user, callback) {
 		      var smtpTransport = nodeMailer.createTransport({
 		        service: 'Gmail',
 		        auth: {
@@ -284,7 +282,7 @@ var User = function()
 		      var mailOptions = {
 		        to: user.email,
 		        from: 'harish@themediaant.com',
-		        subject: 'TMA Password Reset',
+		        subject: 'The MediaAnt Password Reset',
 		        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
 		          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
 		          'http://' + req.headers.host + '/reset/' + token + ':'+	user._id +'\n\n' +
@@ -292,12 +290,12 @@ var User = function()
 		      };
 		      smtpTransport.sendMail(mailOptions, function(err) {
 		        console.log('info', 'An e-mail has been sent to ' + user.email + ' with further instructions.');
-		        done(err, 'done');
+		        callback(err, 'done');
 		      });
 		    }
 		  ], 
 		  function(err) {
-		  		if(err)res.status(200).json("mail not sent"+ err);
+		  		if(err)res.status(404).json("mail not sent :"+ err);
 		    	res.status(200).json("mail sent");
 		  }
 		);
