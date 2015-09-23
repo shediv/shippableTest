@@ -16,5 +16,6 @@ router.post("/googleSignin", UserCtrl.googleSignin);
 router.post("/current", UserCtrl.getSession);
 router.post("/logout", UserCtrl.logout);
 router.post("/forgotPassword", UserCtrl.forgotPassword);
+router.post("/changePassword", UserCtrl.changePassword);
 
 module.exports = router;
