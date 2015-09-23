@@ -8,5 +8,6 @@ router.get('/', function(req, res, next) {
 });
 
 router.get('/isToolExists', CommonCtrl.isToolExists);
+router.post('/customerQuery', CommonCtrl.addCustomerQuery);
 
 module.exports = router;
