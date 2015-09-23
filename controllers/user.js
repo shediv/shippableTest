@@ -10,7 +10,6 @@ var User = function()
 	var nodeMailer = require('nodemailer');
 	var crypto =require('crypto');
 	
-
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
 	var templatesDir = path.resolve(__dirname, '..', 'public/templates');
@@ -19,6 +18,7 @@ var User = function()
 	var md5 = require('md5');
 
 	this.params = {};
+	this.config = require('../config.js');
 	var self = this;
 
 	self.store = function(req, res){

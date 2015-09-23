@@ -28,6 +28,27 @@ var _12thCross = function()
     });
   };
 
+  //Get all the vendors from 12th cross
+  self.getVendors = function(req, res){
+    TwelthCross.find(
+      {isActive:1}, {urlSlug: 'urlSlug', name: 'name'},     
+      function(error, results) 
+      {
+        return res.status(200).json({vendors:results});        
+      }
+    );
+  };
+
+  //update a vendor based on ID in 12th Cross
+  self.updateVendor = function(req, res){
+    var vendorID = req.body.vendor._id;
+    var vendorData = req.body.vendor;
+    TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
+      if (err) return res.send(500, { error: err });
+      return res.send("Vendor info succesfully updated");
+    });
+  };
+
     self.applyFilters = function(){
       var query = {};
       query.sortBy = self.params.sortBy || 'views';

@@ -55,7 +55,8 @@ var Outdoor = function()
         'mediaOptions' : 1,
         'geography' : 1,
         'size' : 1,        
-        'logo' : 1
+        'logo' : 1,
+        'litType' : 1
       };
 
       Object.keys(filters).map(function(value){
