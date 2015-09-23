@@ -3,6 +3,7 @@ var Digital = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
+  var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
@@ -218,16 +219,58 @@ var Digital = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
+    async.parallel({
+      visitor : function(callbackInner)
+        {    
+          var origin = req.originalUrl;
+          var origin = origin.split("/");
+          var type = 'media';
+
+          var user = {
+                        userAgent: req.headers['user-agent'],
+                        remoteAddress: req.connection.remoteAddress,
+                        urlSlug: req.protocol + '://' + req.headers.host + req.originalUrl,
+                        type: type
+                      }
+
+          UniqueVisitor.findOne({remoteAddress: user.remoteAddress, urlSlug: user.urlSlug},
+          function(err, results)
+          {
+             if(results){
+              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1 }}, {upsert:true}, function(err, results){
+                    callbackInner(err, results);
+              });
+             }
+             else{
+              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1, uniqueViews: 1 }}, {upsert:true}, function(err, results){
+                    var newVisitor = UniqueVisitor(user);
+                    newVisitor.save(function(err, newVisitor) {
+                     callbackInner(err, newVisitor); 
+                    });                    
+              });
+             }    
+          }
+          );            
+        },
+      media : function(callbackInner)
+        {
+          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+            function(err, results)
+            {
+            if(!results) res.status(404).json({error : 'No Such Media Found'});
+            callbackInner(err, results);        
+            }
+          ); 
+          
+        }
+      },
+      function(err, results) 
       {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
-          if(cat) results.categoryName = cat.name;
-          res.status(200).json({digital : results});        
+        Category.findOne({ _id:results.media.categoryId },'name').lean().exec(function(err, cat){
+          if(cat) results.media.categoryName = cat.name;
+          res.status(200).json({digital : results.media});        
         });
-      }
-    );
+      });                  
   }
 
   this.compare = function(req, res){
