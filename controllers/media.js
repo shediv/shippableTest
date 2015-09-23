@@ -13,7 +13,7 @@ var Media = function()
 
     // save the Media
     newMedia.save(function(err) {
-      if (err) throw err;
+      if(err) return res.status(500).json(err);
       res.status(200).json("Media Created Successfully");
     });
   };

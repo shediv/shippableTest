@@ -10,7 +10,7 @@ var _12thCross = function()
   this.params = {};
   var self = this;
   
-  this.get12thCross = function(req, res){ 
+  this.get12thCross = function(req, res){
     self.params = JSON.parse(req.query.params);
     async.waterfall([
       function( callback)
@@ -24,6 +24,7 @@ var _12thCross = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -32,8 +33,9 @@ var _12thCross = function()
   self.getVendors = function(req, res){
     TwelthCross.find(
       {isActive:1}, {urlSlug: 'urlSlug', name: 'name'},     
-      function(error, results) 
+      function(err, results) 
       {
+        if(err) return res.status(500).json(err);
         return res.status(200).json({vendors:results});        
       }
     );
@@ -44,7 +46,7 @@ var _12thCross = function()
     var vendorID = req.body.vendor._id;
     var vendorData = req.body.vendor;
     TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
-      if (err) return res.send(500, { error: err });
+      if(err) return res.status(500).json(err);
       return res.send("Vendor info succesfully updated");
     });
   };
@@ -140,7 +142,7 @@ var _12thCross = function()
     },                                                                                      
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -195,64 +197,72 @@ var _12thCross = function()
     self.getGeographies = function(callback){
       TwelthCross.distinct('geography',
         { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
+        function(err, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-            callback(error, geos);
+            callback(err, geos);
           });
         }
       );
     };
 
-    this.show = function(req, res){
-      TwelthCross.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-        function(err, result)
-        {
-          if(!result) res.status(404).json({error : 'No Such Media Found'});
-          async.parallel({
-            categories: function(callback){
-              Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, cats){
-                if(cats)
-                {
-                  result.categories = [];
-                  for(i in cats) result.categories.push(cats[i].name);
-                }
-                callback(err, null);
-              })
-            },
-            subCategories: function(callback){
-              SubCategory.find({ _id:{ $in:result.subCategoryId } },'name').lean().exec(function(err, subCats){
-                if(subCats)
-                {
-                  result.subCategories = [];
-                  for(i in subCats) result.subCategories.push(subCats[i].name);
-                }
-                callback(err, null);
-              })
-            },
-            geography: function(callback){
-              Geography.findOne({ _id:result.geography }).lean().exec(function(err, geo){
-                if(geo) result.geography = geo;
-                callback(err, null);
-              })
-            },
-            areaOfServices: function(callback){
-              console.log(result.areaOfServices);
-              if(result.areaOfServices !== undefined)
+  this.show = function(req, res){
+    TwelthCross.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+      function(err, result)
+      {
+        if(!result) res.status(404).json({error : 'No Such Media Found'});
+        async.parallel({
+          categories: function(callback){
+            Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, cats){
+              if(cats)
               {
-                Geography.find({ _id:{ $in:result.areaOfServices } }).lean().exec(function(err, geo){
-                  if(geo) result.areaOfServices = geo;
-                  callback(err, null);
-                })
+                result.categories = [];
+                for(i in cats) result.categories.push(cats[i].name);
               }
-              else callback(err, null);
+              callback(err, null);
+            })
+          },
+          subCategories: function(callback){
+            SubCategory.find({ _id:{ $in:result.subCategoryId } },'name').lean().exec(function(err, subCats){
+              if(subCats)
+              {
+                result.subCategories = [];
+                for(i in subCats) result.subCategories.push(subCats[i].name);
+              }
+              callback(err, null);
+            })
+          },
+          geography: function(callback){
+            Geography.findOne({ _id:result.geography }).lean().exec(function(err, geo){
+              if(geo) result.geography = geo;
+              callback(err, null);
+            })
+          },
+          areaOfServices: function(callback){
+            console.log(result.areaOfServices);
+            if(result.areaOfServices !== undefined)
+            {
+              Geography.find({ _id:{ $in:result.areaOfServices } }).lean().exec(function(err, geo){
+                if(geo) result.areaOfServices = geo;
+                callback(err, null);
+              })
             }
-          },function(err, results){
-            res.status(200).json({vendor : result});
-          })
-        }
-      );
+            else callback(err, null);
+          }
+        },function(err, results){
+          res.status(200).json({vendor : result});
+        })
+      }
+    );
+    
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: '12thcross'
     };
+    CommonLib.uniqueVisits(visitor);
+  };
 
 };
 

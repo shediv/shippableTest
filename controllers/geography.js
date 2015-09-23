@@ -13,7 +13,7 @@ var Geography = function()
 
     // save the Media
     newGeography.save(function(err) {
-      if (err) throw err;
+      if(err) return res.status(500).json(err);
       res.status(200).json(newGeography);
     });
   };
@@ -26,7 +26,7 @@ var Geography = function()
       localities : function(callback){ self.searchByKey('locality', qString, callback); }
     },
     function(err, results){
-      if(err) throw err;
+      if(err) return res.status(500).json(err);
       var geographies = [];
       geographies = geographies.concat(results.states, results.cities, results.localities);
       res.status(200).json({geographies:geographies});
@@ -89,6 +89,5 @@ var Geography = function()
       });
     }
 }    
-
 
 module.exports.Geo = Geography;

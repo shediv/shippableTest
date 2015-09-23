@@ -31,6 +31,7 @@ var Television = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -135,7 +136,7 @@ var Television = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -213,18 +214,25 @@ var Television = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
-      {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Category.find({ _id:{ $in:results.categoryId } },'name').lean().exec(function(err, genres){
-          results.genres = [];
-          for(i in genres) results.genres.push(genres[i].name);
-          res.status(200).json({television : results});
-        })
-      }
-    );
-  }
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      Category.find({ _id:{ $in:results.categoryId } },'name').lean().exec(function(err, genres){
+        results.genres = [];
+        for(i in genres) results.genres.push(genres[i].name);
+        res.status(200).json({television : results});
+      })
+    });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+  };
 
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
@@ -239,6 +247,7 @@ var Television = function()
     };
     
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
       async.each(results, function(result, callback){
         Category.find({ _id:{ $in:result.categoryId } },'name').lean().exec(function(err, genres){
           result.genres = [];

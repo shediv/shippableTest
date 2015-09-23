@@ -19,22 +19,24 @@ var Cinema = function()
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
+      if(err) return res.status(500).json(err);
       var count = 0;
       if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; delete results[0].allScreens.screens;}
       if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; delete results[0].recommendedScreens.screens;}
       if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; delete results[0].offScreen.screens;}
-      return res.status(200).json({medias:results[0],count:count});
+      res.status(200).json({medias:results[0],count:count});
     });
   };
 
   this.showCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
+      if(err) return res.status(500).json(err);
       var count = 0;
       if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count;}
       if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count;}
       if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count;}
-      return res.status(200).json({medias:results[0],count:count});
+      res.status(200).json({medias:results[0],count:count});
     });
   };
 
@@ -280,7 +282,7 @@ var Cinema = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -336,7 +338,7 @@ var Cinema = function()
       {$sort : {releaseDate:1}},
       {$group : {_id : '$releaseDate', movies:{$push : '$$ROOT'}, count : {$sum : 1}}},
       function(err, results){
-        if(err) throw err;
+        if(err) return res.status(500).json(err);
         res.status(200).json({upcomingMovies:results});
       }
     );
@@ -346,7 +348,8 @@ var Cinema = function()
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
       function(err, results)
       {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
+        if(err) return res.status(500).json(err);
+        if(!results) return res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
           if(results.type == 'onScreen')
@@ -362,6 +365,15 @@ var Cinema = function()
         });
       }
     );
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
   }
 
 };

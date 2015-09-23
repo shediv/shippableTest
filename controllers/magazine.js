@@ -607,7 +607,7 @@ var Magazine = function()
       ],
       function (err, result) 
       {
-
+        if(err) return res.status(500).json(err);
         for(key in result.magazines)
           result.magazines[key].attributes = CommonLib.removeHiddenAttributes(result.magazines[key].attributes);
         res.status(200).json(result);
@@ -812,7 +812,7 @@ var Magazine = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -821,12 +821,12 @@ var Magazine = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, isActive : 1}},
         {$group : { _id : '$categoryId', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
           var catIds = [];
           results.map(function(o){ catIds.push(o._id); });
           Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){
-            callback(error, cats);
+            callback(err, cats);
           });
         }
       );
@@ -837,12 +837,12 @@ var Magazine = function()
         {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
         {$unwind: '$geography'},
         {$group : { _id : '$geography', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
           var geoIds = [];
           results.map(function(o){ geoIds.push(o._id); });
           Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-            callback(error, geos);
+            callback(err, geos);
           });
         }
       );
@@ -852,9 +852,9 @@ var Magazine = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "attributes.language.value": { $exists: 1}, isActive : 1}},
         {$group : { _id : '$attributes.language.value', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -864,9 +864,9 @@ var Magazine = function()
         {$match: {toolId:self.toolId, targetGroup: { $exists: 1}, isActive : 1}},
         {$unwind: '$targetGroup'},
         {$group : { _id : '$targetGroup', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -875,9 +875,9 @@ var Magazine = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "attributes.frequency": { $exists: 1}, isActive : 1}},
         {$group : { _id : '$attributes.frequency.value', count : {$sum : 1}}},
-        function(error, results)
+        function(err, results)
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -893,23 +893,30 @@ var Magazine = function()
     };
 
     self.getProducts = function(callback){
-      Products.find({}, '_id name', function(error, results){
-        callback(error, results);
+      Products.find({}, '_id name', function(err, results){
+        callback(err, results);
       });
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
-      {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
-        Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
-          results['categoryName'] = category.name;
-          res.status(200).json({magazine : results});
-        });
-      }
-    );
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
+      Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
+        results['categoryName'] = category.name;
+        res.status(200).json({magazine : results});
+      });
+    });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
   }
 
   this.compare = function(req, res){
@@ -945,6 +952,7 @@ var Magazine = function()
     },
     function(err, result)
     {
+      if(err) return res.status(500).json(err);
       for(i in result.medias)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
@@ -1003,6 +1011,7 @@ var Magazine = function()
     },
     function(err, result)
     {
+      if(err) return res.status(500).json(err);
       for(i in result.medias)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];

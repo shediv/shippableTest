@@ -5,6 +5,7 @@ var Common = function()
 	var Products = require('../models/product').Products;
 	var Geography = require('../models/geography').Geography;
 	var Category = require('../models/category').Category;
+	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
 	var nodemailer = require('nodemailer');
 
 	var scope = this;
@@ -25,21 +26,26 @@ var Common = function()
 		return attributes;
 	};
 
+	this.uniqueVisits = function(visitor){
+		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
+			if(log)
+			{
+				Media.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true });
+				UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true });
+			}
+			else
+			{
+				Media.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true });
+				visitor.views = 1;
+				var newVisitor = UniqueVisitor(visitor);
+				newVisitor.save();
+			}
+		});
+	};
+
 	this.isNumber = function(n){ 
 		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
 	}
-
-	// create reusable transporter object using SMTP transport
-    this.transporter = nodemailer.createTransport({
-        service: 'smtp.mandrillapp.com',
-        host: 'smtp.mandrillapp.com',
-        port:587,
-        auth: {
-            user: 'manjunath@themediaant.com',
-            pass: 'pWCZVZ17BC26LNamo3GNoA'
-        }
-    }); 
-
 
 };
 

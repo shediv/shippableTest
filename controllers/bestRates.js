@@ -17,6 +17,7 @@ var BestRates = function()
           break;
       }
     },function(err){
+      if(err) return res.status(500).json(err);
       res.status(200).json({bestRates:self.medias});
     });
   };

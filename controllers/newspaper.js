@@ -31,6 +31,7 @@ var Newspaper = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json({medias:result.medias, count:result.count});
     });
   };
@@ -190,7 +191,6 @@ var Newspaper = function()
     }
 
   this.getFilters = function(req, res){
-
     async.parallel({
       categories : self.getCategories,
       areas : self.getAreas,
@@ -202,7 +202,7 @@ var Newspaper = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -210,10 +210,10 @@ var Newspaper = function()
     self.getCategories = function(callback){
       Media.distinct('categoryId',
         { toolId:self.toolId},
-        function(error, categoryIds) 
+        function(err, categoryIds) 
         {
           Category.find({_id : {$in: categoryIds}},'name').lean().exec(function(err, cats){
-            callback(error, cats);
+            callback(err, cats);
           });
         }
       );
@@ -223,9 +223,9 @@ var Newspaper = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "areaCovered": { $exists: 1} }},
         {$group : { _id : '$areaCovered', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -234,9 +234,9 @@ var Newspaper = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
         {$group : { _id : '$language', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -245,9 +245,9 @@ var Newspaper = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "frequency": { $exists: 1} }},
         {$group : { _id : '$frequency', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -261,34 +261,41 @@ var Newspaper = function()
     };
 
     self.getProducts = function(callback){
-      Products.find({}, '_id name', function(error, results){
-        callback(error, results);
+      Products.find({}, '_id name', function(err, results){
+        callback(err, results);
       });
     };
 
     self.getGeographies = function(callback){
       Media.distinct('geography',
         { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
+        function(err, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
-            callback(error, geos);
+            callback(err, geos);
           });
         }
       );
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
-      {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
-          if(cat) results['categoryName'] = cat.name;
-          res.status(200).json({newspaper : results});
-        });
-      }
-    );
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
+        if(cat) results['categoryName'] = cat.name;
+        res.status(200).json({newspaper : results});
+      });
+    });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
   }
 
   this.compare = function(req, res){
@@ -321,6 +328,7 @@ var Newspaper = function()
     },
     function(err, result)
     {
+      if(err) return res.status(500).json(err);
       for(i in result.medias)
       {
         result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
@@ -362,6 +370,7 @@ var Newspaper = function()
       },
       function(err, results)
       {
+        if(err) return res.status(500).json(err);
         res.status(200).json({medias:results});
       }
     );

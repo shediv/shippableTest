@@ -31,6 +31,7 @@ var Digital = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -156,7 +157,7 @@ var Digital = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -200,9 +201,9 @@ var Digital = function()
         {$match: {toolId:self.toolId, "pricingModel": { $exists: 1} }},
         {$unwind: '$pricingModel'},
         {$group : { _id : '$pricingModel', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -211,67 +212,29 @@ var Digital = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "language": { $exists: 1} }},
         {$group : { _id : '$language', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
 
   this.show = function(req, res){
-    async.parallel({
-      visitor : function(callbackInner)
-        {    
-          var origin = req.originalUrl;
-          var origin = origin.split("/");
-          var type = 'media';
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      res.status(200).json({digital : results.media});
+    });
 
-          var user = {
-                        userAgent: req.headers['user-agent'],
-                        remoteAddress: req.connection.remoteAddress,
-                        urlSlug: req.protocol + '://' + req.headers.host + req.originalUrl,
-                        type: type
-                      }
-
-          UniqueVisitor.findOne({remoteAddress: user.remoteAddress, urlSlug: user.urlSlug},
-          function(err, results)
-          {
-             if(results){
-              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1 }}, {upsert:true}, function(err, results){
-                    callbackInner(err, results);
-              });
-             }
-             else{
-              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1, uniqueViews: 1 }}, {upsert:true}, function(err, results){
-                    var newVisitor = UniqueVisitor(user);
-                    newVisitor.save(function(err, newVisitor) {
-                     callbackInner(err, newVisitor); 
-                    });                    
-              });
-             }    
-          }
-          );            
-        },
-      media : function(callbackInner)
-        {
-          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-            function(err, results)
-            {
-            if(!results) res.status(404).json({error : 'No Such Media Found'});
-            callbackInner(err, results);        
-            }
-          ); 
-          
-        }
-      },
-      function(err, results) 
-      {
-        Category.findOne({ _id:results.media.categoryId },'name').lean().exec(function(err, cat){
-          if(cat) results.media.categoryName = cat.name;
-          res.status(200).json({digital : results.media});        
-        });
-      });                  
-  }
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+  };
 
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
@@ -293,6 +256,7 @@ var Digital = function()
     };
     
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
       async.each(results, function(result, callback){
         if(result['reach1'] !== undefined && result['unit1'])
           result['reach1'] = result['reach1'] + ' ' + result['unit1'];

@@ -3,7 +3,6 @@ var Airport = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
-  var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
@@ -31,6 +30,7 @@ var Airport = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -65,7 +65,7 @@ var Airport = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){      
+    self.sortFilteredMedia = function(query, callback){
       async.parallel({
         count : function(callbackInner)
         {          
@@ -156,7 +156,7 @@ var Airport = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -164,11 +164,11 @@ var Airport = function()
     self.getGeographies = function(callback){
       Media.distinct('geography',
         { toolId:self.toolId , isActive:1 },
-        function(error, geographyIds) 
+        function(err, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
             for(i in geos) if(geos[i].city === undefined) geos[i].city = 'All India';
-            callback(error, geos);
+            callback(err, geos);
           });
         }
       );
@@ -196,7 +196,7 @@ var Airport = function()
     };
       
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
-      
+      if(err) return res.status(500).json(err);
       var geographyIds = [];
       var mediaOptions = [];
       var firstmediaOptionsKey;
@@ -235,56 +235,22 @@ var Airport = function()
   };
 
   this.show = function(req, res){
-    async.parallel({
-      visitor : function(callbackInner)
-        {    
-          var origin = req.originalUrl;
-          var origin = origin.split("/");
-          var type = 'media';
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      res.status(200).json({airport : result});
+    });
 
-          var user = {
-                        userAgent: req.headers['user-agent'],
-                        remoteAddress: req.connection.remoteAddress,
-                        urlSlug: req.protocol + '://' + req.headers.host + req.originalUrl,
-                        type: type
-                      }
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+  };
 
-          UniqueVisitor.findOne({remoteAddress: user.remoteAddress, urlSlug: user.urlSlug},
-          function(err, results)
-          {
-             if(results){
-              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1 }}, {upsert:true}, function(err, results){
-                    callbackInner(err, results);
-              });
-             }
-             else{
-              Media.update({urlSlug : req.params.urlSlug}, {$inc: { views: 1, uniqueViews: 1 }}, {upsert:true}, function(err, results){
-                    var newVisitor = UniqueVisitor(user);
-                    newVisitor.save(function(err, newVisitor) {
-                     callbackInner(err, newVisitor); 
-                    });                    
-              });
-             }    
-          }
-          );            
-        },
-      media : function(callbackInner)
-        {
-          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-            function(err, results)
-            {
-            if(!results) res.status(404).json({error : 'No Such Media Found'});
-            callbackInner(err, results);        
-            }
-          ); 
-          
-        }
-      },
-      function(err, results) 
-      {
-        res.status(200).json({airport : results.media});
-      });                  
-  }
 };
 
 module.exports.Airport = Airport;

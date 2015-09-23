@@ -20,6 +20,7 @@ var Search = function()
       medias : function(callback){ self.searchMedias(query, callback) },
       twelthCross : function(callback){ self.searchTwelthCross(query, callback) }
     },function(err, results){
+      if(err) return res.status(500).json(err);
       res.status(200).json({results:results});
     })
   };

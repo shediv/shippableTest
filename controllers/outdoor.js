@@ -30,6 +30,7 @@ var Outdoor = function()
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -136,7 +137,7 @@ var Outdoor = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -163,9 +164,9 @@ var Outdoor = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "landmark": { $exists: 1} }},
         {$group : { _id : '$landmark', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
@@ -174,25 +175,32 @@ var Outdoor = function()
       Media.aggregate(
         {$match: {toolId:self.toolId, "litType": { $exists: 1} }},
         {$group : { _id : '$litType', count : {$sum : 1}}},
-        function(error, results) 
+        function(err, results) 
         {
-          callback(error, results);
+          callback(err, results);
         }
       );
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
-      {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne({ _id:results.geography }).lean().exec(function(err, geo){
-          if(geo) results['geographyData'] = geo;
-          res.status(200).json({outdoor : results});
-        });
-      }
-    );
-  }
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+      if(err) return res.status(500).json(err);
+      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      Geography.findOne({ _id:results.geography }).lean().exec(function(err, geo){
+        if(geo) results['geographyData'] = geo;
+        res.status(200).json({outdoor : results});
+      });
+    });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+  };
 
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
@@ -210,6 +218,7 @@ var Outdoor = function()
     };
     
     Media.find({_id: { $in: ids }}, project,function(err, results){
+      if(err) return res.status(500).json(err);
       res.status(200).json({medias:results});
     });
   };

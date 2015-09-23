@@ -30,11 +30,12 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-		  self.sortFilteredMedia(query, callback);
+		    self.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result)
     {
+      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -214,7 +215,7 @@ var NonTraditional = function()
     },
     function(err, results) 
     {
-      if(err) res.status(500).json({err:err});
+      if(err) return res.status(500).json(err);
       res.status(200).json({filters:results});
     });
   };
@@ -268,17 +269,24 @@ var NonTraditional = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, result)
-      {
-        if(!result) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
-          if(geo) result['geographyData'] = geo;
-          res.status(200).json({nonTraditional : result});
-        });
-      }
-    );
-  }
+    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
+      if(err) return res.status(500).json(err);
+      if(!result) return res.status(404).json({error : 'No Such Media Found'});
+      Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
+        if(geo) result['geographyData'] = geo;
+        res.status(200).json({nonTraditional : result});
+      });
+    });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      urlSlug: req.params.urlSlug,
+      type: 'media',
+      tool: self.toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+  };
 
 };
 

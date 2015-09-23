@@ -9,6 +9,7 @@ var Common = function()
     var toolName = req.query.toolName;
     console.log(toolName);
     Tools.findOne({ name:toolName }, function(err, result){
+      if(err) return res.status(500).json(err);
       if(!result) return res.status(404).json("NOT OK");
       return res.status(200).json("OK");
     });
@@ -19,7 +20,9 @@ var Common = function()
     req.body.remoteAddress = req.connection.remoteAddress;
     var customerQuery = CustomerQueries(req.body);
     customerQuery.save(function(err,result){
-      if(result) res.status(200).json('OK');
+      if(err) return res.status(500).json(err);
+      if(!result) return res.status(500).json("NOT OK");
+      res.status(200).json('OK');
     });
   }
   
