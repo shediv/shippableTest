@@ -18,7 +18,7 @@ var Common = function()
   this.addCustomerQuery = function(req, res){
     req.body.userAgent = req.headers['user-agent'];
     req.body.remoteAddress = req.connection.remoteAddress;
-    var customerQuery = CustomerQueries(req.body);
+    var customerQuery = CustomerQuery(req.body);
     customerQuery.save(function(err,result){
       if(err) return res.status(500).json(err);
       if(!result) return res.status(500).json("NOT OK");

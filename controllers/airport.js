@@ -30,7 +30,6 @@ var Airport = function()
     ],
     function (err, result)
     {
-      if(err) return res.status(500).json(err);
       res.status(200).json(result);
     });
   };
@@ -65,7 +64,7 @@ var Airport = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){
+    self.sortFilteredMedia = function(query, callback){      
       async.parallel({
         count : function(callbackInner)
         {          
@@ -156,7 +155,7 @@ var Airport = function()
     },
     function(err, results) 
     {
-      if(err) return res.status(500).json(err);
+      if(err) res.status(500).json({err:err});
       res.status(200).json({filters:results});
     });
   };
@@ -164,11 +163,11 @@ var Airport = function()
     self.getGeographies = function(callback){
       Media.distinct('geography',
         { toolId:self.toolId , isActive:1 },
-        function(err, geographyIds) 
+        function(error, geographyIds) 
         {
           Geography.find({_id : {$in: geographyIds}},'city').lean().exec(function(err, geos){
             for(i in geos) if(geos[i].city === undefined) geos[i].city = 'All India';
-            callback(err, geos);
+            callback(error, geos);
           });
         }
       );
@@ -196,7 +195,7 @@ var Airport = function()
     };
       
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
-      if(err) return res.status(500).json(err);
+      
       var geographyIds = [];
       var mediaOptions = [];
       var firstmediaOptionsKey;

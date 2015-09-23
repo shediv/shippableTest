@@ -3,7 +3,6 @@ var Digital = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
-  var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
   var Tools = require('../models/tool').Tools;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;

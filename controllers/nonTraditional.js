@@ -30,7 +30,7 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-		    self.sortFilteredMedia(query, callback);
+		self.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result)
