@@ -273,15 +273,17 @@ var User = function()
 		    },
 		    function(token, user, callback) {
 		      var smtpTransport = nodeMailer.createTransport({
-		        service: 'Gmail',
+		        service: 'smtp.mandrillapp.com',
+        		host: 'smtp.mandrillapp.com',
+        		port:587,
 		        auth: {
-		          user: 'hk8049@gmail.com',
-		          pass: ''
+		          user: 'manjunath@themediaant.com',
+		          pass: 'pWCZVZ17BC26LNamo3GNoA'
 		        }
 		      });
 		      var mailOptions = {
 		        to: user.email,
-		        from: 'harish@themediaant.com',
+		        from: 'manjunath@themediaant.com',
 		        subject: 'The MediaAnt Password Reset',
 		        text: 'You are receiving this because you (or someone else) have requested the reset of the password for your account.\n\n' +
 		          'Please click on the following link, or paste this into your browser to complete the process:\n\n' +
@@ -298,6 +300,33 @@ var User = function()
 		  		if(err)res.status(404).json("mail not sent :"+ err);
 		    	res.status(200).json("mail sent");
 		  }
+		);
+	}
+
+	self.changePassword = function(req,res){
+		async.waterfall([
+			function(callback){
+				req.body.oldPassword = md5(req.body.oldPassword);
+				req.body.newPassword = md5(req.body.newPassword);
+
+				User.findOne({ _id: req.body.id ,password : req.body.oldPassword }, function(err, result) {
+						console.log(result);	
+		        if(result != null)
+		         {	callback(err, result); }
+		       	else
+		        { return res.status(404).json("The Old password doesn't match"); }
+				});		
+			},
+			function(result, callback){
+					User.update( { _id : result._id },{ password : req.body.newPassword }, function(err, result) {
+						callback(err, result)
+					});
+			}
+			],
+			function(err ,result){
+				if(err)res.status(404).json("password not updated :"+ err);
+		    	res.status(200).json("pasword updated ");		
+			}
 		);
 	}	
 }
