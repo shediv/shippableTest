@@ -213,13 +213,39 @@ var Radio = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
+    async.parallel({
+      visitor : function(callbackInner)
+        {    
+          var origin = req.originalUrl;
+          var origin = origin.split("/");
+          var type = 'media';
+          var user = {
+                        userAgent: req.headers['user-agent'],
+                        remoteAddress: req.connection.remoteAddress,                        
+                        type: type,
+                        urlSlug: req.params.urlSlug
+                      }
+
+          CommonLib.checkUniqueVisitor(user, function(err, newVisitor){
+              callbackInner(err, newVisitor);
+            });                                 
+        },
+      media : function(callbackInner)
+        {
+          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+            function(err, results)
+            {
+            if(!results) res.status(404).json({error : 'No Such Media Found'});
+            callbackInner(err, results);        
+            }
+          ); 
+          
+        }
+      },
+      function(err, results) 
       {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        res.status(200).json({radio : results});        
-      }
-    );
+        res.status(200).json({radio : results.media});
+      });                  
   }
 
   this.compare = function(req, res){

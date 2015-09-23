@@ -342,26 +342,53 @@ var Cinema = function()
     );
   };
 
-  this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, results)
+this.show = function(req, res){
+    async.parallel({
+      visitor : function(callbackInner)
+        {    
+          var origin = req.originalUrl;
+          var origin = origin.split("/");
+          var type = 'media';
+
+          var user = {
+                        userAgent: req.headers['user-agent'],
+                        remoteAddress: req.connection.remoteAddress,                        
+                        type: type,
+                        urlSlug: req.params.urlSlug
+                      }
+
+          CommonLib.checkUniqueVisitor(user, function(err, newVisitor){
+              callbackInner(err, newVisitor);
+            });            
+        },
+      media : function(callbackInner)
+        {
+          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+            function(err, results)
+            {
+            if(!results) res.status(404).json({error : 'No Such Media Found'});
+            callbackInner(err, results);        
+            }
+          ); 
+          
+        }
+      },
+      function(err, results) 
       {
-        if(!results) res.status(404).json({error : 'No Such Media Found'});
-        Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
-          if(geos) results.geography = geos;
-          if(results.type == 'onScreen')
+        Geography.find({ _id:{ $in:results.media.geography } }).lean().exec(function(err, geos){
+          if(geos) results.media.geography = geos;
+          if(results.media.type == 'onScreen')
           {
             dateObj = new Date();
             dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
             var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                               + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                               + dateObj.getFullYear();
-            results.nextFriday = nextFriday;
+            results.media.nextFriday = nextFriday;
           }
-          res.status(200).json({cinema : results});
+          res.status(200).json({cinema : results.media});
         });
-      }
-    );
+      });                  
   }
 
 };

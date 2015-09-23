@@ -268,16 +268,42 @@ var NonTraditional = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
-      function(err, result)
-      {
-        if(!result) res.status(404).json({error : 'No Such Media Found'});
-        Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
-          if(geo) result['geographyData'] = geo;
-          res.status(200).json({nonTraditional : result});
+    async.parallel({
+      visitor : function(callbackInner)
+        {    
+          var origin = req.originalUrl;
+          var origin = origin.split("/");
+          var type = 'media';
+          var user = {
+                        userAgent: req.headers['user-agent'],
+                        remoteAddress: req.connection.remoteAddress,
+                        urlSlug: req.params.urlSlug,
+                        type: type                        
+                      }
+
+          CommonLib.checkUniqueVisitor(user, function(err, newVisitor){
+              callbackInner(err, newVisitor);
+            });                                 
+        },
+      media : function(callbackInner)
+        {
+          Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+            function(err, results)
+            {
+            if(!results) res.status(404).json({error : 'No Such Media Found'});
+            callbackInner(err, results);        
+            }
+          ); 
+          
+        }
+      },
+      function(err, results) 
+      {        
+        Geography.findOne({ _id:results.media.geography}).lean().exec(function(err, geo){
+          if(geo) results.media['geographyData'] = geo;
+          res.status(200).json({nonTraditional : results.media});
         });
-      }
-    );
+      });                  
   }
 
 };
