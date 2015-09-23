@@ -258,7 +258,7 @@ var Magazine = function()
         //Calculte Y value for the mediaCategoryBuckets1_Geo
         var YdataMediaCategoryBuckets1_Geo = [];
         if(mediaCategoryBuckets1_Geo.length > 0) 
-        {
+        {          
           YdataMediaCategoryBuckets1_Geo.push(calculateY(mediaCategoryBuckets1_Geo));
           GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets1_Geo.length);
         }
@@ -395,7 +395,8 @@ var Magazine = function()
           var YdataMediaCategoryBuckets4_nonGeo = [];
           if(mediaCategoryBuckets4_nonGeo.length > 0) 
           {
-            YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
+            YdataMediaCategoryBuckets4_nonGeo = YdataMediaCategoryBuckets4_nonGeo.concat(mediaCategoryBuckets4_nonGeo);
+            //YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
           }
 
