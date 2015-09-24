@@ -29,17 +29,17 @@ var Common = function()
 	};
 
 	this.uniqueVisits = function(visitor){
-		if(visitor.type == 'media') var model = new Media;
-		if(visitor.type == '12thcross') var model = new TwelthCross;
+		if(visitor.type == 'media') var model = Media;
+		if(visitor.type == '12thcross') var model =  TwelthCross;
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
-				Media.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
+				model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
 				UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true }).exec();
 			}
 			else
 			{
-				Media.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
+				model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
 				visitor.views = 1;
 				var newVisitor = UniqueVisitor(visitor);
 				newVisitor.save();
