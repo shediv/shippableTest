@@ -95,7 +95,7 @@ var Digital = function()
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'medium': query.sortBy = { 'medium' : -1}; break;
-            //case 'lowest10sec': query.sortBy = { 'channelGenre' : -1}; break;
+            case 'minimumBilling': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
           Media.aggregate(
@@ -132,7 +132,7 @@ var Digital = function()
                   callback(err);
                 });
               }, function(err){
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling - b.minimumBilling });
                 results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               }); 
@@ -222,7 +222,7 @@ var Digital = function()
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
-      res.status(200).json({digital : results.media});
+      res.status(200).json({digital : results});
     });
 
     var visitor = {

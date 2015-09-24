@@ -134,7 +134,7 @@ var Airport = function()
                 }                                   
 
                 for(i in results) results[i]['city'] = geographies[results[i].geography].city;
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling - b.minimumBilling });
                 results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
@@ -236,7 +236,7 @@ var Airport = function()
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
-      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      if(!result) return res.status(404).json({error : 'No Such Media Found'});
       res.status(200).json({airport : result});
     });
 
