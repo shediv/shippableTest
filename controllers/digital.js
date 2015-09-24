@@ -140,10 +140,12 @@ var Digital = function()
                     if(results[i].minimumBilling > 0){
                       data.push(results[i]);
                     }
-                  }  
+                  }
+                  data = data.slice(self.params.offset, self.params.limit + self.params.offset);
+                  callbackInner(err, data);  
                 }  
-                data = data.slice(self.params.offset, self.params.limit + self.params.offset);
-                callbackInner(err, data);
+                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
+                callbackInner(err, results);
               }); 
             }
           );
