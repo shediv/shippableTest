@@ -95,7 +95,7 @@ var Digital = function()
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'medium': query.sortBy = { 'medium' : -1}; break;
-            //case 'lowest10sec': query.sortBy = { 'channelGenre' : -1}; break;
+            case 'minimumBilling': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
           Media.aggregate(
@@ -132,7 +132,7 @@ var Digital = function()
                   callback(err);
                 });
               }, function(err){
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling - b.minimumBilling });
                 results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               }); 

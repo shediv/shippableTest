@@ -88,7 +88,7 @@ var Radio = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
-            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : -1}; break;
+            case 'rate10sec': query.sortBy = { 'mediaOptions.regularOptions.showRate.allDayPlan' : 1}; break;
             case 'city': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
