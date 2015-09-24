@@ -74,7 +74,8 @@ var Digital = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){ 
+    self.sortFilteredMedia = function(query, callback){
+      var data = []; 
       async.parallel({
         count : function(callbackInner)
         {          
@@ -132,9 +133,17 @@ var Digital = function()
                   callback(err);
                 });
               }, function(err){
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling - b.minimumBilling });
-                results = results.slice(self.params.offset, self.params.limit + self.params.offset);
-                callbackInner(err, results);
+                if(self.params.sortBy == 'minimumBilling') {
+                  results.sort(function(a,b){ return a.minimumBilling - b.minimumBilling });
+                  //remove medias with minimumBilling <= 0
+                  for(i in results){
+                    if(results[i].minimumBilling > 0){
+                      data.push(results[i]);
+                    }
+                  }  
+                }  
+                data = data.slice(self.params.offset, self.params.limit + self.params.offset);
+                callbackInner(err, data);
               }); 
             }
           );
