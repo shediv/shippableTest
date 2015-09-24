@@ -222,7 +222,7 @@ var Digital = function()
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
-      res.status(200).json({digital : results.media});
+      res.status(200).json({digital : results});
     });
 
     var visitor = {

@@ -236,7 +236,7 @@ var Airport = function()
   this.show = function(req, res){
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
-      if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      if(!result) return res.status(404).json({error : 'No Such Media Found'});
       res.status(200).json({airport : result});
     });
 
