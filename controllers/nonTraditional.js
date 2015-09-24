@@ -145,9 +145,8 @@ var NonTraditional = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
-            case 'name': query.sortBy = { 'name' : -1 }; break;
+            case 'name': query.sortBy = { 'name' : 1 }; break;
             case 'minimumBilling': query.sortBy = {}; break;
-            
           }
           query.sortBy._id = 1;
           Media.aggregate(
