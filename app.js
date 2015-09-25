@@ -55,12 +55,10 @@ app.use(multer({dest: './public/temp/'}).single('file'));
 
 // check if login required
 app.use(function(req, res, next) {
-  RoutesCollection.findOne({url:req.url}).lean().exec(
+  RoutesCollection.findOne({url:req.url, isAuthReq:true}).lean().exec(
     function(err, result)
       {
-        console.log(result.isAuthReq);
-
-        if(result.isAuthReq > 0){
+        if(result){
           var token = req.body.token || req.query.token || req.headers['x-access-token'];
           if(!token) return res.status(401).json("Token not found");
           jwt.verify(token, self.config.secret, function(err, decoded){
