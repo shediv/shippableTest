@@ -175,10 +175,10 @@ var Airport = function()
 
     self.getCategories = function(callback){
       var categories = [
-        {'_id' : 'airport', 'name' : 'Airport'},
-        {'_id' : 'airportLounge', 'name' : 'Airport Lounge'},
-        {'_id' : 'airline', 'name' : 'Airline'},
-        {'_id' : 'inflightMagazine', 'name' : 'Inflight Magazine'}
+        {'_id' : 'Airport', 'name' : 'Airport'},
+        {'_id' : 'AirportLounge', 'name' : 'Airport Lounge'},
+        {'_id' : 'Airline', 'name' : 'Airline'},
+        {'_id' : 'InflightMagazine', 'name' : 'Inflight Magazine'}
       ];
       callback(null, categories);
     };
