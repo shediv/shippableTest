@@ -124,7 +124,8 @@ var Cinema = function()
         mallName : 1,
         cinemaChain : 1,
         seats : 1,
-        geography : 1
+        geography : 1,
+        logo: 1
       };
       if(self.params.filters.mediaType == 'onScreen')
         self.fetchOnScreenData(geographies, match, group, project, callbackMain);
