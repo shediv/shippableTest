@@ -142,52 +142,49 @@ var Cinema = function()
       project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
       project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
-      async.parallel({
-        allScreens : function(callback){
-          Media.aggregate(match, {$project:project}, function(err, medias){
-            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-            else
-            {
-              var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography[0]);
-              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                var geographies = {};
-                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                geographies['length'] = results.length;
-                callback(err, self.populateOnScreenData(medias, geographies));
-              });
-            }
-          });
-        },
-        recommendedScreens : function(callback){
-          var finalMedias = [];
-          Media.aggregate(match, {$project:project}, group, function(err, medias){
-            for(key in medias)
-            {
-              medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
-              finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
-            }
-            medias = finalMedias;
-            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-            else
-            {
-              var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography[0]);
-              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                var geographies = {};
-                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                geographies['length'] = results.length;
-                callback(err, self.populateOnScreenData(medias, geographies));
-              });
-            }
-          });
-        } 
-      },
-      function(err, results)
+
+      if(!self.params.recommended)
       {
-        callbackMain(err, results);
-      });  
-    }
+        Media.aggregate(match, {$project:project}, function(err, medias){
+          if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+          else
+          {
+            var geographyIds = [];
+            for(i in medias) geographyIds.push(medias[i].geography[0]);
+            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+              var geographies = {};
+              for(i in results) geographies[results[i]._id.toString()] = results[i];
+              geographies['length'] = results.length;
+              callbackMain(err, {allScreens:self.populateOnScreenData(medias, geographies)});
+            });
+          }
+        });
+      }
+      else
+      {
+        var finalMedias = [];
+        Media.aggregate(match, {$project:project}, group, function(err, medias){
+          for(key in medias)
+          {
+            medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
+            finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
+          }
+          medias = finalMedias;
+          if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+          else
+          {
+            var geographyIds = [];
+            for(i in medias) geographyIds.push(medias[i].geography[0]);
+            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+              var geographies = {};
+              for(i in results) geographies[results[i]._id.toString()] = results[i];
+              geographies['length'] = results.length;
+              callbackMain(err, {recommendedScreens:self.populateOnScreenData(medias, geographies)});
+            });
+          }
+        });
+      }
+    };
 
     self.populateOnScreenData = function(medias, geographies){
       var totalPrice10SecMuteSlide = 0;
