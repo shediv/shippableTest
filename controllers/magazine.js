@@ -833,16 +833,22 @@ var Magazine = function()
     };
 
     self.getGeographies = function(callback){
-      Media.aggregate(
-        {$match: {toolId:self.toolId, geography: { $exists: 1}, isActive : 1}},
-        {$unwind: '$geography'},
-        {$group : { _id : '$geography', count : {$sum : 1}}},
-        function(err, results) 
+      Media.distinct('geography',
+        { toolId:self.toolId , isActive:1 },
+        function(error, geographyIds) 
         {
-          var geoIds = [];
-          results.map(function(o){ geoIds.push(o._id); });
-          Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-          callback(err, geos);
+          Geography.find({_id : {$in: geographyIds}}).lean().exec(function(err, geos){
+            var geographies = [];
+            for(i in geos)
+            {
+              var key = Object.keys(geos[i])
+              var key = key[key.length - 1];
+              geographies.push({
+                '_id' : geos[i]._id,
+                'name' : geos[i][key]
+              });
+            }
+            callback(error, geographies);
           });
         }
       );
