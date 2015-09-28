@@ -842,7 +842,7 @@ var Magazine = function()
           var geoIds = [];
           results.map(function(o){ geoIds.push(o._id); });
           Geography.find({_id : {$in: geoIds}},'name').lean().exec(function(err, geos){
-            callback(err, geos);
+          callback(err, geos);
           });
         }
       );
