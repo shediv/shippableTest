@@ -120,7 +120,7 @@ var Newspaper = function()
         function(callbackInner)
         {
           Category.findOne({ name:'General Interest'},'_id').lean().exec(function(err, cat){
-            categoryId = cat._id;
+            categoryId = cat._id.toString();
             callbackInner(err, categoryId);
           });
         },
@@ -130,9 +130,10 @@ var Newspaper = function()
             var categoryIds = [];
             if(result.newspaper.categoryIds.indexOf(categoryId) == -1)
             {
-              categoryIds.push(categoryId); 
+              for(i in result.newspaper.categoryIds) categoryIds[i] = result.newspaper.categoryIds[i].toString();
+              categoryIds.push(categoryId);
             }
-            for(i in categoryIds) categoryIds[i] = categoryIds[i].toString();
+            
             callbackInner(err, categoryIds);
           });
         },
