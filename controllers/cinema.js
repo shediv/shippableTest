@@ -125,6 +125,7 @@ var Cinema = function()
         mallName : 1,
         cinemaChain : 1,
         seats : 1,
+        urlSlug :1,
         geography : 1,
         logo: 1
       };
@@ -140,6 +141,7 @@ var Cinema = function()
       project['theatreName'] = 1;
       project['screenNumber'] = 1;
       project['creativeFormat'] = 1;
+      project['urlSlug'] = 1;
       project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
