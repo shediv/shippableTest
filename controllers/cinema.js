@@ -360,7 +360,7 @@ var Cinema = function()
             var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
                               + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                               + dateObj.getFullYear();
-            results.mediaoptions = result.mediaOptions[nextFriday];
+            results.mediaoptions = results.mediaOptions[nextFriday];
           }
           res.status(200).json({cinema : results});
         });
