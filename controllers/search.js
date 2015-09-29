@@ -5,16 +5,19 @@ var Search = function()
   var Media = require('../models/media').Media;
   var TwelthCross = require('../models/12thCross').TwelthCross;
   var Tools = require('../models/tool').Tools;
+  var SearchIgnore = require('../searchignore.js');
   
   var self = this;
 
   this.getResults = function(req, res){
-    var query = req.query.q;
-    query = query.split(' ');
-    for(i in query)
+    var queryTerms = req.query.q;
+    queryTerms = queryTerms.split(' ');
+    var query = [];
+    for(i in queryTerms)
     {
-      var qRegExp = new RegExp('\\b'+query[i], "i");
-      query[i] = qRegExp;
+      if( SearchIgnore.searchIgnore.indexOf(queryTerms[i]) > -1 ) continue;
+      var qRegExp = new RegExp('\\b'+queryTerms[i], "i");
+      query.push(qRegExp);
     }
     async.parallel({
       medias : function(callback){ self.searchMedias(query, callback) },
