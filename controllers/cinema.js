@@ -361,10 +361,10 @@ var Cinema = function()
                               + ('0' + (dateObj.getMonth()+1)).slice(-2) + '/'
                               + dateObj.getFullYear();
             
-            results.mediaoptions.10SecMuteSlide = results.mediaOptions.10SecMuteSlide[nextFriday];
-            results.mediaoptions.10SecAudioSlide = results.mediaOptions.10SecAudioSlide[nextFriday];
-            results.mediaoptions.30SecVideo = results.mediaOptions.30SecVideo[nextFriday];
-            results.mediaoptions.60SecVideo = results.mediaOptions.60SecVideo[nextFriday];
+            results.mediaoptions['10SecMuteSlide'] = results.mediaOptions['10SecMuteSlide'][nextFriday];
+            results.mediaoptions['10SecAudioSlide'] = results.mediaOptions['10SecAudioSlide'][nextFriday];
+            results.mediaoptions['30SecVideo'] = results.mediaOptions['30SecVideo'][nextFriday];
+            results.mediaoptions['60SecVideo'] = results.mediaOptions['60SecVideo'][nextFriday];
           }
           res.status(200).json({cinema : results});
         });
