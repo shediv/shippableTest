@@ -44,19 +44,27 @@ var Magazine = function()
           });
         },
         medias : function(callback){
+          var gender = '';
+          var income = '';
+          var age = [];
+          var consumption = '';
           var categoryNames = {};
-
+          //return res.status(200).json(ProductInfo[0]);
+          if(ProductInfo[0].magazine.eliminators.gender) gender = ProductInfo[0].magazine.eliminators.gender;
+          if(ProductInfo[0].magazine.eliminators.income) income = ProductInfo[0].magazine.eliminators.income;
+          if(ProductInfo[0].magazine.eliminators.age) age = ProductInfo[0].magazine.eliminators.age;
+          if(ProductInfo[0].magazine.eliminators.consumption) consumption = ProductInfo[0].magazine.eliminators.consumption;
           //All the eliminators from product with Media
           var match = {
             "$match" : {
               $or: [
-                {"eliminators.gender" : ProductInfo[0].magazine.eliminators.gender},
-                //{"eliminators.income" : ProductInfo[0].magazine.eliminators.income},
-                {"eliminators.age" : { $in: ProductInfo[0].magazine.eliminators.age }},
-                {"eliminators.consumption" : ProductInfo[0].magazine.eliminators.consumption }
+                {"eliminators.gender" : gender},
+                {"eliminators.income" : income},
+                {"eliminators.age" : { $in: age }},
+                {"eliminators.consumption" : consumption }
               ]
             }
-          };
+          };          
           var project = {
             "$project" : {
               "urlSlug" : 1,
