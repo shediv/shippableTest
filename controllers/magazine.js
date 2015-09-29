@@ -51,7 +51,7 @@ var Magazine = function()
             "$match" : {
               $or: [
                 {"eliminators.gender" : ProductInfo[0].magazine.eliminators.gender},
-                {"eliminators.income" : ProductInfo[0].magazine.eliminators.income},
+                //{"eliminators.income" : ProductInfo[0].magazine.eliminators.income},
                 {"eliminators.age" : { $in: ProductInfo[0].magazine.eliminators.age }},
                 {"eliminators.consumption" : ProductInfo[0].magazine.eliminators.consumption }
               ]
