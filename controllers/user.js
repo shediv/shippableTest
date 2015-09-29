@@ -226,7 +226,7 @@ var User = function()
 	};
 
 	this.getSession = function(req, res){
-		var token = req.body.token || req.query.token || req.headers['x-access-token'];
+		var token = req.body.token || req.query.Tokenn || req.headers['x-access-token'];
 		if(!token) return res.status(401).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, decoded){
 			if(err) res.status(401).json("Invalid Token");
@@ -285,16 +285,24 @@ var User = function()
 	this.changePassword = function(req,res){
 		req.body.oldPassword = md5(req.body.oldPassword);
 		req.body.newPassword = md5(req.body.newPassword);
-
-		User.findOne({ _id:req.body.id, password:req.body.oldPassword }).lean().exec(function(err, result){
-			if(err) return res.status(500).json(err);
-			if(!result) return res.status(404).json("The Old password doesn't match");
-			User.update( { _id:result._id },{ password:req.body.newPassword }, function(err, result){
-				if(err) return res.status(404).json("password not updated :"+ err);
-		    res.status(200).json("OK");
+		var token = req.body.token || req.query.token || req.headers['x-access-token'];
+		if(!token) { 
+			return res.status(401).json("Token not found");
+		} else {
+			jwt.verify(token, self.config.secret, function(err, decoded){
+				if(err) res.status(401).json("Invalid Token");
+				
+				User.findOne({ _id:decoded.id, password:req.body.oldPassword }).lean().exec(function(err, result){
+					if(err) return res.status(500).json(err);
+					if(!result) return res.status(404).json("The Old password doesn't match");
+					User.update( { _id:result._id },{ password:req.body.newPassword }, function(err, result){
+						if(err) return res.status(404).json("password not updated :"+ err);
+				    res.status(200).json("OK");
+					});
+				});
 			});
-		});
+		}
 	};
 }
 
-module.exports.User = User;
+module.exports.User = User;	

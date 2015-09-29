@@ -21,10 +21,11 @@ var Cinema = function()
     async.series([self.buildGeographyQuery], function(err, results){
       if(err) return res.status(500).json(err);
       var count = 0;
-      if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; /*delete results[0].allScreens.screens;*/}
-      if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; /*delete results[0].recommendedScreens.screens;*/}
-      if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; /*delete results[0].offScreen.screens;*/}
-      res.status(200).json({medias:results[0],count:count});
+      var medias = [];
+      if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; medias = results[0].allScreens.screens;/*delete results[0].allScreens.screens;*/}
+      if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; medias = results[0].recommendedScreens.screens;/*delete results[0].recommendedScreens.screens;*/}
+      if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; medias = results[0].offScreen.screens;/*delete results[0].offScreen.screens;*/}
+      res.status(200).json({medias:medias,count:count});
     });
   };
 
@@ -124,7 +125,9 @@ var Cinema = function()
         mallName : 1,
         cinemaChain : 1,
         seats : 1,
-        geography : 1
+        urlSlug :1,
+        geography : 1,
+        logo: 1
       };
       if(self.params.filters.mediaType == 'onScreen')
         self.fetchOnScreenData(geographies, match, group, project, callbackMain);
@@ -138,56 +141,54 @@ var Cinema = function()
       project['theatreName'] = 1;
       project['screenNumber'] = 1;
       project['creativeFormat'] = 1;
+      project['urlSlug'] = 1;
       project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
       project['mediaOptions.60SecVideo.'+self.params.nextFriday] = 1;
-      async.parallel({
-        allScreens : function(callback){
-          Media.aggregate(match, {$project:project}, function(err, medias){
-            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-            else
-            {
-              var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography[0]);
-              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                var geographies = {};
-                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                geographies['length'] = results.length;
-                callback(err, self.populateOnScreenData(medias, geographies));
-              });
-            }
-          });
-        },
-        recommendedScreens : function(callback){
-          var finalMedias = [];
-          Media.aggregate(match, {$project:project}, group, function(err, medias){
-            for(key in medias)
-            {
-              medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
-              finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
-            }
-            medias = finalMedias;
-            if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
-            else
-            {
-              var geographyIds = [];
-              for(i in medias) geographyIds.push(medias[i].geography[0]);
-              Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
-                var geographies = {};
-                for(i in results) geographies[results[i]._id.toString()] = results[i];
-                geographies['length'] = results.length;
-                callback(err, self.populateOnScreenData(medias, geographies));
-              });
-            }
-          });
-        } 
-      },
-      function(err, results)
+
+      if(!self.params.recommended)
       {
-        callbackMain(err, results);
-      });  
-    }
+        Media.aggregate(match, {$project:project}, function(err, medias){
+          if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+          else
+          {
+            var geographyIds = [];
+            for(i in medias) geographyIds.push(medias[i].geography[0]);
+            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+              var geographies = {};
+              for(i in results) geographies[results[i]._id.toString()] = results[i];
+              geographies['length'] = results.length;
+              callbackMain(err, {allScreens:self.populateOnScreenData(medias, geographies)});
+            });
+          }
+        });
+      }
+      else
+      {
+        var finalMedias = [];
+        Media.aggregate(match, {$project:project}, group, function(err, medias){
+          for(key in medias)
+          {
+            medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
+            finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
+          }
+          medias = finalMedias;
+          if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
+          else
+          {
+            var geographyIds = [];
+            for(i in medias) geographyIds.push(medias[i].geography[0]);
+            Geography.find({ _id:{ $in:geographyIds } }).lean().exec(function(err, results){
+              var geographies = {};
+              for(i in results) geographies[results[i]._id.toString()] = results[i];
+              geographies['length'] = results.length;
+              callbackMain(err, {recommendedScreens:self.populateOnScreenData(medias, geographies)});
+            });
+          }
+        });
+      }
+    };
 
     self.populateOnScreenData = function(medias, geographies){
       var totalPrice10SecMuteSlide = 0;
