@@ -60,7 +60,7 @@ var Magazine = function()
               $or: [
                 {"eliminators.gender" : gender},
                 {"eliminators.income" : income},
-                {"eliminators.age" : { $in: age }},
+                {"eliminators.age" : { $in: ProductInfo[0].magazine.eliminators.age }},
                 {"eliminators.consumption" : consumption }
               ]
             }
@@ -79,13 +79,15 @@ var Magazine = function()
               "logo": 1
             }
           };
-          Media.aggregate([match, project], function(err, media){callback(err, media);});
+
+          Media.aggregate([match, project], function(err, media){            
+            callback(err, media);});
         }
       }, 
       function(err, result)
-      {
+      {        
         //Match the keywords
-        if(ProductInfo[0].keywords){
+        if(ProductInfo[0].keywords){  
         for(i in result.medias)
         {
           var check = getMatch(ProductInfo[0].magazine.keywords, result.medias[i].keywords);
@@ -107,13 +109,13 @@ var Magazine = function()
           //Pop up the last element which is added to the Finaldata
           CS.pop();
         }
-        else CS = result.medias; 
+        else CS = result.medias;                         
 
         //Create Buckets Based on Category
         for(i in ProductInfo[0].magazine.categoryIds)
         {
           mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazine.categoryIds[i], i));
-        }
+        }         
 
         //Find Medias that does not belong to any category with category 1
         var NonCatCS0 = [];
@@ -190,7 +192,7 @@ var Magazine = function()
             if (match) NonCatCS.push(CS[i]);
           }
           else NonCatCS.push(NonCatCS2[i]);
-        }               
+        }                     
 
         //Divide  Category 1 Buckets Based on Geography
         var mediaCategoryBuckets1_Geo = [];
@@ -263,11 +265,14 @@ var Magazine = function()
           }
         }
 
+        //return res.status(200).json(CS.length);                                       
+
         //Calculte Y value for the mediaCategoryBuckets1_Geo
         var YdataMediaCategoryBuckets1_Geo = [];
+        var YdataMediaCategoryBuckets1_GeoTmp = [];
         if(mediaCategoryBuckets1_Geo.length > 0) 
-        {          
-          YdataMediaCategoryBuckets1_Geo.push(calculateY(mediaCategoryBuckets1_Geo));
+        {           
+          YdataMediaCategoryBuckets1_Geo = YdataMediaCategoryBuckets1_Geo.push(calculateY(mediaCategoryBuckets1_Geo));                  
           GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets1_Geo.length);
         }
 
@@ -331,7 +336,7 @@ var Magazine = function()
           }
         }
 
-        if(CountOfMedia == 8)
+        if(CountOfMedia == 9)
         {
           //Sort final data base on sort by option
           switch (self.params.sortBy)
@@ -376,8 +381,7 @@ var Magazine = function()
           var YdataMediaCategoryBuckets1_nonGeo = [];
           if(mediaCategoryBuckets1_nonGeo.length > 0) 
           {
-            YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);
-            //YdataMediaCategoryBuckets1_nonGeo.push(calculateY(mediaCategoryBuckets1_nonGeo));
+            YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);            
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);
           }
 
@@ -385,8 +389,7 @@ var Magazine = function()
           var YdataMediaCategoryBuckets2_nonGeo = [];
           if(mediaCategoryBuckets2_nonGeo.length > 0) 
           {
-            YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);
-            //YdataMediaCategoryBuckets2_nonGeo.push(calculateY(mediaCategoryBuckets2_nonGeo));
+            YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);            
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);
           }
 
@@ -394,8 +397,7 @@ var Magazine = function()
           var YdataMediaCategoryBuckets3_nonGeo = [];
           if(mediaCategoryBuckets3_nonGeo.length > 0) 
           {
-            YdataMediaCategoryBuckets3_nonGeo = YdataMediaCategoryBuckets3_nonGeo.concat(mediaCategoryBuckets3_nonGeo);
-            //YdataMediaCategoryBuckets3_nonGeo.push(calculateY(mediaCategoryBuckets3_nonGeo));
+            YdataMediaCategoryBuckets3_nonGeo = YdataMediaCategoryBuckets3_nonGeo.concat(mediaCategoryBuckets3_nonGeo);            
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets3_nonGeo.length);
           }
 
@@ -403,8 +405,7 @@ var Magazine = function()
           var YdataMediaCategoryBuckets4_nonGeo = [];
           if(mediaCategoryBuckets4_nonGeo.length > 0) 
           {
-            YdataMediaCategoryBuckets4_nonGeo = YdataMediaCategoryBuckets4_nonGeo.concat(mediaCategoryBuckets4_nonGeo);
-            //YdataMediaCategoryBuckets4_nonGeo.push(calculateY(mediaCategoryBuckets4_nonGeo));
+            YdataMediaCategoryBuckets4_nonGeo = YdataMediaCategoryBuckets4_nonGeo.concat(mediaCategoryBuckets4_nonGeo);            
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
           }
 
@@ -440,7 +441,7 @@ var Magazine = function()
             }
           }
 
-          if(CountOfMedia == 8)
+          if(CountOfMedia == 9)
           {
             //Sort final data base on sort by option
             switch (self.params.sortBy)
@@ -709,6 +710,8 @@ var Magazine = function()
         var x = a.yValue < b.yValue? -1:1;
         return x;
       });
+
+      //console.log(media);
 
       return media;
     }
