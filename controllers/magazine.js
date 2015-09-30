@@ -267,15 +267,15 @@ var Magazine = function()
           }
         }
 
-        //return res.status(200).json(mediaCategoryBuckets4_nonGeo.length);
-        //return res.status(200).json(mediaCategoryBuckets4_Geo.length);                                       
+        //return res.status(200).json(mediaCategoryBuckets1_nonGeo.length);
+        //return res.status(200).json(mediaCategoryBuckets2_Geo.length);                                       
 
         //Calculte Y value for the mediaCategoryBuckets1_Geo
         var YdataMediaCategoryBuckets1_Geo = [];
         var YdataMediaCategoryBuckets1_GeoTmp = [];
         if(mediaCategoryBuckets1_Geo.length > 0) 
         {           
-          YdataMediaCategoryBuckets1_Geo = YdataMediaCategoryBuckets1_Geo.push(calculateY(mediaCategoryBuckets1_Geo));                  
+          YdataMediaCategoryBuckets1_Geo = YdataMediaCategoryBuckets1_Geo.concat(calculateY(mediaCategoryBuckets1_Geo));                  
           GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets1_Geo.length);
         }
 
@@ -283,15 +283,15 @@ var Magazine = function()
         var YdataMediaCategoryBuckets2_Geo = [];
         if(mediaCategoryBuckets2_Geo.length > 0) 
         {
-          YdataMediaCategoryBuckets2_Geo.push(calculateY(mediaCategoryBuckets2_Geo));
-          GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets2_Geo.length);
+          YdataMediaCategoryBuckets2_Geo = YdataMediaCategoryBuckets2_Geo.concat(calculateY(mediaCategoryBuckets2_Geo));                    
+          GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets2_Geo.length);          
         }
 
         //Calculte Y value for the mediaCategoryBuckets3_Geo
         var YdataMediaCategoryBuckets3_Geo = [];
         if(mediaCategoryBuckets3_Geo.length > 0) 
         {
-          YdataMediaCategoryBuckets3_Geo.push(calculateY(mediaCategoryBuckets3_Geo));
+          YdataMediaCategoryBuckets3_Geo.concat(calculateY(mediaCategoryBuckets3_Geo));
           GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets3_Geo.length);
         }
 
@@ -299,47 +299,51 @@ var Magazine = function()
         var YdataMediaCategoryBuckets4_Geo = [];
         if(mediaCategoryBuckets4_Geo.length > 0) 
         {
-          YdataMediaCategoryBuckets4_Geo.push(calculateY(mediaCategoryBuckets4_Geo));
+          YdataMediaCategoryBuckets4_Geo.concat(calculateY(mediaCategoryBuckets4_Geo));
           GeoMediaCount = (GeoMediaCount + YdataMediaCategoryBuckets4_Geo.length);
-        }
- 
-        // Push the medias with to final data
-        if(GeoMediaCount > 0){
-          while (CountOfMedia < 9) 
-          {          
-            if(YdataMediaCategoryBuckets1_Geo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_Geo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets1_Geo.shift();
-            }
+        }                
+        //return res.status(200).json(YdataMediaCategoryBuckets2_Geo);
 
-            if(YdataMediaCategoryBuckets2_Geo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_Geo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets2_Geo.shift();
-            }
-
-            if(YdataMediaCategoryBuckets3_Geo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_Geo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets3_Geo.shift();
-            }
-
-            if(YdataMediaCategoryBuckets4_Geo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_Geo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets4_Geo.shift();
-            }          
+        // Push the medias with to final data                 
+        while (CountOfMedia < 9 && GeoMediaCount > 0) 
+        {          
+          if(YdataMediaCategoryBuckets1_Geo.length > 0)
+          {
+            FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_Geo[0];
+            CountOfMedia = CountOfMedia + 1;
+            GeoMediaCount = GeoMediaCount - 1;
+            YdataMediaCategoryBuckets1_Geo.shift();
           }
-        }  
+
+          if(YdataMediaCategoryBuckets2_Geo.length > 0)
+          {
+            FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_Geo[0];
+            CountOfMedia = CountOfMedia + 1;
+            GeoMediaCount = GeoMediaCount - 1;
+            YdataMediaCategoryBuckets2_Geo.shift();
+          }
+
+          if(YdataMediaCategoryBuckets3_Geo.length > 0)
+          {
+            FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_Geo[0];
+            CountOfMedia = CountOfMedia + 1;
+            GeoMediaCount = GeoMediaCount - 1;
+            YdataMediaCategoryBuckets3_Geo.shift();
+          }
+
+          if(YdataMediaCategoryBuckets4_Geo.length > 0)
+          {
+            FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_Geo[0];
+            CountOfMedia = CountOfMedia + 1;
+            GeoMediaCount = GeoMediaCount - 1;
+            YdataMediaCategoryBuckets4_Geo.shift();
+          }          
+        }
+        
+
+        //return res.status(200).json(FinalData);
+
+
 
         if(CountOfMedia > 8)
         {
@@ -411,39 +415,38 @@ var Magazine = function()
             NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);                    
           }          
 
-          if(NonGeoMediaCount > 0){
-            while (CountOfMedia < 9) 
-            {            
-              if(YdataMediaCategoryBuckets1_nonGeo.length > 0)
-              {
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
-                CountOfMedia = CountOfMedia + 1;
-                NonGeoMediaCount = NonGeoMediaCount - 1;
-                YdataMediaCategoryBuckets1_nonGeo.shift();
-              }
-              if(YdataMediaCategoryBuckets2_nonGeo.length > 0)
-              {
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
-                CountOfMedia = CountOfMedia + 1;
-                NonGeoMediaCount = NonGeoMediaCount - 1;
-                YdataMediaCategoryBuckets2_nonGeo.shift();
-              }
-              if(YdataMediaCategoryBuckets3_nonGeo.length > 0)
-              {
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
-                CountOfMedia = CountOfMedia + 1;
-                NonGeoMediaCount = NonGeoMediaCount - 1;
-                YdataMediaCategoryBuckets3_nonGeo.shift();
-              }
-              if(YdataMediaCategoryBuckets4_nonGeo.length > 0)
-              {
-                FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
-                CountOfMedia = CountOfMedia + 1;
-                NonGeoMediaCount = NonGeoMediaCount - 1;
-                YdataMediaCategoryBuckets4_nonGeo.shift();
-              }
+          while (CountOfMedia < 9 && NonGeoMediaCount > 0) 
+          {            
+            if(YdataMediaCategoryBuckets1_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets1_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets2_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets2_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets3_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets3_nonGeo.shift();
+            }
+            if(YdataMediaCategoryBuckets4_nonGeo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets4_nonGeo.shift();
             }
           }
+          
 
 
           //return res.status(200).json(CountOfMedia);
@@ -676,17 +679,17 @@ var Magazine = function()
 
       //Add the last data i.e highest readership to the Finaldata
       maxReadership = maxReadership[maxReadership.length - 1];
-      maxReadership = maxReadership.attributes.readership.value;
+      maxReadership = maxReadership.attributes.readership.value;            
 
       //Sort mediaCategoryBuckets1_nonGeo based on the noOfPages
       maxNoOfPages = mediaCategoryBuckets_nonGeo.sort(function(a,b){
         var x = a.attributes.noOfPages.value < b.attributes.noOfPages.value? -1:1;
         return x;
-      });
+      });      
 
       //Add the last data i.e highest readership to the Finaldata
       maxNoOfPages = maxNoOfPages[maxNoOfPages.length - 1];
-      maxNoOfPages = maxNoOfPages.attributes.noOfPages.value;
+      maxNoOfPages = maxNoOfPages.attributes.noOfPages.value;          
 
       //Sort mediaCategoryBuckets1_nonGeo based on the minFullPage 1-2
       minFullPage = mediaCategoryBuckets_nonGeo.sort(function(a,b){
@@ -697,11 +700,13 @@ var Magazine = function()
       //Add the last data i.e highest readership to the Finaldata
       minFullPage = minFullPage[minFullPage.length - 1];
       minFullPage = minFullPage.print.mediaOptions.fullPage['1-2'];
-
+      var media = [];
       for(i in mediaCategoryBuckets_nonGeo)
       {
-        var tmp = [];
+        var tmp = {};
         tmp['_id'] = mediaCategoryBuckets_nonGeo[i]._id;
+        tmp['attributes'] = mediaCategoryBuckets_nonGeo[i].attributes;
+        tmp['print'] = mediaCategoryBuckets_nonGeo[i].print;        
         tmp['categoryId'] = mediaCategoryBuckets_nonGeo[i].categoryId;
         tmp['urlSlug'] = mediaCategoryBuckets_nonGeo[i].urlSlug;
         tmp['thumbnail'] = mediaCategoryBuckets_nonGeo[i].thumbnail;
@@ -711,7 +716,7 @@ var Magazine = function()
         yValue = (0.6 * ((mediaCategoryBuckets_nonGeo[i].attributes.noOfPages.value * 10)/maxNoOfPages)) + (0.3 * ((mediaCategoryBuckets_nonGeo[i].attributes.readership.value * 10)/maxReadership)) + (0.1 * ((mediaCategoryBuckets_nonGeo[i].print.mediaOptions.fullPage['1-2'] * 10)/minFullPage));
         tmp['yValue'] = yValue;
 
-        media = tmp;
+        media.push(tmp);
       }
 
       //Sort mediaCategoryBuckets1_nonGeo based on the noOfPages
@@ -719,8 +724,6 @@ var Magazine = function()
         var x = a.yValue < b.yValue? -1:1;
         return x;
       });
-
-      //console.log(media);
 
       return media;
     }
