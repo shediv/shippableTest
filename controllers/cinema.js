@@ -25,7 +25,7 @@ var Cinema = function()
       if(results[0].allScreens !== undefined) {count+=results[0].allScreens.count; medias = results[0].allScreens.screens;/*delete results[0].allScreens.screens;*/}
       if(results[0].recommendedScreens !== undefined) {count+=results[0].recommendedScreens.count; medias = results[0].recommendedScreens.screens;/*delete results[0].recommendedScreens.screens;*/}
       if(results[0].offScreen !== undefined) {count+=results[0].offScreen.count; medias = results[0].offScreen.screens;/*delete results[0].offScreen.screens;*/}
-      res.status(200).json({medias:medias,count:count,nextDate:self.params.nextFrida});
+      res.status(200).json({medias:medias,count:count,nextDate:self.params.nextFriday});
     });
   };
 
