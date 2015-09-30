@@ -85,7 +85,7 @@ var Magazine = function()
         }
       }, 
       function(err, result)
-      {        
+      {                
         //Match the keywords
         if(ProductInfo[0].keywords){  
         for(i in result.medias)
@@ -93,7 +93,7 @@ var Magazine = function()
           var check = getMatch(ProductInfo[0].magazine.keywords, result.medias[i].keywords);
           if(check.length > 0) CS.push(result.medias[i]);
         }
-        }
+        }        
 
         if(CS.length > 0)
         {
@@ -109,13 +109,13 @@ var Magazine = function()
           //Pop up the last element which is added to the Finaldata
           CS.pop();
         }
-        else CS = result.medias;                         
+        else CS = result.medias;                               
 
         //Create Buckets Based on Category
         for(i in ProductInfo[0].magazine.categoryIds)
         {
           mediacategorybuckets.push(createbucket(CS, ProductInfo[0].magazine.categoryIds[i], i));
-        }         
+        }                   
 
         //Find Medias that does not belong to any category with category 1
         var NonCatCS0 = [];
@@ -192,7 +192,9 @@ var Magazine = function()
             if (match) NonCatCS.push(CS[i]);
           }
           else NonCatCS.push(NonCatCS2[i]);
-        }                     
+        }
+
+        //return res.status(200).json(mediacategorybuckets[0]);                     
 
         //Divide  Category 1 Buckets Based on Geography
         var mediaCategoryBuckets1_Geo = [];
@@ -265,7 +267,8 @@ var Magazine = function()
           }
         }
 
-        //return res.status(200).json(CS.length);                                       
+        //return res.status(200).json(mediaCategoryBuckets4_nonGeo.length);
+        //return res.status(200).json(mediaCategoryBuckets4_Geo.length);                                       
 
         //Calculte Y value for the mediaCategoryBuckets1_Geo
         var YdataMediaCategoryBuckets1_Geo = [];
@@ -301,42 +304,44 @@ var Magazine = function()
         }
  
         // Push the medias with to final data
-        while (CountOfMedia < 9 && GeoMediaCount > 0) 
-        {
-          if(YdataMediaCategoryBuckets1_Geo.length > 0)
-          {
-            FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_Geo[0];
-            CountOfMedia = CountOfMedia + 1;
-            NonGeoMediaCount = NonGeoMediaCount - 1;
-            YdataMediaCategoryBuckets1_Geo.shift();
-          }
+        if(GeoMediaCount > 0){
+          while (CountOfMedia < 9) 
+          {          
+            if(YdataMediaCategoryBuckets1_Geo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_Geo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets1_Geo.shift();
+            }
 
-          if(YdataMediaCategoryBuckets2_Geo.length > 0)
-          {
-            FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_Geo[0];
-            CountOfMedia = CountOfMedia + 1;
-            NonGeoMediaCount = NonGeoMediaCount - 1;
-            YdataMediaCategoryBuckets2_Geo.shift();
-          }
+            if(YdataMediaCategoryBuckets2_Geo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_Geo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets2_Geo.shift();
+            }
 
-          if(YdataMediaCategoryBuckets3_Geo.length > 0)
-          {
-            FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_Geo[0];
-            CountOfMedia = CountOfMedia + 1;
-            NonGeoMediaCount = NonGeoMediaCount - 1;
-            YdataMediaCategoryBuckets3_Geo.shift();
-          }
+            if(YdataMediaCategoryBuckets3_Geo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_Geo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets3_Geo.shift();
+            }
 
-          if(YdataMediaCategoryBuckets4_Geo.length > 0)
-          {
-            FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_Geo[0];
-            CountOfMedia = CountOfMedia + 1;
-            NonGeoMediaCount = NonGeoMediaCount - 1;
-            YdataMediaCategoryBuckets4_Geo.shift();
+            if(YdataMediaCategoryBuckets4_Geo.length > 0)
+            {
+              FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_Geo[0];
+              CountOfMedia = CountOfMedia + 1;
+              NonGeoMediaCount = NonGeoMediaCount - 1;
+              YdataMediaCategoryBuckets4_Geo.shift();
+            }          
           }
-        }
+        }  
 
-        if(CountOfMedia == 9)
+        if(CountOfMedia > 8)
         {
           //Sort final data base on sort by option
           switch (self.params.sortBy)
@@ -371,18 +376,15 @@ var Magazine = function()
                 FinalData[i].categoryName = catNames[FinalData[i].categoryId];
               }
               res.status(200).json({count:FinalData.length, medias:FinalData});
-            });
-            
+            });            
         }
-
-
 
           //Calculte Y value for the mediaCategoryBuckets1_nonGeo
           var YdataMediaCategoryBuckets1_nonGeo = [];
           if(mediaCategoryBuckets1_nonGeo.length > 0) 
           {
             YdataMediaCategoryBuckets1_nonGeo = YdataMediaCategoryBuckets1_nonGeo.concat(mediaCategoryBuckets1_nonGeo);            
-            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets1_nonGeo.length);            
           }
 
           //Calculte Y value for the mediaCategoryBuckets2_nonGeo
@@ -390,7 +392,7 @@ var Magazine = function()
           if(mediaCategoryBuckets2_nonGeo.length > 0) 
           {
             YdataMediaCategoryBuckets2_nonGeo = YdataMediaCategoryBuckets2_nonGeo.concat(mediaCategoryBuckets2_nonGeo);            
-            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets2_nonGeo.length);            
           }
 
           //Calculte Y value for the mediaCategoryBuckets3_nonGeo
@@ -406,42 +408,47 @@ var Magazine = function()
           if(mediaCategoryBuckets4_nonGeo.length > 0) 
           {
             YdataMediaCategoryBuckets4_nonGeo = YdataMediaCategoryBuckets4_nonGeo.concat(mediaCategoryBuckets4_nonGeo);            
-            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);
+            NonGeoMediaCount = (NonGeoMediaCount + YdataMediaCategoryBuckets4_nonGeo.length);                    
+          }          
+
+          if(NonGeoMediaCount > 0){
+            while (CountOfMedia < 9) 
+            {            
+              if(YdataMediaCategoryBuckets1_nonGeo.length > 0)
+              {
+                FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
+                CountOfMedia = CountOfMedia + 1;
+                NonGeoMediaCount = NonGeoMediaCount - 1;
+                YdataMediaCategoryBuckets1_nonGeo.shift();
+              }
+              if(YdataMediaCategoryBuckets2_nonGeo.length > 0)
+              {
+                FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
+                CountOfMedia = CountOfMedia + 1;
+                NonGeoMediaCount = NonGeoMediaCount - 1;
+                YdataMediaCategoryBuckets2_nonGeo.shift();
+              }
+              if(YdataMediaCategoryBuckets3_nonGeo.length > 0)
+              {
+                FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
+                CountOfMedia = CountOfMedia + 1;
+                NonGeoMediaCount = NonGeoMediaCount - 1;
+                YdataMediaCategoryBuckets3_nonGeo.shift();
+              }
+              if(YdataMediaCategoryBuckets4_nonGeo.length > 0)
+              {
+                FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
+                CountOfMedia = CountOfMedia + 1;
+                NonGeoMediaCount = NonGeoMediaCount - 1;
+                YdataMediaCategoryBuckets4_nonGeo.shift();
+              }
+            }
           }
 
-          while (CountOfMedia < 9 && NonGeoMediaCount > 0) 
-          {
-            if(YdataMediaCategoryBuckets1_nonGeo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets1_nonGeo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets1_nonGeo.shift();
-            }
-            if(YdataMediaCategoryBuckets2_nonGeo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets2_nonGeo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets2_nonGeo.shift();
-            }
-            if(YdataMediaCategoryBuckets3_nonGeo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets3_nonGeo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets3_nonGeo.shift();
-            }
-            if(YdataMediaCategoryBuckets4_nonGeo.length > 0)
-            {
-              FinalData[CountOfMedia] = YdataMediaCategoryBuckets4_nonGeo[0];
-              CountOfMedia = CountOfMedia + 1;
-              NonGeoMediaCount = NonGeoMediaCount - 1;
-              YdataMediaCategoryBuckets4_nonGeo.shift();
-            }
-          }
 
-          if(CountOfMedia == 9)
+          //return res.status(200).json(CountOfMedia);
+
+          if(CountOfMedia > 8)
           {
             //Sort final data base on sort by option
             switch (self.params.sortBy)
@@ -488,6 +495,8 @@ var Magazine = function()
 
             //res.status(200).json({count:FinalData.length, magazine:FinalData});
           }
+
+
 
           //Divide  Non Category Buckets Based on All India and others
           var mediaNonCategoryBuckets_GeoAllIndia = [];
