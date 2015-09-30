@@ -128,6 +128,7 @@ var Digital = function()
                   minimumBilling =  result.mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
                 }
                 result['minimumBilling'] = minimumBilling;
+                result['firstMediaOption'] = firstmediaOptionsKey;
                 Category.findOne({ _id:result.categoryId },'name').lean().exec(function(err, cat){
                   if(cat) result.categoryName = cat.name;
                   callback(err);

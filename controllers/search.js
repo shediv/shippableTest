@@ -15,7 +15,7 @@ var Search = function()
     var query = [];
     for(i in queryTerms)
     {
-      if( SearchIgnore.searchIgnore.indexOf(queryTerms[i]) > -1 ) continue;
+      if( SearchIgnore.indexOf(queryTerms[i]) > -1 ) continue;
       var qRegExp = new RegExp('\\b'+queryTerms[i], "i");
       query.push(qRegExp);
     }
