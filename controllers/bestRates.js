@@ -8,8 +8,8 @@ var BestRates = function()
   var self = this;
 
   this.getBestRates = function(req, res){
-    self.medias = req.query.medias;
-    async.forEach(Object.keys(medias), function(tool, callback){
+    self.medias = req.body.medias;
+    async.forEach(Object.keys(self.medias), function(tool, callback){
       switch(tool)
       {
         case 'magazine':
