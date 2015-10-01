@@ -74,7 +74,7 @@ var BestRates = function()
               }
           }
         }
-        medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
+        //medias[media._id].dates = self.getTenDates(media.timeline.dates, media.attributes.frequency.value);
       });
       self.medias[tool] = medias;
       self.medias[tool].totalGrossSaving = totalGrossSaving;
