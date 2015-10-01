@@ -62,7 +62,7 @@ app.use(function(req, res, next) {
         if(result){
           var token = req.body.token || req.query.token || req.headers['x-access-token'];
           if(!token) return res.status(401).json("Token not found");
-          jwt.verify(token, self.config.secret, function(err, decoded){
+          jwt.verify(token, config.secret, function(err, decoded){
             if(err) res.status(401).json("Invalid Token");
             else next();
           });          
