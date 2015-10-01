@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
+var jwt = require('jsonwebtoken');
 var RoutesCollection = require('./models/routesCollection').RoutesCollection;
 
 var config = require('./config.js');
