@@ -10,6 +10,7 @@ var BestRates = function()
   this.getBestRates = function(req, res){
     self.medias = req.body.medias;
     async.each(Object.keys(self.medias), function(tool, callback){
+      console.log(tool);
       switch(tool)
       {
         case 'magazine':
