@@ -16,6 +16,8 @@ var BestRates = function()
         case 'magazine':
           self.magazineBestRates(self.medias[tool], tool, callback);
           break;
+        default:
+          callback(null);
       }
     },function(err){
       if(err) return res.status(500).json(err);
