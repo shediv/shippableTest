@@ -9,6 +9,17 @@ var _12thCross = function()
   
   this.params = {};
   var self = this;
+
+  this.store = function(req, res){
+    // create a new Media
+    var newAgency = TwelthCross(req.body);
+
+    // save the Media
+    newAgency.save(function(err) {
+      if(err) return res.status(500).json(err);
+      res.status(200).json("Agency Created Successfully");
+    });
+  };
   
   this.get12thCross = function(req, res){
     self.params = JSON.parse(req.query.params);
@@ -101,7 +112,7 @@ var _12thCross = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              async.each(results, function(result,callback){
+              async.each(results, function(result,callbackEach){
                 async.parallel({
                   subCategories: function(callbackParallel){
                     SubCategory.find({ _id:{ $in:result.subCategoryId } },'name').lean().exec(function(err, subCats){
@@ -120,7 +131,7 @@ var _12thCross = function()
                     })
                   }
                 },function(err, res){
-                  callback(err);
+                  callbackEach(err);
                 });
               }, function(err){
                 callbackInner(err,results);

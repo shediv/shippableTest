@@ -7,6 +7,7 @@ var router = express.Router();
 var _12thCross = new (require('../controllers/12thCross'))._12thCross();
 
 router.get("/", _12thCross.get12thCross);
+router.post("/store", _12thCross.store);
 router.get("/filters", _12thCross.getFilters);
 router.get("/getVendors", _12thCross.getVendors);
 router.post("/updateVendor", _12thCross.updateVendor);
