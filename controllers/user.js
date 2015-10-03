@@ -208,6 +208,8 @@ var User = function()
 	};
 
 	this.authenticate = function(req, res){
+		console.log(req.body.user);
+		process.exit();
 		var user = req.body.user;
 		User.findOne({email: user.username}).lean().exec(function(err, result){
 			if(err) return res.status(500).json(err);
@@ -219,7 +221,10 @@ var User = function()
 			else
 			{
 				var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
+            
 				res.status(200).json({token:token});
+				console.log(token);
+				
 			}
 				
 		});
