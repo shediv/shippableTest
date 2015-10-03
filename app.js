@@ -6,6 +6,7 @@ var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
+var jwt = require('jsonwebtoken');
 var RoutesCollection = require('./models/routesCollection').RoutesCollection;
 
 var config = require('./config.js');
@@ -26,6 +27,7 @@ var digital = require('./routes/digital');
 var _12thCross = require('./routes/12thCross');
 var search = require('./routes/search');
 var bestRates = require('./routes/bestRates');
+var cafe = require('./routes/cafe');
 var parseExcel = require('./routes/parseExcel');
 
 var app = express();
@@ -61,7 +63,7 @@ app.use(function(req, res, next) {
         if(result){
           var token = req.body.token || req.query.token || req.headers['x-access-token'];
           if(!token) return res.status(401).json("Token not found");
-          jwt.verify(token, self.config.secret, function(err, decoded){
+          jwt.verify(token, config.secret, function(err, decoded){
             if(err) res.status(401).json("Invalid Token");
             else next();
           });          
@@ -88,6 +90,7 @@ app.use('/nonTraditional', nonTraditional);
 app.use('/12thCross', _12thCross);
 app.use('/search', search);
 app.use('/bestRates', bestRates);
+app.use('/cafe', cafe);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);

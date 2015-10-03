@@ -6,6 +6,6 @@ var express = require('express');
 var router = express.Router();
 var BestRates = new (require('../controllers/bestRates')).BestRates();
 
-router.get("/", BestRates.getBestRates);
+router.post("/", BestRates.getBestRates);
 
 module.exports = router;
