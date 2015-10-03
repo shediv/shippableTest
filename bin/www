@@ -12,22 +12,35 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port = normalizePort(process.env.PORT || '3000');
-app.set('port', port);
+var port1 = normalizePort(process.env.PORT || '3000');
+app.set('port', port1);
+
+var port2 = normalizePort(process.env.PORT || '3001');
+app.set('port', port2);
+
+var port3 = normalizePort(process.env.PORT || '3002');
+app.set('port', port3);
 
 /**
  * Create HTTP server.
  */
 
-var server = http.createServer(app);
+var server1 = http.createServer(app).listen(port1).on('error', onError);
+//server1.on('listening', onListening(server1));
+
+var server2 = http.createServer(app).listen(port2).on('error', onError);
+//server1.on('listening', onListening(server2));
+
+var server3 = http.createServer(app).listen(port3).on('error', onError);
+//server1.on('listening', onListening(server3));
 
 /**
  * Listen on provided port, on all network interfaces.
  */
 
-server.listen(port);
-server.on('error', onError);
-server.on('listening', onListening);
+//server.listen(port);
+//server.on('error', onError);
+//server.on('listening', onListening);
 
 /**
  * Normalize a port into a number, string, or false.
@@ -81,7 +94,7 @@ function onError(error) {
  * Event listener for HTTP server "listening" event.
  */
 
-function onListening() {
+function onListening(server) {
   var addr = server.address();
   var bind = typeof addr === 'string'
     ? 'pipe ' + addr

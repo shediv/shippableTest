@@ -6,3 +6,5 @@ public/temp/
 npm-debug.log
 .idea/
 log/
+bin/www
+logs/
