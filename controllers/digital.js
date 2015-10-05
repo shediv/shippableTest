@@ -234,7 +234,10 @@ var Digital = function()
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
-      res.status(200).json({digital : results});
+      Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
+        if(cat) results.categoryName = cat.name;
+        res.status(200).json({digital : results});
+      });
     });
 
     var visitor = {
