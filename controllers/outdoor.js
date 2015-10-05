@@ -91,7 +91,7 @@ var Outdoor = function()
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'price': query.sortBy = { 'mediaOptions.showRate' : 1}; break;
-            case 'size': query.sortBy = { 'area' : 1 }; break;
+            case 'size': query.sortBy = { 'mediaOptions.area': 1 }; break;
           }
           query.sortBy._id = 1;
 

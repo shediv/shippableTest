@@ -794,7 +794,7 @@ var Magazine = function()
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
             case 'price': query.sortBy = { 'print.mediaOptions.fullPage.cardRate' : 1}; break;
-            case 'category': query.sortBy = { 'categoryId' : -1}; break;
+            //case 'category': query.sortBy = { 'categoryId' : -1}; break;
             case 'circulation': query.sortBy = { 'attributes.circulation.value' : -1}; break;
           }
           query.sortBy._id = 1;

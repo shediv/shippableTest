@@ -240,7 +240,7 @@ var User = function()
 			
 			result.userAgent= req.headers['user-agent'];
 			result.timeStamp = Date();
-			result.clientIPAddress = req.connection.remoteAddress;		
+			result.clientIPAddress = req.connection.remoteAddress;	
 			self.userLoginInfo(result);
 		});
 	};
@@ -259,6 +259,8 @@ var User = function()
 	};
 
 	this.forgotPassword	= function(req,res){
+		console.log(req.body.email);
+		process.exit();
 		User.findOne({ email:req.body.email }).lean().exec(function(err, user){
 			if(!user) return res.status(404).json("No account with that email address exists.");
 			
