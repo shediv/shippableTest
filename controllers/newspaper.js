@@ -57,7 +57,7 @@ var Newspaper = function()
         'circulation'         : 1,
         'language'            : 1,
         'geography'           : 1,
-        'mediaOptions.anyPage': 1,        
+        'mediaOptions': 1,        
         'logo'                : 1
       };
 
