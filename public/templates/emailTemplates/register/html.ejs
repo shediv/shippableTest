@@ -14,13 +14,15 @@
     <container>
       <h3>Dear <strong><%= name.first %> <%= name.last %></strong>, thank you for creating an account with us!</h3>
       <h3>Please verify that you used a real email address.</h3>
-      <a href="http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>" class="btn">
-        Verify My Account
-      </a>
+      <div style="text-align:center;">
+        <a href="http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>" class="btn">
+          Verify My Account
+        </a>
+      </div>
     </container>
     
-    <footer style="background:#ccc;margin-top:40px;">
+    <div class="footer">
       <h4 style="color:#666">Stay in touch with us - help@themediaant.com</h4>
-    </footer>
+    </div>
   </body>
 </html>
