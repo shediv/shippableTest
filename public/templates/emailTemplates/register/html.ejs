@@ -14,10 +14,12 @@
     <container>
       <h3>Dear <strong><%= name.first %> <%= name.last %></strong>, thank you for creating an account with us!</h3>
       <h3>Please verify that you used a real email address.</h3>
-      <button>Verify My Account</button>
+      <a href= 'http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>'>
+        <button>Verify My Account</button>
+      </a>
     </container>
     
-    <footer style="background-color:#ccc;margin-top:20px;">
+    <footer style="background:#ccc;margin-top:40px;">
       <h4 style="color:#666">Stay in touch with us - help@themediaant.com</h4>
     </footer>
   </body>
