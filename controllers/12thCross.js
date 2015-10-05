@@ -6,6 +6,8 @@ var _12thCross = function()
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
   var SubCategory = require('../models/subCategory').SubCategory;
+  var Contact = require('../models/contact').Contact;
+  var nodeMailer = require('nodemailer');
   
   this.params = {};
   var self = this;
@@ -273,6 +275,37 @@ var _12thCross = function()
       type: '12thcross'
     };
     CommonLib.uniqueVisits(visitor);
+  };
+
+  //Contact mail to be sent to agencies
+  self.contact = function(req, res){      
+    var user = req.body.user;
+    var agency = req.body.agency;
+    var mailOptions = {};
+    mailOptions.user = user;
+    mailOptions.agency = agency;
+    var newContact = Contact(mailOptions);
+
+      // save the Contact mail
+      newContact.save(function(err){
+        if(err) return res.status(500).json(err);
+        //return res.status(200).json({userId:newContact._id});
+        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'contact'));
+        emailTemplate.render(mailOptions, function(err, results){
+          if(err) return console.error(err)
+          self.transporter.sendMail({
+            from: mailOptions.user.email, // sender address
+            to: mailOptions.agency.email, // list of receivers
+            cc: mailOptions.user.email,
+            subject: 'Contacting for your service.',
+            html: results.html
+          }, function(err, responseStatus){
+            if(err) return console.error(err);
+             console.log("responseStatus.message");
+          })
+        });
+
+      });  
   };
 
 };
