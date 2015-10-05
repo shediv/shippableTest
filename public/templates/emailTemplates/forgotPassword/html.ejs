@@ -1,0 +1,19 @@
+<html>
+<head>
+    <title>The Media Ant</title>
+</head>
+<body>
+  Hello <%= name.first %> <%= name.last %>,
+
+<p> You are receiving this because you (or someone else) have requested the reset of the password for your account. </p>
+
+<p>Please click on the following link, or paste this into your browser to complete the process:</p>
+
+<p><a href= 'http://<%= appHost %>/user/resetPassword/<%= token %>'>http://<%= appHost %>/user/resetPassword/<%= token %></a></p>
+
+<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
+
+<p>Regards<br/>
+Team Media Ant.</p>
+</body>
+</html>
