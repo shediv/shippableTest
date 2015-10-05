@@ -6,9 +6,9 @@ var express = require('express');
 var router = express.Router();
 var LsquareCtrl = new (require('../controllers/lsquare')).Lsquare();
 
-router.get("/", LsquareCtrl.getDigital);
+router.get("/", LsquareCtrl.getLsquare);
 router.get("/filters", LsquareCtrl.getFilters);
-router.post("/addQuestion", LsquareCtrl.addQuestion);
+//router.get("/addQuestion", LsquareCtrl.addQuestion);
 router.get("/:urlSlug", LsquareCtrl.show);
 
 module.exports = router;
