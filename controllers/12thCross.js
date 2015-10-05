@@ -284,6 +284,7 @@ var _12thCross = function()
     var mailOptions = {};
     mailOptions.user = user;
     mailOptions.agency = agency;
+    mailOptions.toolName =  '12thcross';
     var newContact = Contact(mailOptions);
 
       // save the Contact mail
