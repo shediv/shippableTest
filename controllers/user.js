@@ -3,6 +3,7 @@ var User = function()
 	var async = require('async');
 	var CommonLib = require('../libraries/common').Common;
 	var User = require('../models/user').User;
+	var UsersLogs = require('../models/usersLogs').UsersLogs;
 	var jwt = require('jsonwebtoken');
 	var fs = require('fs');
 	var imagick = require('imagemagick');
@@ -99,6 +100,12 @@ var User = function()
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
+					
+					result.userAgent= req.headers['user-agent'];
+					result.timeStamp = Date();
+					result.clientIPAddress = req.connection.remoteAddress;		
+					self.userLoginInfo(result);
+
 					if(result.facebookId === undefined)
 					{
 						result.facebookId = user.id;
@@ -138,6 +145,13 @@ var User = function()
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
+					
+					result.userAgent= req.headers['user-agent'];
+					result.timeStamp = Date();
+					result.clientIPAddress = req.connection.remoteAddress;		
+					self.userLoginInfo(result);
+					
+					
 					if(result.googleId === undefined)
 					{
 						result.googleId = user.id;
@@ -221,9 +235,13 @@ var User = function()
 			else
 			{
 				var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
-				res.status(200).json({token:token});
-			}
-				
+            	res.status(200).json({token:token});
+            }
+			
+			result.userAgent= req.headers['user-agent'];
+			result.timeStamp = Date();
+			result.clientIPAddress = req.connection.remoteAddress;		
+			self.userLoginInfo(result);
 		});
 	};
 
@@ -305,6 +323,22 @@ var User = function()
 			});
 		}
 	};
+
+	self.userLoginInfo = function(result){
+	  var userDetails= {
+	  	userId : result._id.toString(),
+	  	userAgent : result.userAgent,
+	  	clientIp : result.clientIPAddress,
+	  	timeStamp :result.timeStamp
+    };
+
+    var userlogs = UsersLogs(userDetails);
+
+    userlogs.save( function(err) { 
+    	if(err)return err;
+    	else return "user logged";
+    });
+  }
 }
 
 module.exports.User = User;	
