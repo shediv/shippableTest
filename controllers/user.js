@@ -324,22 +324,21 @@ var User = function()
 		}
 	};
 
-
 	self.userLoginInfo = function(result){
 	  var userDetails= {
 	  	userId : result._id.toString(),
 	  	userAgent : result.userAgent,
 	  	clientIp : result.clientIPAddress,
 	  	timeStamp :result.timeStamp
-      };
+    };
 
-      var userlogs = UsersLogs(userDetails);
+    var userlogs = UsersLogs(userDetails);
 
-      userlogs.save( function(err) { 
-      	if(err)return err;
-      	else return "user logged";
-      });
-    }
+    userlogs.save( function(err) { 
+    	if(err)return err;
+    	else return "user logged";
+    });
+  }
 }
 
 module.exports.User = User;	
