@@ -240,7 +240,7 @@ var Radio = function()
       'urlSlug' : 1,
       'city' : 1,
       'language' : 1,
-      'mediaOptions.regularOptions.showRate.allDayPlan' : 1,        
+      'mediaOptions.regularOptions.allDayPlan.cardRate' : 1, 
       'logo' : 1
     };
     
