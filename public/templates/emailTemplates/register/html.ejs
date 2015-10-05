@@ -14,8 +14,8 @@
     <container>
       <h3>Dear <strong><%= name.first %> <%= name.last %></strong>, thank you for creating an account with us!</h3>
       <h3>Please verify that you used a real email address.</h3>
-      <a href= 'http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>'>
-        <button>Verify My Account</button>
+      <a href="http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>" class="btn">
+        Verify My Account
       </a>
     </container>
     

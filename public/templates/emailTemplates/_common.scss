@@ -7,9 +7,11 @@ h3, h4{
   font-weight: 300;
 }
 
-button{
+.btn{
   color: #ffffff;
   background-color: #222;
   border-color: #000000;
   padding: 10px;
+  display: inline-block;
+  text-decoration: none;
 }
