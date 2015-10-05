@@ -65,7 +65,7 @@ var User = function()
 		        subject: 'One Last Step To Create Your Account!',
 		        html: results.html
 					}, function(err, responseStatus){
-						if(err) return console.error(err);
+						if(err) return console.log(err);
 					   console.log("responseStatus.message");
 					})
 				});
