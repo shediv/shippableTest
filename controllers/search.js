@@ -62,7 +62,7 @@ var Search = function()
               result['medias'] = result['medias'].slice(0, 10);
               for(i in result['medias'])
               {
-                result['medias'][i].toolName = tool.name;
+                result['medias'][i].toolName = tool.name.toLowerCase();
                 switch(tool.name)
                 {
                   case 'cinema':
