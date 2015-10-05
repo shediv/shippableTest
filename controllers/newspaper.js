@@ -57,8 +57,9 @@ var Newspaper = function()
         'circulation'         : 1,
         'language'            : 1,
         'geography'           : 1,
-        'mediaOptions': 1,        
-        'logo'                : 1
+        'mediaOptions'        : 1,        
+        'logo'                : 1,
+        'dimensions'          : 1
       };
 
       Object.keys(filters).map(function(value){
