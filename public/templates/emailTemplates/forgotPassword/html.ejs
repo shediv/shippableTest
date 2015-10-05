@@ -1,19 +1,28 @@
 <html>
-<head>
+  <head>
     <title>The Media Ant</title>
-</head>
-<body>
-  Hello <%= name.first %> <%= name.last %>,
+  </head>
+  <body>
+    <header>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0;">
+      <a href="http://<%= appHost %>">
+        <img src="http://<%= appHost %>/images/themediant-logo.jpg" style="width:10%;margin:0 20px;">
+      </a>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0;">
+    </header>
 
-<p> You are receiving this because you (or someone else) have requested the reset of the password for your account. </p>
+    <div style="margin:30px 0;">
+      <h3><strong><%= name.first %></strong>, you are receiving this mail to reset your password!</h3>
+      <h3>In order to reset your password click on the link below. Ignore this mail if you have not sent thhis request.</h3>
+      <div style="text-align:center;">
+        <a href="http://<%= appHost %>/user/resetPassword/<%= token %>" class="btn">
+          Reset My Password
+        </a>
+      </div>
+    </div>
 
-<p>Please click on the following link, or paste this into your browser to complete the process:</p>
-
-<p><a href= 'http://<%= appHost %>/user/resetPassword/<%= token %>'>http://<%= appHost %>/user/resetPassword/<%= token %></a></p>
-
-<p>If you did not request this, please ignore this email and your password will remain unchanged.</p>
-
-<p>Regards<br/>
-Team Media Ant.</p>
-</body>
+    <div class="footer">
+      <h4 style="color:#666">Stay in touch with us - help@themediaant.com</h4>
+    </div>
+  </body>
 </html>
