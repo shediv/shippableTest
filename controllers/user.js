@@ -35,7 +35,8 @@ var User = function()
 			if(result) return res.status(500).json("Email Already Exists");
 				
 			user.password = md5(user.password);
-			user.verified = 0;		
+			user.isActive = 0;	
+			user.dateOfJoin = new Date();	
 			var newUser = User(user);
 
 			// save the User
@@ -82,7 +83,7 @@ var User = function()
 		User.findOne({_id : confirmationCode[1]}, function(err, result){
 			var dbEmailHash = md5(result.email);
 			if(confirmationCode[0] != dbEmailHash) return res.status(500).json("not verified");
-			User.findOneAndUpdate({_id : confirmationCode[1]}, {$set: { verified: 1 }}, {upsert:true}, function(err, doc){
+			User.findOneAndUpdate({_id : confirmationCode[1]}, {$set: { isActive: 1 }}, {upsert:true}, function(err, doc){
 			  if(err) return res.status(500).json(err);
 			  return res.status(200).json("User's email verified");
 			});
@@ -99,23 +100,25 @@ var User = function()
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
+					
 					result.userAgent= req.headers['user-agent'];
 					result.timeStamp = Date();
 					result.clientIPAddress = req.connection.remoteAddress;		
 					self.userLoginInfo(result);
 
-					if(result.fbid === undefined)
+					if(result.facebookId === undefined)
 					{
-						result.fbid = user.id;
+						result.facebookId = user.id;
 						result.save(err);
 					}
 				}
 				else
 				{
-					user.verified = 1;
-					user.fname = user.first_name; delete user.first_name;
-					user.lname = user.last_name; delete user.last_name;
-					user.fbid = user.id; delete user.id;
+					user.dateOfJoin = new Date();	
+					user.isActive = 1;
+					user.firstName = user.first_name; delete user.first_name;
+					user.lastName = user.last_name; delete user.last_name;
+					user.facebookId = user.id; delete user.id;
 					user.thumbnail = user.ppic = user.picture; delete user.picture;
 					// create a new Media
 					var newUser = User(user);
@@ -142,25 +145,27 @@ var User = function()
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
+					
 					result.userAgent= req.headers['user-agent'];
 					result.timeStamp = Date();
 					result.clientIPAddress = req.connection.remoteAddress;		
 					self.userLoginInfo(result);
 					
-					if(result.gid === undefined)
+					
+					if(result.googleId === undefined)
 					{
-						result.gid = user.id;
+						result.googleId = user.id;
 						result.save(err);
 					}
 				}
 				else
 				{
 					delete user.result;
-					user.verified = 1; delete user.verified_email;
-					user.fname = user.given_name; delete user.given_name;
-					user.lname = user.family_name; delete user.family_name;
-					user.gid = user.id; delete user.id;
-					user.fname = user.given_name; delete user.given_name;
+					user.dateOfJoin = new Date();	
+					user.isActive = 1; delete user.verified_email;
+					user.firstName = user.given_name; delete user.given_name;
+					user.lastName = user.family_name; delete user.family_name;
+					user.googleId = user.id; delete user.id;
 					user.thumbnail = user.ppic = user.picture; delete user.picture;
 					// create a new Media
 					var newUser = User(user);
