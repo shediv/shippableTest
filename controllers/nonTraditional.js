@@ -273,6 +273,33 @@ var NonTraditional = function()
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
         if(geo) result['geographyData'] = geo;
+
+        var minimumQtyUnit1;
+        var minimumQtyUnit2;
+        var pricingUnit1;
+        var pricingUnit2;
+        var minimumUnit;
+
+        for(i in result.mediaOptions)
+        {        
+          if(result.mediaOptions[i].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = result.mediaOptions[i].minimumQtyUnit1; }
+          if(result.mediaOptions[i].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = result.mediaOptions[i].minimumQtyUnit2; }
+          if(result.mediaOptions[i].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = result.mediaOptions[i].pricingUnit1; }
+          if(result.mediaOptions[i].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = result.mediaOptions[i].pricingUnit2; }                                      
+          
+          if(minimumQtyUnit2)
+          {
+            minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;          
+          }
+          else
+          {
+            minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;          
+          }
+
+          console.log(minimumUnit);
+
+          result.mediaOptions[i]['minimumUnit'] = minimumUnit;              
+        }
         res.status(200).json({nonTraditional : result});
       });
     });

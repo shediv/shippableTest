@@ -7,6 +7,8 @@ var Lsquare = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+
+  var imagick = require('imagemagick');
   
   this.params = {};
   this.toolName = "digital";
@@ -167,20 +169,46 @@ var Lsquare = function()
           // Combine multiple dashes (i.e., '---') into one dash '-'.
           url = url.replace(/[-]+/g, "-");
 
-          question.aksedBy = req.body.userId;
-          question.url = url;
+          question.askedBy = req.body.userId;
+          question.url = req.body.url;
           question.title = req.body.question;
-          question.description = req.body.description;
-          question.title = req.body.title;
-          question.tags = req.body.tags;  
+          question.description = req.body.description;          
+          question.tags = req.body.tags;
+          question.createdAt = Date();
+          question.editedAt = Date();
 
-          var newQuestion = Lsquare(question);
+          //Image upload
+          var sourcePath = req.file.path;
+          var extension = req.file.originalname.split(".");
+          extension = extension[extension.length - 1];
+          var destPath = "/images/lsquare/"+userId+"/"+req.body.url+"."+extension;
+          var source = fs.createReadStream(sourcePath);
+          var dest = fs.createWriteStream('./public'+destPath);
+          source.pipe(dest);
 
-          newQuestion.save(function(err){
-            if(err) return res.status(500).json(err);
-            res.status(200).json({newQuestion:newQuestion._id});
-          });
-        }      
+          source.on('end', function(){
+            imagick.resize({
+            srcPath: './public'+destPath,
+            dstPath: "./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension,
+            width: 200
+          },
+          function(err, stdout, stderr)
+          {
+            if(err) throw err;
+            fs.writeFileSync("./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension, stdout, 'binary');
+            console.log('resized image to fit within 200x200px');
+            fs.unlinkSync(sourcePath);
+
+            question.image = destPath;
+
+            var newQuestion = Lsquare(question);
+            newQuestion.save(function(err){
+              if(err) return res.status(500).json(err);
+              res.status(200).json({newQuestion:newQuestion._id});
+            });          
+          });          
+        });
+      }      
     });
   };
 
@@ -193,14 +221,41 @@ var Lsquare = function()
           var answer = {};
           answer.answeredBy = req.body.userId;
           answer.answer = req.body.answer;
-          answer.description = req.body.description;
-          answer.id = questionID;        
+          answer.createdAt = Date();
+          answer.editedAt = Date();
 
-          Lsquare.findOneAndUpdate({_id: answer.id}, answer, {upsert:true}, function(err, doc){
-            if (err) return res.send(500, { error: err });
-            return res.status(200).json("succesfully updated");
-          });
-        }
+          //Image upload
+          var sourcePath = req.file.path;
+          var extension = req.file.originalname.split(".");
+          extension = extension[extension.length - 1];
+          var destPath = "/images/lsquare/"+userId+"/"+req.body.url+"."+extension;
+          var source = fs.createReadStream(sourcePath);
+          var dest = fs.createWriteStream('./public'+destPath);
+          source.pipe(dest);
+
+          source.on('end', function(){
+            imagick.resize({
+            srcPath: './public'+destPath,
+            dstPath: "./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension,
+            width: 200
+          },
+          function(err, stdout, stderr)
+          {
+            if(err) throw err;
+            fs.writeFileSync("./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension, stdout, 'binary');
+            console.log('resized image to fit within 200x200px');
+            fs.unlinkSync(sourcePath);
+
+            answer.image = destPath;
+
+            var newQuestion = Lsquare(question);
+            Lsquare.findOneAndUpdate({_id: req.body.id}, answer, {upsert:true}, function(err, doc){
+              if (err) return res.send(500, { error: err });
+              return res.status(200).json("succesfully updated");
+            });          
+          });          
+        });
+      }      
     });
   };  
 
@@ -210,11 +265,11 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          var answer = {};
-          answer.answeredBy = req.body.userId;
-          answer.answer = req.body.answer;
-          answer.description = req.body.description;
-          answer.id = questionID;        
+          var newAnswer = {};
+          newAnswer.answeredBy = req.body.userId;
+          newAnswer.answer = req.body.answer;
+          newAnswer.description = req.body.description;
+          newAnswer.id = questionID;        
 
           Lsquare.findOneAndUpdate({_id: answer.id}, answer, {upsert:true}, function(err, doc){
             if (err) return res.send(500, { error: err });
