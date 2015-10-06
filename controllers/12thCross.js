@@ -285,11 +285,14 @@ var _12thCross = function()
 
   //Contact mail to be sent to agencies
   self.contact = function(req, res){     
+    var emailTo;
     var mailOptions = {};
     mailOptions.to = req.body.to;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  '12thcross';
     var newContact = Contact(mailOptions);
+
+    if(mailOptions.to.email){ emailTo = mailOptions.to.email;} else { emailTo = mailOptions.to.others[0].email;} 
             
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
     if(!token) return res.status(401).json("Token not found");
@@ -304,7 +307,7 @@ var _12thCross = function()
             if(err) return console.error(err)
             self.transporter.sendMail({
               from: decoded.email, // sender address
-              to: mailOptions.to.email, // list of receivers
+              to: emailTo, // list of receivers
               cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
