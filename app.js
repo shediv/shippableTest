@@ -25,6 +25,7 @@ var geography = require('./routes/geography');
 var nonTraditional = require('./routes/nonTraditional');
 var digital = require('./routes/digital');
 var lsquare = require('./routes/lsquare');
+var common = require('./routes/common');
 var _12thCross = require('./routes/12thCross');
 var search = require('./routes/search');
 var bestRates = require('./routes/bestRates');
@@ -93,6 +94,7 @@ app.use('/12thCross', _12thCross);
 app.use('/search', search);
 app.use('/bestRates', bestRates);
 app.use('/cafe', cafe);
+app.use('/common', common);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);

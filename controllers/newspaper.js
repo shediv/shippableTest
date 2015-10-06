@@ -312,7 +312,7 @@ var Newspaper = function()
       'areaCovered' : 1,
       'categoryId' :1,
       'language' : 1,
-      'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+      'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,        
       'logo' : 1
     };
     
@@ -366,7 +366,7 @@ var Newspaper = function()
           'areaCovered' : 1,
           'language' : 1,
           'urlSlug' : 1,
-          'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+          'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,        
           'logo' : 1
         }
       },

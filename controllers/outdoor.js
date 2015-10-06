@@ -145,7 +145,7 @@ var Outdoor = function()
     self.getMediaTypes = function(callback){
       var mediaTypes = [
         {'_id' : 'Hoarding', 'name' : 'Hoarding'},
-        {'_id' : 'Bus Shelters', 'name' : 'Bus Shelters'},
+        {'_id' : 'Bus Shelter', 'name' : 'Bus Shelter'},
         {'_id' : 'Pole Kiosk', 'name' : 'Pole Kiosk'}
       ];
       callback(null, mediaTypes);
