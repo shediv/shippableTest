@@ -304,13 +304,13 @@ var _12thCross = function()
             if(err) return console.error(err)
             self.transporter.sendMail({
               from: decoded.email, // sender address
-              to: mailOptions.to, // list of receivers
+              to: mailOptions.to.email, // list of receivers
               cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){
               if(err) return console.error(err);
-               return res.status(200).json(mailOptions);
+               return res.status(200).json("sucess");
             })
           });
         });        
