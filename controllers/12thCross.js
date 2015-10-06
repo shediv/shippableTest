@@ -8,6 +8,12 @@ var _12thCross = function()
   var SubCategory = require('../models/subCategory').SubCategory;
   var Contact = require('../models/contact').Contact;
   var nodeMailer = require('nodemailer');
+  var jwt = require('jsonwebtoken');
+  var config = require('../config.js');
+
+  var path = require('path');
+  var EmailTemplate = require('email-templates').EmailTemplate;
+  var templatesDir = path.resolve(__dirname, '..', 'public/templates/emailTemplates');
   
   this.params = {};
   var self = this;
@@ -278,36 +284,38 @@ var _12thCross = function()
   };
 
   //Contact mail to be sent to agencies
-  self.contact = function(req, res){      
-    var user = req.body.user;
-    var agency = req.body.agency;
+  self.contact = function(req, res){     
     var mailOptions = {};
-    mailOptions.user = user;
-    mailOptions.agency = agency;
+    mailOptions.to = req.body.to;
+    mailOptions.message = req.body.message;
     mailOptions.toolName =  '12thcross';
     var newContact = Contact(mailOptions);
-
-      // save the Contact mail
-      newContact.save(function(err){
-        if(err) return res.status(500).json(err);
-        //return res.status(200).json({userId:newContact._id});
-        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'contact'));
-        emailTemplate.render(mailOptions, function(err, results){
-          if(err) return console.error(err)
-          self.transporter.sendMail({
-            from: mailOptions.user.email, // sender address
-            to: mailOptions.agency.email, // list of receivers
-            cc: mailOptions.user.email,
-            subject: 'Contacting for your service.',
-            html: results.html
-          }, function(err, responseStatus){
-            if(err) return console.error(err);
-             console.log("responseStatus.message");
-          })
-        });
-
-      });  
-  };
+            
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    if(!token) return res.status(401).json("Token not found");
+    jwt.verify(token, config.secret, function(err, decoded){
+      if(err) res.status(401).json("Invalid Token");
+        // save the Contact mail
+        newContact.save(function(err){      
+          if(err) return res.status(500).json(err);
+          //return res.status(200).json({userId:newContact._id});
+          var emailTemplate = new EmailTemplate(path.join(templatesDir, 'contact'));
+          emailTemplate.render(mailOptions, function(err, results){
+            if(err) return console.error(err)
+            self.transporter.sendMail({
+              from: decoded.email, // sender address
+              to: mailOptions.to, // list of receivers
+              cc: decoded.email,
+              subject: 'Contacting for your service.',
+              html: results.html
+            }, function(err, responseStatus){
+              if(err) return console.error(err);
+               return res.status(200).json(mailOptions);
+            })
+          });
+        });        
+    });
+  };    
 
 };
 
