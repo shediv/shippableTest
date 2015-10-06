@@ -9,7 +9,16 @@ var _12thCross = function()
   var Contact = require('../models/contact').Contact;
   var nodeMailer = require('nodemailer');
   var jwt = require('jsonwebtoken');
-  var config = require('../config.js');
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
+  this.transporter = nodeMailer.createTransport({
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
+  });
 
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
@@ -290,25 +299,25 @@ var _12thCross = function()
     mailOptions.to = req.body.to;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  '12thcross';
+    mailOptions.appHost = self.config.appHost;
     var newContact = Contact(mailOptions);
 
     if(mailOptions.to.email){ emailTo = mailOptions.to.email;} else { emailTo = mailOptions.to.others[0].email;} 
             
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
-    if(!token) return res.status(401).json("Token not found");
-    jwt.verify(token, config.secret, function(err, decoded){
+    if(!token) return res.status(401).json("Token not found"); 
+    jwt.verify(token, self.config.secret, function(err, decoded){
       if(err) res.status(401).json("Invalid Token");
         // save the Contact mail
         newContact.save(function(err){      
-          if(err) return res.status(500).json(err);
-          //return res.status(200).json({userId:newContact._id});
+          if(err) return res.status(500).json(err);          
           var emailTemplate = new EmailTemplate(path.join(templatesDir, 'contact'));
-          emailTemplate.render(mailOptions, function(err, results){
+          emailTemplate.render(mailOptions, function(err, results){            
             if(err) return console.error(err)
             self.transporter.sendMail({
               from: decoded.email, // sender address
               to: emailTo, // list of receivers
-              cc: decoded.email,
+              //cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){
@@ -316,6 +325,7 @@ var _12thCross = function()
                return res.status(200).json("sucess");
             })
           });
+
         });        
     });
   };    
