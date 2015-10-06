@@ -237,7 +237,6 @@ var NonTraditional = function()
             { toolId:self.toolId },
             function(error, subCategoryIds)
             {
-              //console.log(subCategoryIds);
               SubCategory.find({ _id:{ $in:subCategoryIds } }).lean().exec(function(err, result){
                 var subObj = {};
                 for(i in result)
@@ -254,7 +253,11 @@ var NonTraditional = function()
       function(err, result)
       {
         for(i in result.categories)
+        {
           result.categories[i].subCategories = result.subCategories[result.categories[i]._id];
+          result.categories[i].subCategories.sort(function(a,b){ return a.name > b.name });
+        }
+        result.categories.sort(function(a,b){ return a.name > b.name });
         callback(err, result.categories);
       });
     };
