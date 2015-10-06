@@ -10,7 +10,7 @@ var NonTraditional = function()
   var SubCategory = require('../models/subCategory').SubCategory;
   
   this.params = {};
-  this.toolName = "nonTraditional";
+  this.toolName = "nontraditional";
   var self = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){

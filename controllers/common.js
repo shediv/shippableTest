@@ -46,7 +46,7 @@ var Common = function()
         {          
           Media.aggregate(
             {$match: {"urlSlug": { $exists: 1} }},
-            {$skip : 0}, {$limit: 200},
+            {$skip : 5000}, {$limit: 5500},
             { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},            
             function(error, results) 
             {
@@ -55,7 +55,9 @@ var Common = function()
               for(i in results) toolIds.push(results[i]._id);
                 Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){                                
                 for(i in tool) toolName[tool[i]._id] = tool[i];                  
-                for(i in results) results[i]['_id'] = toolName[results[i]._id].name;                  
+                for(i in results) {
+                  if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;                  
+                  }                  
                 callbackInner(error, results);                
               });
             }
