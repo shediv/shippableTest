@@ -302,7 +302,7 @@ var Cinema = function()
 
     self.getCinemaChain = function(callback){
       var aggregation = Media.aggregate(
-                          {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, isActive : 1}},
+                          {$match: {toolId:self.toolId, "cinemaChain": { $exists: 1}, "cinemaChain" : { "$ne": "Single Screen" }, isActive : 1}},
                           {$group : { _id : '$cinemaChain', count : {$sum : 1}}}
                         );
 
