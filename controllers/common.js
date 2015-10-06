@@ -77,8 +77,7 @@ var Common = function()
           for(j in results.media[i].medias) {  
             data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j])
           }
-        }
-        
+        }        
         data = data.concat(results.twelthCross);
         res.status(200).json({url:data});
       });
