@@ -90,6 +90,16 @@ var Common = function()
       res.status(200).json(result.metaTags);
     });
   }
+
+  this.getMediaName = function(req, res){
+    var toolName = req.query.toolName;
+    var search = new RegExp('\\b'+req.query.toolName, "i");
+    Tools.findOne({ name:toolName }).lean().exec(function(err, tool){
+      Media.find({ name:search },{ name:1, _id:1 }).lean().exec(function(err, medias){
+        res.status(200).json({medias:medias});
+      });
+    });
+  };
 };
 
 module.exports.CommonCtrl = Common;
