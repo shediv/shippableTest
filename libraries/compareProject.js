@@ -77,3 +77,5 @@ var compareProject ={
     'categoryId' : 1
 	}
 }
+
+module.exports = compareProject;

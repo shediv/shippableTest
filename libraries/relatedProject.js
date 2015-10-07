@@ -34,3 +34,5 @@ var relatedProject ={
     'logo' : 1
 	}
 } 
+
+module.exports = relatedProject;
