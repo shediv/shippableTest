@@ -12,5 +12,6 @@ router.post('/customerQuery', CommonCtrl.addCustomerQuery);
 router.get('/sitemap', CommonCtrl.getSiteMap);
 router.get('/metaTags/:toolName', CommonCtrl.getMetaTags);
 router.get('/mediaName', CommonCtrl.getMediaName);
+router.post('/saveCampaigns', CommonCtrl.saveCampaigns);
 
 module.exports = router;
