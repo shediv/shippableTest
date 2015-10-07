@@ -11,6 +11,10 @@ var Newspaper = function()
   this.params = {};
   this.toolName = "newspaper";
   var self = this;
+
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
@@ -286,7 +290,19 @@ var Newspaper = function()
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
         if(cat) results['categoryName'] = cat.name;
-        res.status(200).json({newspaper : results});
+        if(results.about) {
+          description = results.about;
+        }else {
+          description = results.name+" that covers "+results.areaCovered+" is a popular newspaper in the "+results.categoryName+" Segment. "+results.name+" Advertising is utilized by a variety of brands to reach our target audience. You can explore "+results.name+ " Advertising Rates & "+results.name+" Advertising Costs here";          
+        }
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : description,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+        res.status(200).json({newspaper : results, metaTags:metaTags});
       });
     });
 

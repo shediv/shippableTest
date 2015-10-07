@@ -12,6 +12,10 @@ var Digital = function()
   this.toolName = "digital";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -231,12 +235,20 @@ var Digital = function()
     };
 
   this.show = function(req, res){
+    //return res.status(200).json(self.config.twitter);
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
         if(cat) results.categoryName = cat.name;
-        res.status(200).json({digital : results});
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : results.about,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+        res.status(200).json({digital : results, metaTags : metaTags});
       });
     });
 

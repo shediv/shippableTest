@@ -12,6 +12,10 @@ var NonTraditional = function()
   this.params = {};
   this.toolName = "nontraditional";
   var self = this;
+
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
@@ -299,11 +303,17 @@ var NonTraditional = function()
             minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;          
           }
 
-          console.log(minimumUnit);
-
           result.mediaOptions[i]['minimumUnit'] = minimumUnit;              
         }
-        res.status(200).json({nonTraditional : result});
+
+        var metaTags = {
+          name : result.name,
+          image  : result.imageUrl,
+          description  : result.about,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+        res.status(200).json({nonTraditional : result, metaTags : metaTags});
       });
     });
 

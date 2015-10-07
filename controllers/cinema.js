@@ -12,6 +12,10 @@ var Cinema = function()
   this.toolName = "cinema";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -366,7 +370,20 @@ var Cinema = function()
             results.mediaOptions['30SecVideo'] = results.mediaOptions['30SecVideo'][nextFriday];
             results.mediaOptions['60SecVideo'] = results.mediaOptions['60SecVideo'][nextFriday];
           }
-          res.status(200).json({cinema : results});
+
+          if(results.about) {
+            description = results.about;
+          }else {
+          description = results.cinemaChain+" at "+results.mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
+          }
+          var metaTags = {
+            name : results.cinemaChain+ ", "+ results.mallName,
+            image  : results.imageUrl,
+            description  : description,
+            facebook : self.config.facebook,
+            twitter : self.config.twitter
+          }
+          res.status(200).json({cinema : results, metaTags : metaTags});
         });
       }
     );
