@@ -13,7 +13,7 @@ var User = function()
 	
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
-	var templatesDir = path.resolve(__dirname, '..', 'public/templates/emailTemplates');
+	var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
 
 	var md5 = require('md5');
 

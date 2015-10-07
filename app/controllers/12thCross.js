@@ -24,7 +24,7 @@ var _12thCross = function()
 
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
-  var templatesDir = path.resolve(__dirname, '..', 'public/templates/emailTemplates');
+  var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
   
   this.params = {};
   var self = this;
