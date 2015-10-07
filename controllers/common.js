@@ -6,6 +6,7 @@ var Common = function()
   var CustomerQuery = require('../models/customerQuery').CustomerQuery;
   var Media = require('../models/media').Media;
   var TwelthCross = require('../models/12thCross').TwelthCross;
+  var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
   this.config = require('../config.js');
   var self = this;
   
@@ -99,6 +100,18 @@ var Common = function()
     });
   };
 
+
+  this.saveCampaigns =function(req, res){
+    // create a new campaign
+      var newCampaign = SaveCampaigns(req.body);
+  
+    // save the campaign
+      newCampaign.save(function(err) {
+        if(err) return res.status(500).json(err);
+        res.status(200).json("Campaign Created Successfully");
+      });
+  }    
+
   this.getMoreSeller = function(req, res){
     var params = req.query;
     var media = ["all"];
@@ -116,5 +129,9 @@ var Common = function()
     }); 
   }
 };
+
+  
+
+
 
 module.exports.CommonCtrl = Common;

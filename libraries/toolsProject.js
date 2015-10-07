@@ -12,7 +12,9 @@ var toolsProject= {
       "IRS"        : 1,
       "createdBy"  : 1,
       "logo"       : 1,
-      "name"       : 1
+      "name"       : 1,
+      "serviceTaxPercentage" :1
+
     },
 
 		"newspaper": {
@@ -26,7 +28,8 @@ var toolsProject= {
       'geography'     : 1,
       'mediaOptions'  : 1,        
       'logo'          : 1,
-      'dimensions'    : 1
+      'dimensions'    : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"radio": {
@@ -37,7 +40,8 @@ var toolsProject= {
       'language'  		: 1,
       'radioFrequency' : 1,
       'mediaOptions.regularOptions' : 1,        
-      'logo' : 1
+      'logo' : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"television":{
@@ -48,7 +52,8 @@ var toolsProject= {
       'geography'    : 1,
       'language'     : 1,        
       'logo'         : 1,
-      'categoryId'   : 1
+      'categoryId'   : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"cinema":{
@@ -58,7 +63,8 @@ var toolsProject= {
       'seats' : 1,
       'urlSlug' :1,
       'geography' : 1,
-      'logo': 1
+      'logo': 1,
+      "serviceTaxPercentage" :1
 		},
 		
 		"outdoor":{
@@ -71,7 +77,8 @@ var toolsProject= {
       'geography' : 1,
       'size' : 1,        
       'logo' : 1,
-      'litType' : 1
+      'litType' : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"airport" :{
@@ -81,7 +88,8 @@ var toolsProject= {
       'category' : 1,
       'mediaOptions' : 1,
       'geography' : 1,        
-      'logo' : 1
+      'logo' : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"digital":{
@@ -97,7 +105,8 @@ var toolsProject= {
       'reach2' : 1,
       'unit1' : 1,
       'unit2' : 1,
-      'categoryId' : 1
+      'categoryId' : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"nonTraditional" : {
@@ -107,7 +116,8 @@ var toolsProject= {
       'mediaOptions' : 1,
       'geography'    : 1,
       'urlSlug'      : 1,
-      'logo'         : 1
+      'logo'         : 1,
+      "serviceTaxPercentage" :1
 		},
 
 		"12thCross" : {
@@ -116,9 +126,12 @@ var toolsProject= {
       'subCategoryId': 1,
       'geography'    : 1,
       'urlSlug'      : 1,
-      'logo'         : 1
+      'logo'         : 1,
+      "serviceTaxPercentage" :1
 		}
-	}
+}
+
+module.exports = toolsProject;
 
 
 

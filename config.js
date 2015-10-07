@@ -1,3 +1,4 @@
+//config file. Ignore by GIT.
 var config = {
   //SMTP Configs
   smtpService : 'smtp.mandrillapp.com',
