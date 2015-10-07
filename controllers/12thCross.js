@@ -91,7 +91,8 @@ var _12thCross = function()
         'subCategoryId': 1,
         'geography'    : 1,
         'urlSlug'      : 1,
-        'logo'         : 1
+        'logo'         : 1,
+        'areaOfServices' : 1,
       };
       
       if(self.params.filters.geographies.length) query.match['geography'] = { $in:self.params.filters.geographies };
@@ -144,6 +145,12 @@ var _12thCross = function()
                   geography: function(callbackParallel){
                     Geography.findOne({ _id:result.geography }).lean().exec(function(err, geo){
                       if(geo) result.geography = geo;
+                      callbackParallel(err, null);
+                    })
+                  },
+                  areaOfServices: function(callbackParallel){
+                    Geography.findOne({ _id:result.areaOfServices }).lean().exec(function(err, geo){
+                      if(geo) result.areaOfServices = geo;
                       callbackParallel(err, null);
                     })
                   }
