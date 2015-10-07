@@ -982,7 +982,7 @@ var Magazine = function()
       'attributes.targetGroup' : 1,
       'attributes.readership.value' : 1,
       'attributes.circulation.value' : 1,
-      'print.mediaOptions.fullPage.1-2' : 1,
+      'print.mediaOptions.fullPage.cardRate' : 1,
       'IRS' : 1,
       'digital' : 1
     };
@@ -1008,7 +1008,7 @@ var Magazine = function()
         result.medias[i].language = result.medias[i].attributes.language.value;
         result.medias[i].circulation = result.medias[i].attributes.circulation.value;
         result.medias[i].readership = result.medias[i].attributes.readership.value;
-        result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage['1-2'];
+        result.medias[i].fullPage = result.medias[i].print.mediaOptions.fullPage.cardRate;
         result.medias[i].website = result.medias[i].digital;
         delete result.medias[i].digital;
         delete result.medias[i].attributes;

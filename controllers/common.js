@@ -100,6 +100,7 @@ var Common = function()
     });
   };
 
+
   this.saveCampaigns =function(req, res){
     // create a new campaign
       var newCampaign = SaveCampaigns(req.body);
@@ -109,6 +110,24 @@ var Common = function()
         if(err) return res.status(500).json(err);
         res.status(200).json("Campaign Created Successfully");
       });
+  }    
+
+  this.getMoreSeller = function(req, res){
+    var params = req.query;
+    var media = ["all"];
+    media.push(params.media);
+    var mediaOption = ["all"];
+    mediaOption.push(params.mediaOption);
+    var tool = ["all"];
+    tool.push(params.tool);
+    
+    TwelthCross.find({servicesOffered: {$elemMatch: { media:{ $in: media }, mediaOption:{ $in: media }, tool:{ $in: tool } }}}, 
+      { "name":1, "imageUrl": 1, "urlSlug": 1}, 
+      function(err, results){
+        if(err) return res.status(500).json(err);            
+        return res.status(200).json(results);
+    }); 
+
   }
 };
 

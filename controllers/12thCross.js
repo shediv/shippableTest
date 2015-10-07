@@ -307,7 +307,7 @@ var _12thCross = function()
   };
 
   //Contact mail to be sent to agencies
-  self.contact = function(req, res){     
+  self.contact = function(req, res){
     var emailTo;
     var mailOptions = {};
     mailOptions.to = req.body.to;
