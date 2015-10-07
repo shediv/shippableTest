@@ -314,6 +314,10 @@ var _12thCross = function()
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
     if(!token) return res.status(401).json("Token not found"); 
     jwt.verify(token, self.config.secret, function(err, decoded){
+
+      var firstName = decoded.firstName;
+      firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
+      mailOptions.name = firstName;
       if(err) res.status(401).json("Invalid Token");
         // save the Contact mail
         newContact.save(function(err){      
@@ -324,7 +328,7 @@ var _12thCross = function()
             self.transporter.sendMail({
               from: decoded.email, // sender address
               to: emailTo, // list of receivers
-              cc: decoded.email,
+              //cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){
