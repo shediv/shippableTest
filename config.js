@@ -9,11 +9,8 @@ var config = {
   },
   smtpPort:587,
 
-  //Database Configs for server
+  //Database Configs
   mongoUrl : "mongodb://root:goosebumps@139.162.29.37/media_ant?authSource=admin",
-
-  //Database Configs for local
-  //mongoUrl : "mongodb://localhost/media_ant_two",
 
   //Domain Name Configs
   appHost : 'beta.themediaant.com',
@@ -23,7 +20,18 @@ var config = {
   help : 'The Media Ant <help@themediaant.com>',
 
   //Miscellaneous Configs
-  secret : "iamyoursecret"
+  secret : "iamyoursecret",
+
+  //seo content     
+  twitter: {
+    "card": "website",
+    "site": "@themediaant" 
+  },
+  facebook: {
+   "type": "type",
+   "siteName": "TheMediaAnt",
+   "admins": "" 
+  }     
 };
 
 module.exports = config;

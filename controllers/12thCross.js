@@ -91,7 +91,8 @@ var _12thCross = function()
         'subCategoryId': 1,
         'geography'    : 1,
         'urlSlug'      : 1,
-        'logo'         : 1
+        'logo'         : 1,
+        'areaOfServices' : 1,
       };
       
       if(self.params.filters.geographies.length) query.match['geography'] = { $in:self.params.filters.geographies };
@@ -144,6 +145,12 @@ var _12thCross = function()
                   geography: function(callbackParallel){
                     Geography.findOne({ _id:result.geography }).lean().exec(function(err, geo){
                       if(geo) result.geography = geo;
+                      callbackParallel(err, null);
+                    })
+                  },
+                  areaOfServices: function(callbackParallel){
+                    Geography.findOne({ _id:result.areaOfServices }).lean().exec(function(err, geo){
+                      if(geo) result.areaOfServices = geo;
                       callbackParallel(err, null);
                     })
                   }
@@ -314,6 +321,10 @@ var _12thCross = function()
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
     if(!token) return res.status(401).json("Token not found"); 
     jwt.verify(token, self.config.secret, function(err, decoded){
+
+      var firstName = decoded.firstName;
+      firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
+      mailOptions.name = firstName;
       if(err) res.status(401).json("Invalid Token");
         // save the Contact mail
         newContact.save(function(err){      
