@@ -5,7 +5,7 @@ var Search = function()
   var Media = require('../models/media').Media;
   var TwelthCross = require('../models/12thCross').TwelthCross;
   var Tools = require('../models/tool').Tools;
-  var SearchIgnore = require('../searchignore.js');
+  var SearchIgnore = require('../config/searchignore.js');
   
   var self = this;
 

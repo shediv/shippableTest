@@ -8,7 +8,7 @@ var relatedProject ={
     'categoryId' : 1,
     '_id' : 1,
     'logo': 1,
-    'print.mediaOptions.fullPage.1-2' : 1
+    'print.mediaOptions.fullPage.cardRate' : 1
 	},
 
 	"newspaper" : {
@@ -20,7 +20,7 @@ var relatedProject ={
     'areaCovered' : 1,
     'language' : 1,
     'urlSlug' : 1,
-    'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+    'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,
     'logo' : 1
 	},
 

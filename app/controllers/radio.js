@@ -7,13 +7,16 @@ var Radio = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var ToolsProject = require('../config/toolsProject.js');
+  var CompareProject = require('../config/compareProject.js');
+  var RelatedProject = require('../config/relatedProject.js');
   
   this.params = {};
   this.toolName = "radio";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -51,16 +54,7 @@ var Radio = function()
         'languages' : 'language',
         'stations' : 'station'
       };
-      query.projection = {
-        '_id' : 1,
-        'urlSlug' : 1,
-        'radioFrequency' : 1,
-        'station' : 1,
-        'geography' : 1,
-        'language' : 1,
-        'mediaOptions.regularOptions' : 1,        
-        'logo' : 1
-      };
+      query.projection = ToolsProject[self.toolName];
 
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
@@ -227,7 +221,7 @@ var Radio = function()
           description = results.station+ " in "+results.city+" plays music in "+results.language.join()+" language(s). "+results.station+" advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+results.station+ " Advertising Rates & "+results.station+" Advertising Costs here";        
         }
         var metaTags = {
-          name : results.name,
+          title : results.name,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
@@ -249,16 +243,7 @@ var Radio = function()
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
-    var project = {
-      '_id' : 1,
-      'radioFrequency' : 1,
-      'station' : 1,
-      'urlSlug' : 1,
-      'city' : 1,
-      'language' : 1,
-      'mediaOptions.regularOptions.allDayPlan.cardRate' : 1, 
-      'logo' : 1
-    };
+    var project = CompareProject[self.toolName];
     
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
@@ -283,15 +268,7 @@ var Radio = function()
       },
       {$skip : 0}, {$limit: 3},
       {
-        $project : {
-          '_id' : 1,
-          'radioFrequency' : 1,
-          'station' : 1,
-          'geography' : 1,
-          'language' : 1,
-          'mediaOptions.regularOptions' : 1,        
-          'logo' : 1
-        }
+        $project : RelatedProject[self.toolName]
       },
       function(err, results)
       {

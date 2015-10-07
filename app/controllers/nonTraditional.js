@@ -8,13 +8,14 @@ var NonTraditional = function()
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
   var SubCategory = require('../models/subCategory').SubCategory;
+  var ToolsProject = require('../config/toolsProject.js');
   
   this.params = {};
   this.toolName = "nontraditional";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -110,15 +111,7 @@ var NonTraditional = function()
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
-      query.projection = {
-        '_id'          : 1,
-        'name'         : 1,
-        'about'        : 1,
-        'mediaOptions' : 1,
-        'geography'    : 1,
-        'urlSlug'      : 1,
-        'logo'         : 1
-      };
+      query.projection = ToolsProject[self.toolName];
       
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
@@ -307,7 +300,7 @@ var NonTraditional = function()
         }
 
         var metaTags = {
-          name : result.name,
+          title : result.name,
           image  : result.imageUrl,
           description  : result.about,
           facebook : self.config.facebook,

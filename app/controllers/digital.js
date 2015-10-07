@@ -7,13 +7,15 @@ var Digital = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var ToolsProject = require('../config/toolsProject.js');
+  var CompareProject = require('../config/compareProject.js');
   
   this.params = {};
   this.toolName = "digital";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -52,21 +54,7 @@ var Digital = function()
         'pricingModels' : 'pricingModel',
         'mediums' : 'medium'
       };
-      query.projection = {
-        '_id' : 1,
-        'urlSlug' : 1,
-        'name' : 1,
-        'medium' : 1,
-        'mediaOptions' : 1,
-        'language' : 1,        
-        'logo' : 1,
-        'geoTagging' : 1,
-        'reach1' : 1,
-        'reach2' : 1,
-        'unit1' : 1,
-        'unit2' : 1,
-        'categoryId' : 1
-      };
+      query.projection = ToolsProject[self.toolName];
 
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
@@ -242,7 +230,7 @@ var Digital = function()
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
         if(cat) results.categoryName = cat.name;
         var metaTags = {
-          name : results.name,
+          title : results.name,
           image  : results.imageUrl,
           description  : results.about,
           facebook : self.config.facebook,
@@ -265,21 +253,7 @@ var Digital = function()
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
-    var project = {
-      '_id' : 1,
-      'urlSlug' : 1,
-      'name' : 1,
-      'medium' : 1,
-      'mediaOptions' : 1,
-      'language' : 1,        
-      'logo' : 1,
-      'geoTagging' : 1,
-      'reach1' : 1,
-      'reach2' : 1,
-      'unit1' : 1,
-      'unit2' : 1,
-      'categoryId' : 1
-    };
+    var project = CompareProject[self.toolName];
     
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);

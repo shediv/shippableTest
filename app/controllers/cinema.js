@@ -7,13 +7,14 @@ var Cinema = function()
   var Category = require('../models/category').Category;
   var Geography = require('../models/geography').Geography;
   var UpcomingMovies = require('../models/upcomingMovies').UpcomingMovies;
+  var ToolsProject = require('../config/toolsProject.js');
   
   this.params = {};
   this.toolName = "cinema";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -110,7 +111,7 @@ var Cinema = function()
       });
     };
 
-    self.buildScreensQuery = function(geographies, callbackMain){ 
+    self.buildScreensQuery = function(geographies, callbackMain){
       var match = [];
       if(self.params.filters.geographies !== undefined) match.push({geography : { $in:self.params.geographyIds }});
       if(self.params.filters.mallName.length) match.push({mallName : { $in:self.params.filters.mallName }});
@@ -124,15 +125,7 @@ var Cinema = function()
       var group = {
         "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
       };
-      var project = {
-        type : 1,
-        mallName : 1,
-        cinemaChain : 1,
-        seats : 1,
-        urlSlug :1,
-        geography : 1,
-        logo: 1
-      };
+      var project = ToolsProject[self.toolName];
       if(self.params.filters.mediaType == 'onScreen')
         self.fetchOnScreenData(geographies, match, group, project, callbackMain);
       else
@@ -377,7 +370,7 @@ var Cinema = function()
           description = results.cinemaChain+" at "+results.mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
           }
           var metaTags = {
-            name : results.cinemaChain+ ", "+ results.mallName,
+            title : results.cinemaChain+ ", "+ results.mallName,
             image  : results.imageUrl,
             description  : description,
             facebook : self.config.facebook,

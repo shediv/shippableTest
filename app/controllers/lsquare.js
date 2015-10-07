@@ -11,12 +11,7 @@ var Lsquare = function()
   var imagick = require('imagemagick');
   
   this.params = {};
-  this.toolName = "digital";
   var self = this;
-
-  Tools.findOne({name: this.toolName}, function(err, result){
-    self.toolId = result._id.toString();
-  });
 
   this.getLsquare = function(req, res){
     //self.params = JSON.parse(req.query.params);

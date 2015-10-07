@@ -12,13 +12,16 @@ var Magazine = function()
   var days = ['sunday','monday','tuesday','wednesday','thursday','friday','saturday'];
   var week = ['first','second','third','fourth'];
   var dayConversion = (24 * 60 * 60 * 1000);
+  var ToolsProject = require('../config/toolsProject.js');
+  var CompareProject = require('../config/compareProject.js');
+  var RelatedProject = require('../config/relatedProject.js');
   
   this.params = {};
   this.toolName = "magazine";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -69,21 +72,7 @@ var Magazine = function()
               ]
             }
           };          
-          var project = {
-            "$project" : {
-              "urlSlug" : 1,
-              "categoryId" : 1,
-              "attributes" : 1,
-              "print" : 1,
-              "geography"  : 1,
-              "thumbnail" : 1,
-              "keywords" : 1,
-              "IRS" : 1,
-              "createdBy": 1,
-              "logo": 1,
-              "name": 1
-            }
-          };
+          var project = ToolsProject[self.toolName];
 
           Media.aggregate([match, project], function(err, media){            
             callback(err, media);});
@@ -748,21 +737,7 @@ var Magazine = function()
         'frequencies' : 'attributes.frequency.value',
         'targetGroups' : 'targetGroup'
       };
-      query.projection = {
-        '_id' : 1,
-        'attributes' : 1,
-        'urlSlug' : 1,
-        'thumbnail' : 1,
-        'categoryId' : 1,
-        'name' : 1,
-        'print' : 1,
-        'website' : 1,
-        'email' : 1,
-        'toolId' : 1,
-        'createdBy' : 1,
-        'views':1,
-        'logo' : 1
-      };
+      query.projection = ToolsProject[self.toolName];
 
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
@@ -947,7 +922,7 @@ var Magazine = function()
           description = results.name+" is a "+results.attributes.frequency.value+"Magazine in the "+results.categoryName+" Segment. "+results.name+" is utilized by a variety of brands to reach out to their target audience. You can explore "+ results.name +" Rates & " + results.name +" Costs here";
         }
         var metaTags = {
-          name : results.name,
+          title : results.name,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
@@ -970,22 +945,7 @@ var Magazine = function()
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
-    var project = {
-      '_id' : 1,
-      'name' : 1,
-      'urlSlug' : 1,
-      'thumbnail' : 1,
-      'targetGroup' : 1,
-      'categoryId' : 1,
-      'attributes.frequency.value' : 1,
-      'attributes.language.value' : 1,
-      'attributes.targetGroup' : 1,
-      'attributes.readership.value' : 1,
-      'attributes.circulation.value' : 1,
-      'print.mediaOptions.fullPage.cardRate' : 1,
-      'IRS' : 1,
-      'digital' : 1
-    };
+    var project = CompareProject[self.toolName];
     async.series({
       medias : function(callback){
         Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
@@ -1033,16 +993,7 @@ var Magazine = function()
             }
           },
           {
-            $project : {
-              urlSlug : 1,
-              name: 1,
-              thumbnail : 1,
-              attributes : 1,
-              categoryId : 1,
-              _id : 1,
-              logo: 1,
-              'print.mediaOptions.fullPage.cardRate' : 1
-            }
+            $project : RelatedProject[self.toolName]
           },
           function(err, results)
           {

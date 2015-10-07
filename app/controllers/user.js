@@ -18,7 +18,7 @@ var User = function()
 	var md5 = require('md5');
 
 	this.params = {};
-	this.config = require('../config.js');
+	this.config = require('../config/config.js');
 	var self = this;
 
 	this.transporter = nodeMailer.createTransport({

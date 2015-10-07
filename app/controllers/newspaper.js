@@ -7,13 +7,16 @@ var Newspaper = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var ToolsProject = require('../config/toolsProject.js');
+  var CompareProject = require('../config/compareProject.js');
+  var RelatedProject = require('../config/relatedProject.js');
   
   this.params = {};
   this.toolName = "newspaper";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
   
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -52,19 +55,7 @@ var Newspaper = function()
         'languages'   : 'language',
         'frequencies' : 'frequency'
       };
-      query.projection = {
-        '_id'                 : 1,
-        'urlSlug'             : 1,
-        'name'                : 1,
-        'editionName'         : 1,
-        'areaCovered'         : 1,
-        'circulation'         : 1,
-        'language'            : 1,
-        'geography'           : 1,
-        'mediaOptions'        : 1,        
-        'logo'                : 1,
-        'dimensions'          : 1
-      };
+      query.projection = ToolsProject[self.toolName];
 
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
@@ -296,7 +287,7 @@ var Newspaper = function()
           description = results.name+" that covers "+results.areaCovered+" is a popular newspaper in the "+results.categoryName+" Segment. "+results.name+" Advertising is utilized by a variety of brands to reach our target audience. You can explore "+results.name+ " Advertising Rates & "+results.name+" Advertising Costs here";          
         }
         var metaTags = {
-          name : results.name,
+          title : results.name,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
@@ -319,18 +310,7 @@ var Newspaper = function()
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
-    var project = {
-      '_id' : 1,
-      'urlSlug' : 1,
-      'name'       : 1,
-      'editionName' : 1,
-      'circulation' : 1,
-      'areaCovered' : 1,
-      'categoryId' :1,
-      'language' : 1,
-      'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,        
-      'logo' : 1
-    };
+    var project = CompareProject[self.toolName];
     
     async.series({
       medias : function(callback){
@@ -373,18 +353,7 @@ var Newspaper = function()
       },
       {$skip : 0}, {$limit: 3},
       {
-        $project : {
-          '_id' : 1,
-          'urlSlug' : 1,
-          'name'       : 1,
-          'editionName' : 1,
-          'circulation' : 1,
-          'areaCovered' : 1,
-          'language' : 1,
-          'urlSlug' : 1,
-          'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,        
-          'logo' : 1
-        }
+        $project : RelatedProject[self.toolName]
       },
       function(err, results)
       {

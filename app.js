@@ -7,34 +7,34 @@ var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
 var jwt = require('jsonwebtoken');
-var RoutesCollection = require('./models/routesCollection').RoutesCollection;
+var RoutesCollection = require('./app/models/routesCollection').RoutesCollection;
 
-var config = require('./config.js');
+var config = require('./app/config/config.js');
 
-var routes = require('./routes/index');
-var user = require('./routes/user');
-var magazine = require('./routes/magazine');
-var cinema = require('./routes/cinema');
-var radio = require('./routes/radio');
-var airport = require('./routes/airport');
-var outdoor = require('./routes/outdoor');
-var television = require('./routes/television');
-var newspaper = require('./routes/newspaper');
-var media = require('./routes/media');
-var geography = require('./routes/geography');
-var nonTraditional = require('./routes/nonTraditional');
-var digital = require('./routes/digital');
-var lsquare = require('./routes/lsquare');
-var _12thCross = require('./routes/12thCross');
-var search = require('./routes/search');
-var bestRates = require('./routes/bestRates');
-var cafe = require('./routes/cafe');
-var parseExcel = require('./routes/parseExcel');
+var routes = require('./app/routes/index');
+var user = require('./app/routes/user');
+var magazine = require('./app/routes/magazine');
+var cinema = require('./app/routes/cinema');
+var radio = require('./app/routes/radio');
+var airport = require('./app/routes/airport');
+var outdoor = require('./app/routes/outdoor');
+var television = require('./app/routes/television');
+var newspaper = require('./app/routes/newspaper');
+var media = require('./app/routes/media');
+var geography = require('./app/routes/geography');
+var nonTraditional = require('./app/routes/nonTraditional');
+var digital = require('./app/routes/digital');
+var lsquare = require('./app/routes/lsquare');
+var _12thCross = require('./app/routes/12thCross');
+var search = require('./app/routes/search');
+var bestRates = require('./app/routes/bestRates');
+var cafe = require('./app/routes/cafe');
+var parseExcel = require('./app/routes/parseExcel');
 
 var app = express();
 
 // view engine setup
-app.set('views', path.join(__dirname, 'views'));
+app.set('views', path.join(__dirname, 'app/views'));
 app.set('view engine', 'jade');
 
 app.use(cors({
@@ -60,20 +60,20 @@ app.use(multer({dest: './public/temp/'}).single('file'));
 app.use(function(req, res, next) {
   RoutesCollection.findOne({url:req.url, isAuthReq:true}).lean().exec(
     function(err, result)
-      {
-        if(result){
-          var token = req.body.token || req.query.token || req.headers['x-access-token'];
-          if(!token) return res.status(401).json("Token not found");
-          jwt.verify(token, config.secret, function(err, decoded){
-            if(err) res.status(401).json("Invalid Token");
-            else next();
-          });          
-        }
-        else{
-           next();
-        }
+    {
+      if(result){
+        var token = req.body.token || req.query.token || req.headers['x-access-token'];
+        if(!token) return res.status(401).json("Token not found");
+        jwt.verify(token, config.secret, function(err, decoded){
+          if(err) res.status(401).json("Invalid Token");
+          else next();
+        });          
       }
-    );
+      else{
+         next();
+      }
+    }
+  );
 });
 
 app.use('/user', user);

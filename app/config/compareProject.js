@@ -1,4 +1,4 @@
-var compareProject ={
+var compareProject = {
 
 	"magazine":{
 	  '_id' : 1,
@@ -9,10 +9,9 @@ var compareProject ={
     'categoryId' : 1,
     'attributes.frequency.value' : 1,
     'attributes.language.value' : 1,
-    'attributes.targetGroup' : 1,
     'attributes.readership.value' : 1,
     'attributes.circulation.value' : 1,
-    'print.mediaOptions.fullPage.1-2' : 1,
+    'print.mediaOptions.fullPage.cardRate' : 1,
     'IRS' : 1,
     'digital' : 1
 	},
@@ -26,7 +25,7 @@ var compareProject ={
     'areaCovered' : 1,
     'categoryId' :1,
     'language' : 1,
-    'mediaOptions.anyPage.<800SqCms.cardRate' : 1,        
+    'mediaOptions.regularOptions.anyPage.<800SqCms.cardRate' : 1,
     'logo' : 1
 	},
 
@@ -75,7 +74,16 @@ var compareProject ={
     'unit1' : 1,
     'unit2' : 1,
     'categoryId' : 1
-	}
+	},
+
+  "television": {
+    '_id' : 1,
+    'urlSlug' : 1,
+    'name' : 1,
+    'language' : 1,
+    'mediaOptions'  : 1,
+    'categoryId' : 1
+  }
 }
 
 module.exports = compareProject;

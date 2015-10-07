@@ -7,7 +7,7 @@ var Common = function()
   var Media = require('../models/media').Media;
   var TwelthCross = require('../models/12thCross').TwelthCross;
   var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
   
   this.isToolExists = function(req, res){
@@ -129,9 +129,5 @@ var Common = function()
     }); 
   }
 };
-
-  
-
-
 
 module.exports.CommonCtrl = Common;

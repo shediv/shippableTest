@@ -9,8 +9,10 @@ var _12thCross = function()
   var Contact = require('../models/contact').Contact;
   var nodeMailer = require('nodemailer');
   var jwt = require('jsonwebtoken');
+  var ToolsProject = require('../config/toolsProject.js');
+
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   this.transporter = nodeMailer.createTransport({
@@ -85,15 +87,7 @@ var _12thCross = function()
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
-      query.projection = {
-        '_id'          : 1,
-        'name'         : 1,
-        'subCategoryId': 1,
-        'geography'    : 1,
-        'urlSlug'      : 1,
-        'logo'         : 1,
-        'areaOfServices' : 1,
-      };
+      query.projection = ToolsProject['12thcross'];
       
       if(self.params.filters.geographies.length) query.match['geography'] = { $in:self.params.filters.geographies };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
@@ -286,7 +280,7 @@ var _12thCross = function()
           }
         },function(err, results){          
           var metaTags = {
-            name : result.name,
+            title : result.name,
             image  : result.imageUrl,
             description  : result.description,
             facebook : self.config.facebook,

@@ -7,13 +7,15 @@ var Airport = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var ToolsProject = require('../config/toolsProject.js');
+  var CompareProject = require('../config/compareProject.js');
   
   this.params = {};
   this.toolName = "airport";
   var self = this;
 
   this.params = {};
-  this.config = require('../config.js');
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
@@ -48,15 +50,7 @@ var Airport = function()
         'geographies' : 'geography',
         'categories' : 'category'
       };
-      query.projection = {
-        '_id' : 1,
-        'urlSlug' : 1,
-        'name' : 1,
-        'category' : 1,
-        'mediaOptions' : 1,
-        'geography' : 1,        
-        'logo' : 1
-      };
+      query.projection = ToolsProject[self.toolName];
 
       Object.keys(filters).map(function(value){
         if(self.params.filters[value].length)
@@ -190,13 +184,7 @@ var Airport = function()
   this.compare = function(req, res){
     var ids = JSON.parse(req.query.params);
     var catIds = [];
-    var project = {
-      '_id' : 1,
-      'name' : 1,
-      'urlSlug' : 1,
-      'thumbnail' : 1,
-      'mediaOptions': 1
-    };
+    var project = CompareProject[self.toolName];
       
     Media.find({_id: { $in: ids }}, project).lean().exec(function(err, results){
       
@@ -266,7 +254,7 @@ var Airport = function()
       }
 
       var metaTags = {
-          name : result.name,
+          title : result.name,
           image  : result.imageUrl,
           description  : result.about,
           facebook : self.config.facebook,
