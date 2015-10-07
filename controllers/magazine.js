@@ -1041,7 +1041,7 @@ var Magazine = function()
               categoryId : 1,
               _id : 1,
               logo: 1,
-              'print.mediaOptions.fullPage.1-2' : 1
+              'print.mediaOptions.fullPage.cardRate' : 1
             }
           },
           function(err, results)
