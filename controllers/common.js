@@ -93,9 +93,9 @@ var Common = function()
 
   this.getMediaName = function(req, res){
     var toolName = req.query.toolName;
-    var search = new RegExp('\\b'+req.query.toolName, "i");
+    var search = new RegExp('\\b'+req.query.mediaName, "i");
     Tools.findOne({ name:toolName }).lean().exec(function(err, tool){
-      Media.find({ name:search },{ name:1, _id:1 }).lean().exec(function(err, medias){
+      Media.find({ name:search, toolId:tool._id },{ name:1, _id:1 }).lean().exec(function(err, medias){
         res.status(200).json({medias:medias});
       });
     });
