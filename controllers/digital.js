@@ -205,8 +205,8 @@ var Digital = function()
 
     self.getGeoTargets = function(callback){
       var geoTargets = [
-        {'_id' : true, 'name' : 'Yes'},
-        {'_id' : false, 'name' : 'No'}
+        {'_id' : true, 'name' : 'Geo Targetting Possible'}
+        //{'_id' : false, 'name' : 'No'}
       ];
       callback(null, geoTargets);
     };
