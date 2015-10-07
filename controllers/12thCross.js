@@ -328,7 +328,7 @@ var _12thCross = function()
             self.transporter.sendMail({
               from: decoded.email, // sender address
               to: emailTo, // list of receivers
-              //cc: decoded.email,
+              cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){
