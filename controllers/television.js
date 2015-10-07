@@ -13,6 +13,10 @@ var Television = function()
   this.toolName = "television";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -220,7 +224,14 @@ var Television = function()
       Category.find({ _id:{ $in:results.categoryId } },'name').lean().exec(function(err, genres){
         results.genres = [];
         for(i in genres) results.genres.push(genres[i].name);
-        res.status(200).json({television : results});
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : results.about,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }  
+        res.status(200).json({television : results, metaTags : metaTags});
       })
     });
 

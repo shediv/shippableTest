@@ -12,6 +12,10 @@ var Outdoor = function()
   this.toolName = "outdoor";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -188,7 +192,19 @@ var Outdoor = function()
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Geography.findOne({ _id:results.geography }).lean().exec(function(err, geo){
         if(geo) results['geographyData'] = geo;
-        res.status(200).json({outdoor : results});
+        if(results.about) {
+          description = results.about;
+        }else {
+          description = "This Hoarding is located at "+results.geographyData.locality+", "+results.geographyData.city;
+        }
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : description,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+        res.status(200).json({outdoor : results, metaTags : metaTags});
       });
     });
 

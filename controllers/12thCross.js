@@ -267,7 +267,7 @@ var _12thCross = function()
             })
           },
           areaOfServices: function(callback){
-            console.log(result.areaOfServices);
+            //console.log(result.areaOfServices);
             if(result.areaOfServices !== undefined)
             {
               Geography.find({ _id:{ $in:result.areaOfServices } }).lean().exec(function(err, geo){
@@ -277,8 +277,15 @@ var _12thCross = function()
             }
             else callback(err, null);
           }
-        },function(err, results){
-          res.status(200).json({vendor : result});
+        },function(err, results){          
+          var metaTags = {
+            name : result.name,
+            image  : result.imageUrl,
+            description  : result.description,
+            facebook : self.config.facebook,
+            twitter : self.config.twitter
+          }
+          res.status(200).json({vendor : result, metaTags : metaTags});
         })
       }
     );
@@ -317,7 +324,7 @@ var _12thCross = function()
             self.transporter.sendMail({
               from: decoded.email, // sender address
               to: emailTo, // list of receivers
-              //cc: decoded.email,
+              cc: decoded.email,
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){

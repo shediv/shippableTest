@@ -17,6 +17,10 @@ var Magazine = function()
   this.toolName = "magazine";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -929,13 +933,27 @@ var Magazine = function()
     };
 
   this.show = function(req, res){
+    var description = '';
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
       Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
         results['categoryName'] = category.name;
-        res.status(200).json({magazine : results});
+
+        if(results.about) {
+          description = results.about;
+        }else {
+          description = results.name+" is a "+results.attributes.frequency.value+"Magazine in the "+results.categoryName+" Segment. "+results.name+" is utilized by a variety of brands to reach out to their target audience. You can explore "+ results.name +" Rates & " + results.name +" Costs here";
+        }
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : description,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+        res.status(200).json({magazine : results, metaTags : metaTags});
       });
     });
 
@@ -1023,7 +1041,7 @@ var Magazine = function()
               categoryId : 1,
               _id : 1,
               logo: 1,
-              'print.mediaOptions.fullPage.1-2' : 1
+              'print.mediaOptions.fullPage.cardRate' : 1
             }
           },
           function(err, results)
