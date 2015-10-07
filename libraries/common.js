@@ -51,6 +51,10 @@ var Common = function()
 		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
 	}
 
+	this.capitalizeFirstLetter= function(string) {
+    return string.charAt(0).toUpperCase() + string.slice(1);
+	}
+
 };
 
 module.exports.Common = new Common();
