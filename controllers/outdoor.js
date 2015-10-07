@@ -25,7 +25,11 @@ var Outdoor = function()
     async.waterfall([
       function(callback)
       {
-        callback(null, self.applyFilters());
+        self.buildGeographyQuery(callback);
+      },
+      function(geographies, callback)
+      {
+        callback(null, self.applyFilters(geographies));
       },
       function(query, callback)
       {
@@ -39,7 +43,67 @@ var Outdoor = function()
     });
   };
 
-    self.applyFilters = function(){
+    self.buildGeographyQuery = function(callback){
+      var or = [];
+      self.params.geographyIds = [];
+      if(!self.params.filters.geographies.length)
+      {
+       delete self.params.filters.geographies;
+       return callback(null, []); 
+      }
+      for(key in self.params.filters.geographies)
+      {
+        switch(self.params.filters.geographies[key].place)
+        {
+          case 'state' : 
+            or.push(
+              { $and : [{ state :self.params.filters.geographies[key].state}] }
+            ); 
+            break;                  
+          case 'city' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city}
+              ] 
+            }); 
+            break;          
+          case 'locality' : 
+            or.push({ 
+              $and : [
+                { state :self.params.filters.geographies[key].state}, 
+                { city : self.params.filters.geographies[key].city},
+                { locality : self.params.filters.geographies[key].locality}
+              ] 
+            });          
+        }
+      }      
+
+      var match = { $or:or, pincode : { $exists:1 } };
+
+      async.series([
+        function(callbackInner){
+          Geography.distinct('pincode', match, function(err, pincodes){
+            Geography.find({pincode:{$in:pincodes}}).lean().exec(function(err, results){
+              var geographies = [];
+              if(!results) return callbackInner(err, geographies);
+              for(i in results)
+              {
+                geographies[results[i]._id.toString()] = results[i];
+                self.params.geographyIds.push(results[i]._id.toString());
+              }
+              callbackInner(err, geographies); 
+            });
+          });
+        }
+      ],
+      function(err, geographies)
+      {
+        callback(err, geographies[0]);
+      });
+    };
+
+    self.applyFilters = function(geographies){
       var query = {};
       query.sortBy = self.params.sortBy || 'views';
       query.offset = self.params.offset || 0;
@@ -68,6 +132,8 @@ var Outdoor = function()
         if(self.params.filters[value].length)
           query.match[filters[value]] = {'$in': self.params.filters[value]};
       });
+
+      if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
 
       query.match.isActive = 1;
       query.match.toolId = self.toolId;
