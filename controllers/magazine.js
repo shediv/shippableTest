@@ -982,7 +982,7 @@ var Magazine = function()
       'attributes.targetGroup' : 1,
       'attributes.readership.value' : 1,
       'attributes.circulation.value' : 1,
-      'print.mediaOptions.fullPage.1-2' : 1,
+      'print.mediaOptions.fullPage.cardRate' : 1,
       'IRS' : 1,
       'digital' : 1
     };
