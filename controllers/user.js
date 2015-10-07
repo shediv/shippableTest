@@ -47,8 +47,8 @@ var User = function()
 				var mailOptions = {
 		      email: user.email,
 		      name: {
-		        first: user.firstName,
-		        last: user.lastName
+		        first: CommonLib.capitalizeFirstLetter(user.firstName),
+		        last: CommonLib.capitalizeFirstLetter(user.lastName)
 		      },
 		      userId:newUser._id,
 		      emailHash:md5(user.email),
@@ -263,8 +263,8 @@ var User = function()
 			var mailOptions = {
 	      email: user.email,
 	      name: {
-	        first: user.firstName,
-	        last: user.lastName
+	        first: CommonLib.capitalizeFirstLetter(user.firstName),
+	        last: CommonLib.capitalizeFirstLetter(user.lastName)
 	      },
 	      appHost: self.config.appHost,
 	      token: token
