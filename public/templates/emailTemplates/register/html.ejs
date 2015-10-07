@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>The Media Ant</title>
+    <title>Contacting for your service | The Media Ant</title>
   </head>
   <body>
     <header>
@@ -12,8 +12,9 @@
     </header>
 
     <div style="margin:30px 0;">
-      <h3>Dear <strong><%= name.first %> <%= name.last %></strong>, thank you for creating an account with us!</h3>
-      <h3>Please verify that you used a real email address.</h3>
+      <h3>Dear <strong><%= name.first %> <%= name.last %> !</strong></h3> 
+      <h3>Thank you for creating an account with us!</h3>
+      <h3>Please click on the button below to verify your email address.</h3>
       <div style="text-align:center;">
         <a href="http://<%= appHost %>/user/verify/<%= emailHash %>:<%= userId %>" class="btn">
           Verify My Account

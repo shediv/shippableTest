@@ -12,6 +12,10 @@ var Radio = function()
   this.toolName = "radio";
   var self = this;
 
+  this.params = {};
+  this.config = require('../config.js');
+  var self = this;
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -217,7 +221,19 @@ var Radio = function()
     Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
-      res.status(200).json({radio : results});        
+      if(results.about) {
+          description = results.about;
+        }else {
+          description = results.station+ " in "+results.city+" plays music in "+results.language.join()+" language(s). "+results.station+" advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+results.station+ " Advertising Rates & "+results.station+" Advertising Costs here";        
+        }
+        var metaTags = {
+          name : results.name,
+          image  : results.imageUrl,
+          description  : description,
+          facebook : self.config.facebook,
+          twitter : self.config.twitter
+        }
+      res.status(200).json({radio : results, metaTags : metaTags});        
     });
 
     var visitor = {
