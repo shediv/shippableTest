@@ -31,57 +31,65 @@ var Common = function()
   }
 
   this.getSiteMap = function(req, res){
-      async.parallel({
-        twelthCross : function(callbackInner)
-        {          
-          TwelthCross.aggregate(
-            {$match: {"urlSlug": { $exists: 1} }},
-            //{$skip : 0}, {$limit: 10},
-            { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
-            { $group : { _id : "$url"}},
-            function(error, twelthCross) 
-            {
-              for(i in twelthCross) twelthCross[i] = twelthCross[i]._id;
-              callbackInner(error, twelthCross);
-            }
-          );
-        },      
-        media : function(callbackInner)
-        {          
-          Media.aggregate(
-            {$match: {"urlSlug": { $exists: 1} }},
-            //{$skip : 0}, {$limit: 5},
-            { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},            
-            function(error, results) 
-            {
-              var toolIds = [];
-              var toolName = [];
-              for(i in results) toolIds.push(results[i]._id);
-                Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){                                
-                for(i in tool) toolName[tool[i]._id] = tool[i];                  
-                for(i in results) 
-                {
-                  if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;                  
-                }                  
-                callbackInner(error, results);                
-              });
-            }
-          );
-        }        
-      },
-      function(err, results) 
-      {        
-        var data = [];      
-        if(err) return res.status(500).json(err);
-        for(i in results.media) {
-          for(j in results.media[i].medias) {  
-            data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j])
+    async.parallel({
+      twelthCross : function(callbackInner)
+      {          
+        TwelthCross.aggregate(
+          {$match: {"urlSlug": { $exists: 1} }},
+          //{$skip : 0}, {$limit: 10},
+          { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
+          { $group : { _id : "$url"}},
+          function(error, twelthCross) 
+          {
+            for(i in twelthCross) twelthCross[i] = twelthCross[i]._id;
+            callbackInner(error, twelthCross);
           }
-        }        
-        data = data.concat(results.twelthCross);
-        res.status(200).json({url:data});
-      });
-    };  
+        );
+      },      
+      media : function(callbackInner)
+      {          
+        Media.aggregate(
+          {$match: {"urlSlug": { $exists: 1} }},
+          //{$skip : 0}, {$limit: 5},
+          { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},            
+          function(error, results) 
+          {
+            var toolIds = [];
+            var toolName = [];
+            for(i in results) toolIds.push(results[i]._id);
+              Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){                                
+              for(i in tool) toolName[tool[i]._id] = tool[i];                  
+              for(i in results) 
+              {
+                if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;                  
+              }                  
+              callbackInner(error, results);                
+            });
+          }
+        );
+      }        
+    },
+    function(err, results) 
+    {
+      var data = [];      
+      if(err) return res.status(500).json(err);
+      for(i in results.media) 
+      {
+        for(j in results.media[i].medias) 
+          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
+      }        
+      data = data.concat(results.twelthCross);
+      res.status(200).json({url:data});
+    });
+  };
+
+  this.getMetaTags = function(req, res){
+    var toolName = req.params.toolName;
+    Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+      if(err) return res.status(500).json(err);
+      res.status(200).json(result.metaTags);
+    });
+  }
 };
 
 module.exports.CommonCtrl = Common;

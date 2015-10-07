@@ -9,5 +9,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/isToolExists', CommonCtrl.isToolExists);
 router.post('/customerQuery', CommonCtrl.addCustomerQuery);
+router.get('/sitemap', Common.getSiteMap);
+router.get('/metaTags', Common.getMetaTags);
 
 module.exports = router;
