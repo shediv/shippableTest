@@ -229,12 +229,12 @@ var User = function()
 				
 			//Verify Password
 			if(md5(user.password) != result.password) return res.status(401).json("Invalid Password");
-			if(!result.verified) return res.status(401).json("Account Not Verified");
+			if(!result.isActive) return res.status(401).json("Account Not Verified");
 			else
 			{
 				var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
-        res.status(200).json({token:token});
-      }
+		        res.status(200).json({token:token});
+		    }
 			
 			result.userAgent= req.headers['user-agent'];
 			result.clientIPAddress = req.connection.remoteAddress;	
