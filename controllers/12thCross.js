@@ -73,10 +73,6 @@ var _12thCross = function()
   self.updateVendor = function(req, res){
     var vendorID = req.body.vendor._id;
     var vendorData = req.body.vendor;
-    for(i in vendorData.servicesOffered)
-    {
-      vendorData.servicesOffered[i].media = vendorData.servicesOffered[i].media._id;
-    }
     TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
       if(err) return res.status(500).json(err);
       return res.send("Vendor info succesfully updated");
