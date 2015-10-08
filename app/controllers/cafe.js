@@ -3,6 +3,7 @@ var Cafe = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Cafe = require('../models/cafe').Cafe;
+  var underscore = require('underscore');
   
   this.params = {};
   var self = this;
@@ -38,10 +39,14 @@ var Cafe = function()
   this.search = function(req, res){    
     var qString = req.query.q;
     var qRegExp = new RegExp('\\b'+qString, "i");    
-    Cafe.find({topics : qRegExp}, function(err, doc){
+    Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
       if(err) return res.status(500).json(err);
-      console.log(doc.length)
-      return res.send(doc);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
     });
   };
   
