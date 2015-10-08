@@ -190,7 +190,7 @@ var NonTraditional = function()
                   results[i]['firstMediaOption'] = firstmediaOptionsKey; 
                 }                                   
                 for(i in results) results[i]['geography'] = geographies[results[i].geography];
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                if(self.params.sortBy == 'minimumBilling') results = results.sort(function(a,b){ return a.minimumBilling > b.minimumBilling });
                 //results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
