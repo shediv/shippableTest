@@ -3,6 +3,7 @@ var Cafe = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Cafe = require('../models/cafe').Cafe;
+  var underscore = require('underscore');
   
   this.params = {};
   var self = this;
@@ -24,6 +25,32 @@ var Cafe = function()
     Cafe.findOneAndUpdate({_id : cafeID}, cafeData, {upsert:true}, function(err, doc){
       if(err) return res.status(500).json(err);
       return res.send("Cafe info succesfully updated");
+    });
+  };
+
+  this.trending = function(req, res){    
+    Cafe.find({}).lean().limit(15).exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
+    });
+  };
+
+  this.search = function(req, res){    
+    var qString = req.query.q;
+    var qRegExp = new RegExp('\\b'+qString, "i");    
+    Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
     });
   };
   

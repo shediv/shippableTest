@@ -9,6 +9,7 @@ var NonTraditional = function()
   var Category = require('../models/category').Category;
   var SubCategory = require('../models/subCategory').SubCategory;
   var ToolsProject = require('../config/toolsProject.js');
+  var underscore = require('underscore');
   
   this.params = {};
   this.toolName = "nontraditional";
@@ -319,6 +320,22 @@ var NonTraditional = function()
     };
     CommonLib.uniqueVisits(visitor);
   };
+
+
+  this.getMediaOption = function(req, res){    
+    Media.distinct('mediaOptions',
+        { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
+        function(error, result) 
+        {          
+          var keys = [];
+          for(i in result){
+            keys = keys.concat(Object.keys(result[i]));
+          }          
+          var mediaOptions = underscore.uniq(keys)
+          return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
+        });                 
+  };
+
 
 };
 
