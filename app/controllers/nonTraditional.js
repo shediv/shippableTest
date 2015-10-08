@@ -320,6 +320,15 @@ var NonTraditional = function()
     CommonLib.uniqueVisits(visitor);
   };
 
+  this.getMediaOption = function(req, res){
+    Media.distinct('mediaOptions',
+        { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
+        function(error, mediaOptions) 
+        {
+          return res.status(200).json(mediaOptions);
+        });                 
+  };
+
 };
 
 module.exports.NonTraditional = NonTraditional;
