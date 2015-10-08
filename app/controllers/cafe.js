@@ -26,6 +26,24 @@ var Cafe = function()
       return res.send("Cafe info succesfully updated");
     });
   };
+
+  this.trending = function(req, res){    
+    Cafe.find({}, function(err, doc){
+      if(err) return res.status(500).json(err);
+      console.log(doc.length);
+      return res.send(doc);
+    }).limit(15);
+  };
+
+  this.search = function(req, res){    
+    var qString = req.query.q;
+    var qRegExp = new RegExp('\\b'+qString, "i");    
+    Cafe.find({topics : qRegExp}, function(err, doc){
+      if(err) return res.status(500).json(err);
+      console.log(doc.length)
+      return res.send(doc);
+    });
+  };
   
   this.getCafe = function(req, res){
     self.params = JSON.parse(req.query.params);

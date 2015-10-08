@@ -10,6 +10,8 @@ router.get("/", Cafe.getCafe);
 router.post("/store", Cafe.store);
 router.get("/filters", Cafe.getFilters);
 router.post("/update", Cafe.update);
+router.get("/search", Cafe.search);
+router.get("/trending", Cafe.trending);
 router.get("/:urlSlug", Cafe.show);
 
 module.exports = router;
