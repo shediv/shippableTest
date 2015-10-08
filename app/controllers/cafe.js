@@ -11,6 +11,7 @@ var Cafe = function()
   this.store = function(req, res){
     // create a new Media
     req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
+    req.body.cafe.createdAt = new Date();
     if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
     var newCafe = Cafe(req.body.cafe);
 

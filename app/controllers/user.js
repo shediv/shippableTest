@@ -291,7 +291,7 @@ var User = function()
 
 	this.forgotPassword	= function(req,res){
 		User.findOne({ email:req.body.email }).lean().exec(function(err, user){
-			if(!user) return res.status(404).json("No account with that email address exists.");
+			if(!user) return res.status(500).json("No account with that email address exists.");
 			
 			var token = jwt.sign(user, self.config.secret, { expiresInMinutes: (24*60) });
 			var mailOptions = {
