@@ -50,7 +50,7 @@ var Mtwenty = function()
 	      from: req.body.email, // sender address
 	      to: 'help@m20.in', // list of receivers
 	      cc: req.body.email,
-	      subject: 'Message from '+req.body.name,
+	      subject: 'Message from '+req.body.name+' to m20',
 	      html: results.html
 	    }, function(err, responseStatus){
 	      if(err) return console.error(err);
