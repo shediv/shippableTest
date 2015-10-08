@@ -29,6 +29,7 @@ var _12thCross = require('./app/routes/12thCross');
 var search = require('./app/routes/search');
 var bestRates = require('./app/routes/bestRates');
 var cafe = require('./app/routes/cafe');
+var mtwenty = require('./app/routes/mtwenty');
 var parseExcel = require('./app/routes/parseExcel');
 
 var app = express();
@@ -93,6 +94,7 @@ app.use('/12thCross', _12thCross);
 app.use('/search', search);
 app.use('/bestRates', bestRates);
 app.use('/cafe', cafe);
+app.use('/mtwenty', mtwenty);
 app.use('/parseExcel', parseExcel);
 
 app.use('/', routes);

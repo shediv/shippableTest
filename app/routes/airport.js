@@ -9,6 +9,7 @@ var AirportCtrl = new (require('../controllers/airport')).Airport();
 router.get("/", AirportCtrl.getAirport);
 router.get("/filters", AirportCtrl.getFilters);
 router.get("/compare", AirportCtrl.compare);
+router.get("/mediaOption", AirportCtrl.getMediaOption);
 router.get("/:urlSlug", AirportCtrl.show);
 
 module.exports = router;

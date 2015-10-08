@@ -9,6 +9,7 @@ var Airport = function()
   var Category = require('../models/category').Category;
   var ToolsProject = require('../config/toolsProject.js');
   var CompareProject = require('../config/compareProject.js');
+  var underscore = require('underscore');
   
   this.params = {};
   this.toolName = "airport";
@@ -271,6 +272,20 @@ var Airport = function()
       tool: self.toolName
     };
     CommonLib.uniqueVisits(visitor);
+  };
+
+  this.getMediaOption = function(req, res){    
+    Media.distinct('mediaOptions',
+        { toolId:"55f08b5044ae1ef71a02f415", isActive:1 },
+        function(error, result) 
+        {          
+          var keys = [];
+          for(i in result){
+            keys = keys.concat(Object.keys(result[i]));
+          }          
+          var mediaOptions = underscore.uniq(keys)
+          return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions.length});
+        });                 
   };
 
 };
