@@ -75,9 +75,43 @@ var User = function()
 		});
 	};
 
+	this.reVerificationMail = function(req, res){
+		//return res.status(200).json(req.body.email);
+		User.findOne({email: req.body.email, isActive:0}).lean().exec(function(err, result){			
+			if(err) throw err;
+			if(result) {											
+				var mailOptions = {
+			      email: result.email,
+			      name: {
+			        first: CommonLib.capitalizeFirstLetter(result.firstName),
+			        last: CommonLib.capitalizeFirstLetter(result.lastName)
+			      },
+			      userId:result._id,
+			      emailHash:md5(result.email),
+			      appHost:self.config.appHost
+			    };			    			    
+
+			    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
+
+				emailTemplate.render(mailOptions, function(err, results){
+					if(err) return console.error(err)
+					self.transporter.sendMail({
+		        from: self.config.noreply, // sender address
+		        to: mailOptions.email, // list of receivers
+		        subject: 'One Last Step To Create Your Account!',
+		        html: results.html
+					}, function(err, responseStatus){
+						if(err) return console.log(err);
+					   	console.log("responseStatus.message");
+					})
+				});
+			}				
+		});
+	};
+
 	this.verify = function(req, res){
 		var confirmationCode = req.params.confirmationCode;
-		var confirmationCode = confirmationCode.split(":");
+		var confirmationCode = confirmationCode.split(":");		
 		var dbEmail = false;
 		
 		User.findOne({_id : confirmationCode[1]}, function(err, result){
