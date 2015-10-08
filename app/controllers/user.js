@@ -300,7 +300,7 @@ var User = function()
 	        first: CommonLib.capitalizeFirstLetter(user.firstName),
 	        last: CommonLib.capitalizeFirstLetter(user.lastName)
 	      },
-	      appHost: self.config.appHost,
+	      appHost: req.body.hostName,
 	      token: token
 	    };
 
