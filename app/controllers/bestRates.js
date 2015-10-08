@@ -10,7 +10,6 @@ var BestRates = function()
   this.getBestRates = function(req, res){
     self.medias = req.body.medias;
     async.each(Object.keys(self.medias), function(tool, callback){
-      console.log(tool);
       switch(tool)
       {
         case 'magazine':
@@ -85,6 +84,44 @@ var BestRates = function()
       callback(err)
     });
   }
+
+  this.emailBestRates = function(req, res){
+    self.medias = req.body.medias;
+    async.each(Object.keys(self.medias), function(tool, callback){
+      switch(tool)
+      {
+        case 'magazine':
+          self.magazineEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'newspaper':
+          self.newspaperEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'radio':
+          self.radioEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'cinema':
+          self.cinemaEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'airport':
+          self.airportEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'digital':
+          self.digitalEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'outdoor':
+          self.outdoorEmailContent(self.medias[tool], tool, callback);
+          break;
+        case 'nontraditional':
+          self.nontraditionalEmailContent(self.medias[tool], tool, callback);
+          break;
+        default:
+          callback(null);
+      }
+    },function(err){
+      if(err) return res.status(500).json(err);
+      res.status(200).json({bestRates:self.medias});
+    });
+  };
 };
 
 module.exports.BestRates = BestRates;

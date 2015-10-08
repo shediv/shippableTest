@@ -52,7 +52,7 @@ var User = function()
 		      },
 		      userId:newUser._id,
 		      emailHash:md5(user.email),
-		      appHost:self.config.appHost
+		      appHost:req.body.hostName
 		    };
 
 		    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
@@ -88,7 +88,7 @@ var User = function()
 			      },
 			      userId:result._id,
 			      emailHash:md5(result.email),
-			      appHost:self.config.appHost
+			      appHost:req.body.hostName
 			    };			    			    
 
 			    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
