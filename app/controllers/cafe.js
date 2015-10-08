@@ -9,7 +9,9 @@ var Cafe = function()
 
   this.store = function(req, res){
     // create a new Media
-    var newCafe = Cafe(req.body);
+    req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
+    if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
+    var newCafe = Cafe(req.body.cafe);
 
     // save the Media
     newCafe.save(function(err) {
