@@ -190,7 +190,7 @@ var NonTraditional = function()
                   results[i]['firstMediaOption'] = firstmediaOptionsKey; 
                 }                                   
                 for(i in results) results[i]['geography'] = geographies[results[i].geography];
-                if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
+                //if(self.params.sortBy == 'minimumBilling') results.sort(function(a,b){ return a.minimumBilling < b.minimumBilling });
                 //results = results.slice(self.params.offset, self.params.limit + self.params.offset);
                 callbackInner(err, results);
               });
@@ -318,6 +318,15 @@ var NonTraditional = function()
       tool: self.toolName
     };
     CommonLib.uniqueVisits(visitor);
+  };
+
+  this.getMediaOption = function(req, res){
+    Media.distinct('mediaOptions',
+        { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
+        function(error, mediaOptions) 
+        {
+          return res.status(200).json(mediaOptions);
+        });                 
   };
 
 };
