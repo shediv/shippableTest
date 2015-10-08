@@ -54,7 +54,7 @@ var Cafe = function()
       query.match = {};
 
       if(self.params.filters.topics.length) query.match['topics'] = { $in:self.params.filters.topics };
-      query.match.isActive = 1;
+      //query.match.isActive = 1;
       
       return query;
     };
