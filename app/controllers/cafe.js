@@ -9,14 +9,22 @@ var Cafe = function()
   var self = this;
 
   this.store = function(req, res){
-    // create a new Media
-    var newCafe = Cafe(req.body);
 
-    // save the Media
-    newCafe.save(function(err) {
-      if(err) return res.status(500).json(err);
-      res.status(200).json("Cafe Created Successfully");
+    Cafe.findOne({ url:req.body.cafe.url }).lean().exec(function(err, cafe){
+      if(cafe) return res.status(500).json("Cafe already exists");
+      // create a new Media
+      req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
+      req.body.cafe.createdAt = new Date();
+      if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
+      var newCafe = Cafe(req.body.cafe);
+
+      // save the Media
+      newCafe.save(function(err) {
+        if(err) return res.status(500).json(err);
+        res.status(200).json("Cafe Created Successfully");
+      });  
     });
+    
   };
 
   this.update = function(req, res){
