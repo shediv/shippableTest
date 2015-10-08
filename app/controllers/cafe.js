@@ -29,11 +29,15 @@ var Cafe = function()
   };
 
   this.trending = function(req, res){    
-    Cafe.find({}, function(err, doc){
+    Cafe.find({}).lean().limit(15).exec(function(err, doc){
       if(err) return res.status(500).json(err);
-      console.log(doc.length);
-      return res.send(doc);
-    }).limit(15);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
+    });
   };
 
   this.search = function(req, res){    
