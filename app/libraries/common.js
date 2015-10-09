@@ -31,7 +31,6 @@ var Common = function()
 	this.uniqueVisits = function(visitor){
 		if(visitor.type == 'media') var model = Media;
 		if(visitor.type == '12thcross') var model =  TwelthCross;
-		visitor.timeStamp = new Date();
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{

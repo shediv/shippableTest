@@ -110,6 +110,14 @@ var Common = function()
       if(err) return res.status(500).json(err);
       res.status(200).json(result.metaTags);
     });
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.connection.remoteAddress,
+      type: 'tool',
+      tool: toolName
+    };
+    CommonLib.uniqueVisits(visitor);
   }
 
   this.getMediaName = function(req, res){
