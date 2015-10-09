@@ -139,7 +139,7 @@ var NonTraditional = function()
           );
         },
         medias : function(callbackInner)
-        {         
+        {          
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;

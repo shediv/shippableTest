@@ -52,7 +52,7 @@ var User = function()
 		      },
 		      userId:newUser._id,
 		      emailHash:md5(user.email),
-		      appHost:req.body.hostName
+		      appHost:self.config.appHost
 		    };
 
 		    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
@@ -88,7 +88,7 @@ var User = function()
 			      },
 			      userId:result._id,
 			      emailHash:md5(result.email),
-			      appHost:req.body.hostName
+			      appHost:self.config.appHost
 			    };			    			    
 
 			    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
@@ -291,7 +291,7 @@ var User = function()
 
 	this.forgotPassword	= function(req,res){
 		User.findOne({ email:req.body.email }).lean().exec(function(err, user){
-			if(!user) return res.status(500).json("No account with that email address exists.");
+			if(!user) return res.status(404).json("No account with that email address exists.");
 			
 			var token = jwt.sign(user, self.config.secret, { expiresInMinutes: (24*60) });
 			var mailOptions = {
@@ -300,7 +300,7 @@ var User = function()
 	        first: CommonLib.capitalizeFirstLetter(user.firstName),
 	        last: CommonLib.capitalizeFirstLetter(user.lastName)
 	      },
-	      appHost: req.body.hostName,
+	      appHost: self.config.appHost,
 	      token: token
 	    };
 
@@ -326,7 +326,6 @@ var User = function()
 		if(!token) return res.status(401).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, user){
 			if(err) res.status(401).json("Invalid Token");
-			req.body.newPassword = md5(req.body.newPassword);
 			User.update( { _id:user._id },{ password:req.body.newPassword }, function(err, result){
 				if(err) return res.status(404).json("password not updated :"+ err);
 		    res.status(200).json("OK");
