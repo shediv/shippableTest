@@ -5,6 +5,11 @@ var BestRates = function()
   var Media = require('../models/media').Media;
   var nodeMailer = require('nodemailer');
   var jwt = require('jsonwebtoken');
+
+  var xlReader = require('node-xlsx');
+  var excelbuilder = require('msexcel-builder');
+  var multer  = require('multer');
+  var fs = require('fs');
   
   this.medias = {};
   this.config = require('../config/config.js');
@@ -100,9 +105,12 @@ var BestRates = function()
   }
 
   this.emailBestRates = function(req, res){
+    //return res.status(200).json(req.body.medias);
     self.medias = req.body.medias;
     self.emailContent = [];
     self.excelContent = [];
+    self.filename;
+    self.path = [];
     async.each(Object.keys(self.medias), function(tool, callback){
       switch(tool)
       {
@@ -140,7 +148,8 @@ var BestRates = function()
       if(err) return res.status(500).json(err);
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       res.status(200).json({email:self.emailContent,excel:self.excelContent});
-      self.sendEmail(self.emailContent, token);
+      excelContent = self.createExcel(self.excelContent, token);
+      
     });
   };
 
@@ -317,6 +326,7 @@ var BestRates = function()
               screens.screenNumber = data[type][i].screens[k].screenNumber;
               screens.seats = data[type][i].screens[k].seats;
               screens.city = data[type][i].screens[k].city;
+              screens.theatreName = data[type][i].screens[k].theatreName;
 
               key = Object.keys(data[type][i].screens[k].mediaOptions[data[type][i].selectedOption])[0];
               screens.weeklyRate = data[type][i].screens[k].mediaOptions[data[type][i].selectedOption][key].discountedRate;
@@ -458,7 +468,7 @@ var BestRates = function()
       callback(null);
     };
 
-    self.sendEmail = function(data, token)
+    self.sendEmail = function(data, token, filename, excelPath)
     {
       if(!token) console.log("No Token"); //res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, decoded){
@@ -474,6 +484,11 @@ var BestRates = function()
           emailContent: data
         };
 
+        var attachments = [];
+        for(i in excelPath){
+          attachments.push({path : excelPath[i]});
+        }
+
         var emailTemplate = new EmailTemplate(path.join(templatesDir, 'bestRates'));
 
         emailTemplate.render(mailOptions, function(err, results){
@@ -482,7 +497,8 @@ var BestRates = function()
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
             subject: 'Discounted Rates',
-            html: results.html
+            html: results.html,
+            attachments: attachments
           }, function(err, responseStatus){
             if(err) return console.log(err);
              console.log("responseStatus.message");
@@ -490,6 +506,57 @@ var BestRates = function()
         });
       });
     };
+
+    self.createExcel = function(data, token)
+    {
+      if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
+      async.each(data, function(media, callback){        
+        var length = parseInt(media.length);      
+        var path = 'public/bestRate';
+        date = new Date();
+        var file_name = 'cinema'+self.path.length+'.xlsx';
+        self.filename = file_name;
+        self.path.push(path+'/'+file_name);    
+        var workbook = excelbuilder.createWorkbook(path, file_name);
+        // Create a new worksheet with 10 columns and 12 rows
+        var sheet1 = workbook.createSheet('sheet1', 6, length+1);      
+
+        // Fill some data
+        sheet1.set(1, 1, 'City');
+        sheet1.set(2, 1, 'MallName/Locality');
+        sheet1.set(3, 1, 'Theatre Name');
+        sheet1.set(4, 1, 'Screen Number');
+        sheet1.set(5, 1, 'Seats');
+        sheet1.set(6, 1, 'Weekly Rate');
+
+        for (var j = 0; j<media.length; j++){        
+              sheet1.set(1, j+2, media[j].city);
+              sheet1.set(2, j+2, media[j].mallName);
+              sheet1.set(3, j+2, media[j].theatreName);
+              sheet1.set(4, j+2, media[j].screenNumber);
+              sheet1.set(5, j+2, media[j].seats);
+              sheet1.set(6, j+2, media[j].weeklyRate);
+        }
+            
+        // Save it
+        workbook.save(function(err){
+          if (err) {
+              workbook.cancel();
+              //res.status(500).json(err);
+              //return 0;
+          }
+          else {
+              //res.status(200).json("success");
+              //return 1;
+          }
+
+          callback(err);
+        });
+      },function(err){
+        if(err) console.log("not able to create excel");
+        self.sendEmail(self.emailContent, token, self.filename, self.path);
+      });      
+    }  
 };
 
 module.exports.BestRates = BestRates;
