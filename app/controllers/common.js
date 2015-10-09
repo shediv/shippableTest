@@ -89,7 +89,7 @@ var Common = function()
 
     var visitor = {
       userAgent: req.headers['user-agent'],
-      clientIPAddress: req.connection.remoteAddress,
+      clientIPAddress: req.ip,
       type: 'tool',
       tool: toolName
     };
