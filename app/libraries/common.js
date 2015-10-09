@@ -52,9 +52,35 @@ var Common = function()
 		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
 	}
 
-	this.capitalizeFirstLetter= function(string) {
+	this.capitalizeFirstLetter= function(string){
     return string.charAt(0).toUpperCase() + string.slice(1);
 	}
+
+	this.humanReadable = function(str){
+    returnString = str[0].toUpperCase();
+
+    for(var i = 1; i < str.length; i++) 
+    {
+      if(str[i] >= 'A' && str[i] <= 'Z') 
+      {
+        returnString += ' ' + str[i];
+      }
+      else 
+      if(str[i] == '-' || str[i] == '_') 
+      {
+        returnString += ' ';
+      }
+      else 
+      {
+        returnString += str[i];
+      }
+    }
+    return returnString;
+	};
+
+  this.addCommas = function(x){
+    return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+  };
 
 };
 
