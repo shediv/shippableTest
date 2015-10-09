@@ -326,6 +326,7 @@ var User = function()
 		if(!token) return res.status(401).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, user){
 			if(err) res.status(401).json("Invalid Token");
+			req.body.newPassword = md5(req.body.newPassword);
 			User.update( { _id:user._id },{ password:req.body.newPassword }, function(err, result){
 				if(err) return res.status(404).json("password not updated :"+ err);
 		    res.status(200).json("OK");
