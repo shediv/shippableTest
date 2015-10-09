@@ -13,7 +13,7 @@ var config = {
   mongoUrl : "mongodb://root:goosebumps@139.162.29.37/media_ant?authSource=admin",
 
   //Domain Name Configs
-  appHost : 'beta.themediaant.com',
+  appHost : 'themediaant.com',
 
   //EmailID Configs
   noreply : 'The Media Ant <noreply@themediaant.com>',
