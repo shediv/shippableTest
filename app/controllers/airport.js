@@ -176,8 +176,8 @@ var Airport = function()
       var categories = [
         {'_id' : 'Airport', 'name' : 'Airport'},
         {'_id' : 'Airport Lounge', 'name' : 'Airport Lounge'},
-        {'_id' : 'Airline', 'name' : 'Airline'},
-        {'_id' : 'InflightMagazine', 'name' : 'Inflight Magazine'}
+        {'_id' : 'Airline', 'name' : 'Airline'}
+      //{'_id' : 'InflightMagazine', 'name' : 'Inflight Magazine'}
       ];
       callback(null, categories);
     };
