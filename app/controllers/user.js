@@ -52,7 +52,7 @@ var User = function()
 		      },
 		      userId:newUser._id,
 		      emailHash:md5(user.email),
-		      appHost:req.body.hostName
+		      appHost:self.config.appHost
 		    };
 
 		    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
@@ -88,7 +88,7 @@ var User = function()
 			      },
 			      userId:result._id,
 			      emailHash:md5(result.email),
-			      appHost:req.body.hostName
+			      appHost:self.config.appHost
 			    };			    			    
 
 			    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
@@ -291,7 +291,7 @@ var User = function()
 
 	this.forgotPassword	= function(req,res){
 		User.findOne({ email:req.body.email }).lean().exec(function(err, user){
-			if(!user) return res.status(500).json("No account with that email address exists.");
+			if(!user) return res.status(404).json("No account with that email address exists.");
 			
 			var token = jwt.sign(user, self.config.secret, { expiresInMinutes: (24*60) });
 			var mailOptions = {
@@ -300,7 +300,7 @@ var User = function()
 	        first: CommonLib.capitalizeFirstLetter(user.firstName),
 	        last: CommonLib.capitalizeFirstLetter(user.lastName)
 	      },
-	      appHost: req.body.hostName,
+	      appHost: self.config.appHost,
 	      token: token
 	    };
 
