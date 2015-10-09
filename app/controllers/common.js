@@ -86,6 +86,26 @@ var Common = function()
 
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
+    if(toolName == '12thcross')
+    {
+      return res.status(200).json({
+        title : '12th Cross || Question & Answer Forum || The Media Ant',
+        description : '12th Cross is a question and answers forum for advertising and related mediums',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook
+      });
+    }
+    if(toolName == 'cafe')
+    {
+      return res.status(200).json({
+        title : 'Cafe || The Media Ant',
+        description : 'Cafe, browse popular URLs and articles',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook
+      });
+    }
     Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
       res.status(200).json(result.metaTags);

@@ -28,7 +28,7 @@ var config = {
     "site": "@themediaant" 
   },
   facebook: {
-   "type": "type",
+   "type": "article",
    "siteName": "TheMediaAnt",
    "admins": "" 
   }     
