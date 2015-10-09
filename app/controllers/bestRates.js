@@ -3,14 +3,27 @@ var BestRates = function()
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
+  var nodeMailer = require('nodemailer');
+  var jwt = require('jsonwebtoken');
   
   this.medias = {};
+  this.config = require('../config/config.js');
   var self = this;
+
+  this.transporter = nodeMailer.createTransport({
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
+  });
+
+  var path = require('path');
+  var EmailTemplate = require('email-templates').EmailTemplate;
+  var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
 
   this.getBestRates = function(req, res){
     self.medias = req.body.medias;
     async.each(Object.keys(self.medias), function(tool, callback){
-      console.log(tool);
       switch(tool)
       {
         case 'magazine':
@@ -85,6 +98,398 @@ var BestRates = function()
       callback(err)
     });
   }
+
+  this.emailBestRates = function(req, res){
+    self.medias = req.body.medias;
+    self.emailContent = [];
+    self.excelContent = [];
+    async.each(Object.keys(self.medias), function(tool, callback){
+      switch(tool)
+      {
+        case 'magazine':
+          self.magazine(self.medias[tool], tool, callback);
+          break;
+        case 'newspaper':
+          self.newspaper(self.medias[tool], tool, callback);
+          break;
+        case 'radio':
+          self.radio(self.medias[tool], tool, callback);
+          break;
+        case 'television':
+          self.television(self.medias[tool], tool, callback);
+          break;
+        case 'cinema':
+          self.cinema(self.medias[tool], tool, callback);
+          break;
+        case 'airport':
+          self.airport(self.medias[tool], tool, callback);
+          break;
+        case 'digital':
+          self.digital(self.medias[tool], tool, callback);
+          break;
+        case 'outdoor':
+          self.outdoor(self.medias[tool], tool, callback);
+          break;
+        case 'nontraditional':
+          self.nontraditional(self.medias[tool], tool, callback);
+          break;
+        default:
+          callback(null);
+      }
+    },function(err){
+      if(err) return res.status(500).json(err);
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      res.status(200).json({email:self.emailContent,excel:self.excelContent});
+      self.sendEmail(self.emailContent, token);
+    });
+  };
+
+    self.magazine = function(data, tool, callback){
+      tool = 'Magazine';
+      unit = 'Insert(s)';
+      
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {
+            switch(i)
+            {
+              case 'print':
+              {
+                for(k in data[id].selectedOptions[i])
+                {
+                  var option = {};
+                  option.tool = tool + ' - Print';
+                  option.name = data[id].name;
+                  option.mediaOption = CommonLib.humanReadable(k);
+                  option.campaignDetails = data[id].selectedOptions[i][k].qty + ' ' + unit;
+                  if(data[id].selectedOptions[i][k].qty <= 2 && data[id].selectedOptions[i][k].qty >= 1) 
+                    option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['1-2'];
+                  if(data[id].selectedOptions[i][k].qty <= 6 && data[id].selectedOptions[i][k].qty >= 3) 
+                    option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['3-6'];
+                  if(data[id].selectedOptions[i][k].qty >= 7) 
+                    option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['7+'];
+                  option.totalPrice = 'Rs. ' + CommonLib.addCommas(option.totalPrice);
+                  self.emailContent.push(option);
+                }
+                break;
+              }
+              default:
+              {
+                for(k in data[id].selectedOptions[i])
+                {
+                  var option = {};
+                  option.tool = tool + ' - ' + CommonLib.humanReadable(i);
+                  option.name = data[id].name;
+                  option.mediaOption = CommonLib.humanReadable(k);
+                  option.campaignDetails = data[id].selectedOptions[i][k].qty + ' ' + unit;
+                  option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k].pricing;
+                  option.totalPrice = 'Rs. ' + CommonLib.addCommas(option.totalPrice);
+                  self.emailContent.push(option);
+                }
+              }
+            }
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.newspaper = function(data, tool, callback){
+      tool = 'Newspaper';
+      unit = 'Insert(s)';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            for(k in data[id].selectedOptions[i])
+            {
+              var option = {};
+              option.tool = tool;
+              option.name = data[id].name + ', ' + data[id].editionName + ', ' + data[id].areaCovered;
+              option.mediaOption = CommonLib.humanReadable(k);
+              option.campaignDetails = data[id].selectedOptions[i][k].noOfInserts + ' ' + unit;
+              option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i][k].totalPrice);
+              self.emailContent.push(option);
+            }
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.radio = function(data, tool, callback){
+      tool = 'Radio';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            for(k in data[id].selectedOptions[i])
+            {
+              var option = {};
+              option.tool = tool;
+              option.name = data[id].station + ', ' + data[id].city;
+              if(i == 'rjOptions')
+                option.mediaOption = 'RJ Mention - ' + data[id].selectedOptions[i][k].rjName + data[id].selectedOptions[i][k].showName;
+              else
+                option.mediaOption = CommonLib.humanReadable(k);
+              
+              if(i == 'regularOptions')
+              {
+                option.campaignDetails = data[id].selectedOptions[i][k].jingleLength + ' ' + data[id].selectedOptions[i][k].pricingUnit1;
+                option.campaignDetails += '/' + data[id].selectedOptions[i][k].noOfTimes + ' ' + data[id].selectedOptions[i][k].pricingUnit2;
+                option.campaignDetails += '/' + data[id].selectedOptions[i][k].noOfDays + ' ' + data[id].selectedOptions[i][k].pricingUnit3;  
+              }
+              else
+              {
+                option.campaignDetails = data[id].selectedOptions[i][k].inputUnit1 + ' ' + data[id].selectedOptions[i][k].pricingUnit1;
+                if(data[id].selectedOptions[i][k].pricingUnit2 != undefined)
+                  option.campaignDetails += '/' + data[id].selectedOptions[i][k].inputUnit2 + ' ' + data[id].selectedOptions[i][k].pricingUnit2;
+                if(data[id].selectedOptions[i][k].pricingUnit3 != undefined)
+                  option.campaignDetails += '/' + data[id].selectedOptions[i][k].inputUnit3 + ' ' + data[id].selectedOptions[i][k].pricingUnit3;
+              }
+              option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i][k].totalPrice);
+              self.emailContent.push(option);
+            }
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.television = function(data, tool, callback){
+      tool = 'Television';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            var option = {};
+            option.tool = tool;
+            option.name = data[id].name;
+            option.mediaOption = data[id].selectedOptions[i].time;
+
+            option.campaignDetails = data[id].selectedOptions[i].adLength + ' Seconds';
+            option.campaignDetails += '/' + data[id].selectedOptions[i].noOfTimes + ' Time(s)';
+            option.campaignDetails += '/' + data[id].selectedOptions[i].noOfDays + ' Day(s)';
+
+            option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
+            self.emailContent.push(option);
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.cinema = function(data, tool, callback){
+      tool = 'Cinema';
+
+      for(type in data)
+      {
+        if(type == 'onScreen')
+        {
+          for(i in data[type])
+          {
+            var option = {};
+            option.tool = tool + ' - On Screen';
+            option.name = 'Cinema Plan - ' + parseInt( parseInt(i)+1);
+            option.mediaOption = CommonLib.humanReadable(data[type][i].selectedOption);
+            option.campaignDetails = data[type][i].noOfWeeks + ' Week(s)';
+            option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[type][i].totalPrice);
+            self.emailContent.push(option);
+
+            var option = [];
+            for(k in data[type][i].screens)
+            {
+              var screens = {};
+              screens.city = data[type][i].screens[k].city;
+              screens.mallName = data[type][i].screens[k].resultMallName;
+              screens.screenNumber = data[type][i].screens[k].screenNumber;
+              screens.seats = data[type][i].screens[k].seats;
+              screens.city = data[type][i].screens[k].city;
+
+              key = Object.keys(data[type][i].screens[k].mediaOptions[data[type][i].selectedOption])[0];
+              screens.weeklyRate = data[type][i].screens[k].mediaOptions[data[type][i].selectedOption][key].discountedRate;
+              option.push(screens);
+            }
+            self.excelContent.push(option);
+          }
+        }
+        if(type == 'offScreen')
+        {
+          tool += ' - Off Screen';
+          for(id in data[type])
+          {
+            if(data[type][id].selectedOptions != undefined)
+            {
+              for(i in data[type][id].selectedOptions)
+              {  
+                var option = {};
+                option.tool = tool;
+                option.name = data[type][id].cinemaChain + ' - ' + data[type][id].mallName;
+                option.mediaOption = CommonLib.humanReadable(i);
+
+                option.campaignDetails = data[type][id].selectedOptions[i].inputUnit1 + ' ' + data[type][id].selectedOptions[i].pricingUnit1;
+                if(data[type][id].selectedOptions[i].pricingUnit2 != undefined)
+                  option.campaignDetails += '/' + data[type][id].selectedOptions[i].inputUnit2 + ' ' + data[type][id].selectedOptions[i].pricingUnit2;
+                if(data[type][id].selectedOptions[i].pricingUnit3 != undefined)
+                  option.campaignDetails += '/' + data[type][id].selectedOptions[i].inputUnit3 + ' ' + data[type][id].selectedOptions[i].pricingUnit3;
+
+                option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[type][id].selectedOptions[i].totalPrice);
+                self.emailContent.push(option);
+              }  
+            }
+          }
+        }
+      }
+      callback(null);
+    };
+
+    self.airport = function(data, tool, callback){
+      tool = 'Airort/Inflight';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            var option = {};
+            option.tool = tool;
+            option.name = data[id].name;
+            option.mediaOption = data[id].selectedOptions[i].name;
+
+            option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
+            if(data[id].selectedOptions[i].pricingUnit2 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit2 + ' ' + data[id].selectedOptions[i].pricingUnit2;
+            if(data[id].selectedOptions[i].pricingUnit3 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit3 + ' ' + data[id].selectedOptions[i].pricingUnit3;
+
+            option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
+            self.emailContent.push(option);
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.digital = function(data, tool, callback){
+      tool = 'Digital';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            var option = {};
+            option.tool = tool;
+            option.name = data[id].name;
+            option.mediaOption = data[id].selectedOptions[i].name;
+
+            option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
+            if(data[id].selectedOptions[i].pricingUnit2 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit2 + ' ' + data[id].selectedOptions[i].pricingUnit2;
+            if(data[id].selectedOptions[i].pricingUnit3 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit3 + ' ' + data[id].selectedOptions[i].pricingUnit3;
+
+            option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
+            self.emailContent.push(option);
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.outdoor = function(data, tool, callback){
+      tool = 'Outdoor';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          var option = {};
+          option.tool = tool;
+          option.name = data[id].name;
+          option.mediaOption = data[id].selectedOptions.mediaType;
+          option.campaignDetails = data[id].selectedOptions.noOfMonths + ' Month(s)';
+          option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions.totalPrice);
+          self.emailContent.push(option); 
+        }
+      }
+      callback(null);
+    };
+
+    self.nontraditional = function(data, tool, callback){
+      tool = 'Non Traditional';
+
+      for(id in data)
+      {
+        if(data[id].selectedOptions != undefined)
+        {
+          for(i in data[id].selectedOptions)
+          {  
+            var option = {};
+            option.tool = tool;
+            option.name = data[id].name;
+            option.mediaOption = data[id].selectedOptions[i].name;
+
+            option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
+            if(data[id].selectedOptions[i].pricingUnit2 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit2 + ' ' + data[id].selectedOptions[i].pricingUnit2;
+            if(data[id].selectedOptions[i].pricingUnit3 != undefined)
+              option.campaignDetails += '/' + data[id].selectedOptions[i].inputUnit3 + ' ' + data[id].selectedOptions[i].pricingUnit3;
+
+            option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
+            self.emailContent.push(option);
+          }  
+        }
+      }
+      callback(null);
+    };
+
+    self.sendEmail = function(data, token)
+    {
+      if(!token) console.log("No Token"); //res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) console.log("Invalid Token");
+        var user = decoded;
+        var mailOptions = {
+          email: user.email,
+          name: {
+            first: CommonLib.capitalizeFirstLetter(user.firstName),
+            last: CommonLib.capitalizeFirstLetter(user.lastName)
+          },
+          appHost: self.config.appHost,
+          emailContent: data
+        };
+
+        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'bestRates'));
+
+        emailTemplate.render(mailOptions, function(err, results){
+          if(err) return console.error(err)
+          self.transporter.sendMail({
+            from: self.config.noreply, // sender address
+            to: mailOptions.email, // list of receivers
+            subject: 'Discounted Rates',
+            html: results.html
+          }, function(err, responseStatus){
+            if(err) return console.log(err);
+             console.log("responseStatus.message");
+          })
+        });
+      });
+    };
 };
 
 module.exports.BestRates = BestRates;
