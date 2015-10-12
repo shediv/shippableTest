@@ -42,25 +42,25 @@ var Mtwenty = function()
 		//return res.status(200).json(mailOptions);
     var newContact = Contact(mailOptions);
 
-	// save the Contact mail
-	newContact.save(function(err){
-	  if(err) return res.status(500).json(err);
-	  var emailTemplate = new EmailTemplate(path.join(templatesDir, 'miContact'));
-	  emailTemplate.render(mailOptions, function(err, results){
-	    if(err) return console.error(err)
-	    self.transporter.sendMail({
-	      from: req.body.email, // sender address
-	      to: mailOptions.to, // list of receivers
-	      cc: req.body.email,
-	      subject: 'Message from '+req.body.name+' to m20',
-	      html: results.html
-	    }, function(err, responseStatus){
-	      if(err) return console.error(err);
-	       return res.status(200).json("sucess");
-	    })
-	  });
+		// save the Contact mail
+		newContact.save(function(err){
+		  if(err) return res.status(500).json(err);
+		  var emailTemplate = new EmailTemplate(path.join(templatesDir, 'miContact'));
+		  emailTemplate.render(mailOptions, function(err, results){
+		    if(err) return console.error(err)
+		    self.transporter.sendMail({
+		      from: req.body.email, // sender address
+		      to: mailOptions.to, // list of receivers
+		      cc: req.body.email,
+		      subject: 'Message from '+req.body.name+' to m20',
+		      html: results.html
+		    }, function(err, responseStatus){
+		      if(err) return console.error(err);
+		       return res.status(200).json("sucess");
+		    })
+		  });
 
-	});
+		});
   };
 
 }
