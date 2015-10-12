@@ -34,10 +34,12 @@ var Mtwenty = function()
   	//return res.status(200).json("data");
     var mailOptions = {};
     mailOptions.email = req.body.email;
+		mailOptions.to = "help@m20.in";
     mailOptions.name = req.body.name;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  'm20';
     mailOptions.appHost = self.config.appHost;
+		//return res.status(200).json(mailOptions);
     var newContact = Contact(mailOptions);
 
 	// save the Contact mail
@@ -48,7 +50,7 @@ var Mtwenty = function()
 	    if(err) return console.error(err)
 	    self.transporter.sendMail({
 	      from: req.body.email, // sender address
-	      to: "help@m20.in", // list of receivers
+	      to: mailOptions.to, // list of receivers
 	      cc: req.body.email,
 	      subject: 'Message from '+req.body.name+' to m20',
 	      html: results.html
