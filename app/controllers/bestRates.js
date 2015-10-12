@@ -10,7 +10,7 @@ var BestRates = function()
   var excelbuilder = require('msexcel-builder');
   var multer  = require('multer');
   var fs = require('fs');
-  
+
   this.medias = {};
   this.config = require('../config/config.js');
   var self = this;
@@ -50,7 +50,7 @@ var BestRates = function()
     Media.find({_id : {$in : mediaIds}}).lean().exec(function(err, result){
       totalGrossPrice = 0;
       totalGrossSaving = 0;
-      result.map(function(media){ 
+      result.map(function(media){
         for(key in medias[media._id].selectedOptions)
         {
           switch(key)
@@ -63,16 +63,16 @@ var BestRates = function()
                 switch(true)
                 {
                   case medias[media._id].selectedOptions.print[mo].qty <= 2:
-                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];   
+                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['1-2'];
                     break;
                   case medias[media._id].selectedOptions.print[mo].qty <= 6:
-                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];   
+                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['3-6'];
                     break;
                   case medias[media._id].selectedOptions.print[mo].qty > 6:
-                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];   
+                    medias[media._id].selectedOptions[key][mo].discountedUnitPrice = media.print.mediaOptions[mo]['7+'];
                     break;
                 }
-                
+
                 medias[media._id].selectedOptions[key][mo].originalGrossPrice = medias[media._id].selectedOptions[key][mo].originalUnitPrice * medias[media._id].selectedOptions[key][mo].qty;
                 medias[media._id].selectedOptions[key][mo].discountedGrossPrice = medias[media._id].selectedOptions[key][mo].discountedUnitPrice * medias[media._id].selectedOptions[key][mo].qty;
                 medias[media._id].selectedOptions[key][mo].unitSaving = medias[media._id].selectedOptions[key][mo].originalUnitPrice - medias[media._id].selectedOptions[key][mo].discountedUnitPrice;
@@ -149,14 +149,14 @@ var BestRates = function()
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       res.status(200).json({email:self.emailContent,excel:self.excelContent});
       excelContent = self.createExcel(self.excelContent, token);
-      
+
     });
   };
 
     self.magazine = function(data, tool, callback){
       tool = 'Magazine';
       unit = 'Insert(s)';
-      
+
       for(id in data)
       {
         if(data[id].selectedOptions != undefined)
@@ -174,11 +174,11 @@ var BestRates = function()
                   option.name = data[id].name;
                   option.mediaOption = CommonLib.humanReadable(k);
                   option.campaignDetails = data[id].selectedOptions[i][k].qty + ' ' + unit;
-                  if(data[id].selectedOptions[i][k].qty <= 2 && data[id].selectedOptions[i][k].qty >= 1) 
+                  if(data[id].selectedOptions[i][k].qty <= 2 && data[id].selectedOptions[i][k].qty >= 1)
                     option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['1-2'];
-                  if(data[id].selectedOptions[i][k].qty <= 6 && data[id].selectedOptions[i][k].qty >= 3) 
+                  if(data[id].selectedOptions[i][k].qty <= 6 && data[id].selectedOptions[i][k].qty >= 3)
                     option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['3-6'];
-                  if(data[id].selectedOptions[i][k].qty >= 7) 
+                  if(data[id].selectedOptions[i][k].qty >= 7)
                     option.totalPrice = data[id].selectedOptions[i][k].qty * data[id].selectedOptions[i][k]['7+'];
                   option.totalPrice = 'Rs. ' + CommonLib.addCommas(option.totalPrice);
                   self.emailContent.push(option);
@@ -200,7 +200,7 @@ var BestRates = function()
                 }
               }
             }
-          }  
+          }
         }
       }
       callback(null);
@@ -215,7 +215,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             for(k in data[id].selectedOptions[i])
             {
               var option = {};
@@ -226,7 +226,7 @@ var BestRates = function()
               option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i][k].totalPrice);
               self.emailContent.push(option);
             }
-          }  
+          }
         }
       }
       callback(null);
@@ -240,7 +240,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             for(k in data[id].selectedOptions[i])
             {
               var option = {};
@@ -250,12 +250,12 @@ var BestRates = function()
                 option.mediaOption = 'RJ Mention - ' + data[id].selectedOptions[i][k].rjName + data[id].selectedOptions[i][k].showName;
               else
                 option.mediaOption = CommonLib.humanReadable(k);
-              
+
               if(i == 'regularOptions')
               {
                 option.campaignDetails = data[id].selectedOptions[i][k].jingleLength + ' ' + data[id].selectedOptions[i][k].pricingUnit1;
                 option.campaignDetails += '/' + data[id].selectedOptions[i][k].noOfTimes + ' ' + data[id].selectedOptions[i][k].pricingUnit2;
-                option.campaignDetails += '/' + data[id].selectedOptions[i][k].noOfDays + ' ' + data[id].selectedOptions[i][k].pricingUnit3;  
+                option.campaignDetails += '/' + data[id].selectedOptions[i][k].noOfDays + ' ' + data[id].selectedOptions[i][k].pricingUnit3;
               }
               else
               {
@@ -268,7 +268,7 @@ var BestRates = function()
               option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i][k].totalPrice);
               self.emailContent.push(option);
             }
-          }  
+          }
         }
       }
       callback(null);
@@ -282,7 +282,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
@@ -294,7 +294,7 @@ var BestRates = function()
 
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
             self.emailContent.push(option);
-          }  
+          }
         }
       }
       callback(null);
@@ -343,7 +343,7 @@ var BestRates = function()
             if(data[type][id].selectedOptions != undefined)
             {
               for(i in data[type][id].selectedOptions)
-              {  
+              {
                 var option = {};
                 option.tool = tool;
                 option.name = data[type][id].cinemaChain + ' - ' + data[type][id].mallName;
@@ -357,7 +357,7 @@ var BestRates = function()
 
                 option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[type][id].selectedOptions[i].totalPrice);
                 self.emailContent.push(option);
-              }  
+              }
             }
           }
         }
@@ -373,7 +373,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
@@ -387,7 +387,7 @@ var BestRates = function()
 
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
             self.emailContent.push(option);
-          }  
+          }
         }
       }
       callback(null);
@@ -401,7 +401,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
@@ -415,7 +415,7 @@ var BestRates = function()
 
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
             self.emailContent.push(option);
-          }  
+          }
         }
       }
       callback(null);
@@ -434,7 +434,7 @@ var BestRates = function()
           option.mediaOption = data[id].selectedOptions.mediaType;
           option.campaignDetails = data[id].selectedOptions.noOfMonths + ' Month(s)';
           option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions.totalPrice);
-          self.emailContent.push(option); 
+          self.emailContent.push(option);
         }
       }
       callback(null);
@@ -448,7 +448,7 @@ var BestRates = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {  
+          {
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
@@ -462,7 +462,7 @@ var BestRates = function()
 
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i].totalPrice);
             self.emailContent.push(option);
-          }  
+          }
         }
       }
       callback(null);
@@ -496,6 +496,7 @@ var BestRates = function()
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
+            cc: "help@themediaant.com",
             subject: 'Discounted Rates',
             html: results.html,
             attachments: attachments
@@ -510,16 +511,16 @@ var BestRates = function()
     self.createExcel = function(data, token)
     {
       if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
-      async.each(data, function(media, callback){        
-        var length = parseInt(media.length);      
+      async.each(data, function(media, callback){
+        var length = parseInt(media.length);
         var path = 'public/bestRate';
         date = new Date();
         var file_name = 'cinema'+self.path.length+'.xlsx';
         self.filename = file_name;
-        self.path.push(path+'/'+file_name);    
+        self.path.push(path+'/'+file_name);
         var workbook = excelbuilder.createWorkbook(path, file_name);
         // Create a new worksheet with 10 columns and 12 rows
-        var sheet1 = workbook.createSheet('sheet1', 6, length+1);      
+        var sheet1 = workbook.createSheet('sheet1', 6, length+1);
 
         // Fill some data
         sheet1.set(1, 1, 'City');
@@ -529,7 +530,7 @@ var BestRates = function()
         sheet1.set(5, 1, 'Seats');
         sheet1.set(6, 1, 'Weekly Rate');
 
-        for (var j = 0; j<media.length; j++){        
+        for (var j = 0; j<media.length; j++){
               sheet1.set(1, j+2, media[j].city);
               sheet1.set(2, j+2, media[j].mallName);
               sheet1.set(3, j+2, media[j].theatreName);
@@ -537,7 +538,7 @@ var BestRates = function()
               sheet1.set(5, j+2, media[j].seats);
               sheet1.set(6, j+2, media[j].weeklyRate);
         }
-            
+
         // Save it
         workbook.save(function(err){
           if (err) {
@@ -555,8 +556,8 @@ var BestRates = function()
       },function(err){
         if(err) console.log("not able to create excel");
         self.sendEmail(self.emailContent, token, self.filename, self.path);
-      });      
-    }  
+      });
+    }
 };
 
 module.exports.BestRates = BestRates;
