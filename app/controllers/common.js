@@ -43,7 +43,7 @@ var Common = function()
               var qRegExp = new RegExp('\\b'+toolName[i], "i");
               toolName[i] = qRegExp;
             }
-            Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
+            Media.find({ searchKeyWords:{ $all:toolName } }).lean().exec(function(err, media){
               if(!media) return res.status(404).json("NO MEDIAS FOUND");
               if(media.length == 1)
               {
