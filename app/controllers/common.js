@@ -44,7 +44,7 @@ var Common = function()
               toolName[i] = qRegExp;
             }
             Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
-              if(!media) return res.status(200).json("NO MEDIAS FOUND");
+              if(!media) return res.status(404).json("NO MEDIAS FOUND");
               if(media.length == 1)
               {
                 Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
