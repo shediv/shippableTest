@@ -39,6 +39,28 @@ var _12thCross = function()
       res.status(200).json("Agency Created Successfully");
     });
   };
+
+  //Get all the vendors from 12th cross
+  this.getVendors = function(req, res){
+    TwelthCross.find(
+      {isActive:1}, {urlSlug: 'urlSlug', name: 'name'},     
+      function(err, results) 
+      {
+        if(err) return res.status(500).json(err);
+        return res.status(200).json({vendors:results});        
+      }
+    );
+  };
+
+  //update a vendor based on ID in 12th Cross
+  this.updateVendor = function(req, res){
+    var vendorID = req.body.vendor._id;
+    var vendorData = req.body.vendor;
+    TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
+      if(err) return res.status(500).json(err);
+      return res.send("Vendor info succesfully updated");
+    });
+  };
   
   this.get12thCross = function(req, res){
     self.params = JSON.parse(req.query.params);
@@ -56,28 +78,6 @@ var _12thCross = function()
     {
       if(err) return res.status(500).json(err);
       res.status(200).json(result);
-    });
-  };
-
-  //Get all the vendors from 12th cross
-  self.getVendors = function(req, res){
-    TwelthCross.find(
-      {isActive:1}, {urlSlug: 'urlSlug', name: 'name'},     
-      function(err, results) 
-      {
-        if(err) return res.status(500).json(err);
-        return res.status(200).json({vendors:results});        
-      }
-    );
-  };
-
-  //update a vendor based on ID in 12th Cross
-  self.updateVendor = function(req, res){
-    var vendorID = req.body.vendor._id;
-    var vendorData = req.body.vendor;
-    TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
-      if(err) return res.status(500).json(err);
-      return res.send("Vendor info succesfully updated");
     });
   };
 
@@ -103,6 +103,7 @@ var _12thCross = function()
           TwelthCross.aggregate(
             {$match : query.match},
             {$group: { _id : null, count: {$sum: 1} }},
+            {$sort: {views: 1}},
             function(err, result)
             {
               if(result[0] === undefined) count = 0;
