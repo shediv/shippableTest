@@ -51,7 +51,7 @@ var Mtwenty = function()
 		    self.transporter.sendMail({
 		      from: req.body.email, // sender address
 		      to: mailOptions.to, // list of receivers
-		      cc: req.body.email,
+		      cc: [req.body.email, self.config.m20Help],
 		      subject: 'Message from '+req.body.name+' to m20',
 		      html: results.html
 		    }, function(err, responseStatus){
