@@ -59,11 +59,13 @@ var Common = function()
               }
             });
           }
+          else
           Tools.findOne({ _id:media.toolId }).lean().exec(function(err, tool){
             return res.status(200).json({ tool:tool.name, urlSlug:media.urlSlug });  
           });
         });
       }
+      else
       return res.status(200).json({ tool:result.name });
     });
   }
