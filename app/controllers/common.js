@@ -9,6 +9,7 @@ var Common = function()
   var Contact = require('../models/contact').Contact;
   var TwelthCross = require('../models/12thCross').TwelthCross;
   var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
+  var SearchIgnore = require('../config/searchignore.js');
   this.config = require('../config/config.js');
   var self = this;
 
@@ -28,8 +29,43 @@ var Common = function()
     if(toolName == '12thcross') return res.status(200).json("OK");
     Tools.findOne({ name:toolName }, function(err, result){
       if(err) return res.status(500).json(err);
-      if(!result) return res.status(404).json("NOT OK");
-      return res.status(200).json("OK");
+      if(!result) 
+      {
+        Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
+          if(!media)
+          {
+            var find = '-';
+            var regExp = new RegExp(find, 'g');
+            toolName = toolName.replace(regExp, ' ').split(' ');
+            for(i in toolName)
+            {
+              if( SearchIgnore.indexOf(toolName[i]) > -1 ) continue;
+              var qRegExp = new RegExp('\\b'+toolName[i], "i");
+              toolName[i] = qRegExp;
+              Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
+                if(!media) return res.status(404).json("BISCUIT");
+                if(media.length == 1)
+                {
+                  Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                    return res.status(200).json({ tool:tool.name, urlSlug:media[0].urlSlug });  
+                  });
+                }
+                else
+                {
+                  Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                    return res.status(200).json({ tool:tool.name });  
+                  });
+                }
+              });
+            }
+          }
+          Tools.findOne({ _id:media.toolId }).lean().exec(function(err, tool){
+            return res.status(200).json({ tool:tool.name, urlSlug:media.urlSlug });  
+          });
+        });
+        return res.status(404).json("BISCUIT");
+      }
+      return res.status(200).json({ tool:result.name });
     });
   }
 
