@@ -18,6 +18,7 @@ var config = {
   //EmailID Configs
   noreply : 'The Media Ant <noreply@themediaant.com>',
   help : 'The Media Ant <help@themediaant.com>',
+  m20Help : 'M20 <help@m20.in>',
 
   //Miscellaneous Configs
   secret : "iamyoursecret",

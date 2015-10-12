@@ -158,7 +158,7 @@ var searchIgnore = [
   "give",
   "given",
   "gives",
-  "go",
+  //"go",
   "goes",
   "going",
   "gone",

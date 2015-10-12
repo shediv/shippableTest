@@ -34,7 +34,7 @@ var Mtwenty = function()
   	//return res.status(200).json("data");
     var mailOptions = {};
     mailOptions.email = req.body.email;
-		mailOptions.to = "help@m20.in";
+		mailOptions.to = self.config.m20Help;
     mailOptions.name = req.body.name;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  'm20';
