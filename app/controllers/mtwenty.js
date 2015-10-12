@@ -34,7 +34,7 @@ var Mtwenty = function()
   	//return res.status(200).json("data");
     var mailOptions = {};
     mailOptions.email = req.body.email;
-		mailOptions.to = "help@m20.in";
+		mailOptions.to = self.config.m20Help;
     mailOptions.name = req.body.name;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  'm20';
@@ -51,7 +51,7 @@ var Mtwenty = function()
 		    self.transporter.sendMail({
 		      from: req.body.email, // sender address
 		      to: mailOptions.to, // list of receivers
-		      cc: [req.body.email, self.config.m20Help],
+		      cc: req.body.email,
 		      subject: 'Message from '+req.body.name+' to m20',
 		      html: results.html
 		    }, function(err, responseStatus){
