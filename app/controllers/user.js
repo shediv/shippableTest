@@ -326,7 +326,7 @@ var User = function()
 		if(!token) return res.status(401).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, user){
 			if(err) res.status(401).json("Invalid Token");
-			User.update( { _id:user._id },{ password:req.body.newPassword }, function(err, result){
+			User.update( { _id:user._id },{ password:md5(req.body.newPassword) }, function(err, result){
 				if(err) return res.status(404).json("password not updated :"+ err);
 		    res.status(200).json("OK");
 			});
@@ -346,7 +346,7 @@ var User = function()
 				User.findOne({ _id:decoded.id, password:req.body.oldPassword }).lean().exec(function(err, result){
 					if(err) return res.status(500).json(err);
 					if(!result) return res.status(404).json("The Old password doesn't match");
-					User.update( { _id:result._id },{ password:md5(req.body.newPassword) }, function(err, result){
+					User.update( { _id:result._id },{ password:req.body.newPassword }, function(err, result){
 						if(err) return res.status(404).json("password not updated :"+ err);
 				    res.status(200).json("OK");
 					});
