@@ -15,10 +15,6 @@ var NonTraditional = function()
   this.toolName = "nontraditional";
   var self = this;
 
-  this.params = {};
-  this.config = require('../config/config.js');
-  var self = this;
-  
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -336,7 +332,30 @@ var NonTraditional = function()
         });                 
   };
 
+  this.bigsearch =function(req, res){
 
+    var nonTradData= {};
+    var cursor = Media.aggregate(
+      {$match:{"isActive": 1,"toolId": "55f180b344aef45d8f1531d5"}},
+      {$project: {
+        "_id": 1,
+        "name": 1,
+        "about": 1,
+        "mediaOptions": 1,
+        "geography": 1,
+        "urlSlug": 1,
+        "logo": 1,
+        "serviceTaxPercentage": 1}
+      }).cursor({ batchSize: 5000}).exec();
+
+    cursor.forEach(function(doc) {
+     /* if(error)res.status(200).json(error);*/
+       nonTradData.data=doc;
+       console.log(doc);
+
+    });
+   res.send(nonTradData);    
+  };
 };
 
 module.exports.NonTraditional = NonTraditional;

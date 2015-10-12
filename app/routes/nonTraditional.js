@@ -11,4 +11,7 @@ router.get("/filters", NonTraditional.getFilters);
 router.get("/mediaOption", NonTraditional.getMediaOption);
 router.get("/:urlSlug", NonTraditional.show);
 
+
+
+
 module.exports = router;
