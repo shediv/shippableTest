@@ -40,7 +40,7 @@ app.set('view engine', 'jade');
 
 app.use(cors({
     allowedOrigins: [
-        'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost', 'http://dev1.themediaant.com'
+        'http://tma.dev', 'http://beta.themediaant.com', 'http://localhost', 'http://dev1.themediaant.com', 'http://themediaant.com', 'http://www.themediaant.com'
     ],
 	headers: [
 		'x-access-token', 'Content-Type'
@@ -68,7 +68,7 @@ app.use(function(req, res, next) {
         jwt.verify(token, config.secret, function(err, decoded){
           if(err) res.status(401).json("Invalid Token");
           else next();
-        });          
+        });
       }
       else{
          next();

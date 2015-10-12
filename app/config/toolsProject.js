@@ -130,7 +130,8 @@ var toolsProject= {
     'subCategoryId': 1,
     'geography'    : 1,
     'urlSlug'      : 1,
-    'logo'         : 1
+    'logo'         : 1,
+    'contact.primary.areasServiced' : 1
 	}
 }
 
