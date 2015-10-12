@@ -42,28 +42,27 @@ var Common = function()
               if( SearchIgnore.indexOf(toolName[i]) > -1 ) continue;
               var qRegExp = new RegExp('\\b'+toolName[i], "i");
               toolName[i] = qRegExp;
-              Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
-                if(!media) return res.status(200).json("NO MEDIAS FOUND");
-                if(media.length == 1)
-                {
-                  Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
-                    return res.status(200).json({ tool:tool.name, urlSlug:media[0].urlSlug });  
-                  });
-                }
-                else
-                {
-                  Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
-                    return res.status(200).json({ tool:tool.name });  
-                  });
-                }
-              });
             }
+            Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
+              if(!media) return res.status(200).json("NO MEDIAS FOUND");
+              if(media.length == 1)
+              {
+                Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                  return res.status(200).json({ tool:tool.name, urlSlug:media[0].urlSlug });  
+                });
+              }
+              else
+              {
+                Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                  return res.status(200).json({ tool:tool.name });  
+                });
+              }
+            });
           }
           Tools.findOne({ _id:media.toolId }).lean().exec(function(err, tool){
             return res.status(200).json({ tool:tool.name, urlSlug:media.urlSlug });  
           });
         });
-        return res.status(404).json("URL SLUG NOT FOUND");
       }
       return res.status(200).json({ tool:result.name });
     });
