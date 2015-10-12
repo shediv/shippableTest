@@ -43,7 +43,7 @@ var Common = function()
               var qRegExp = new RegExp('\\b'+toolName[i], "i");
               toolName[i] = qRegExp;
               Media.find({ searchKeyWords:{ $all:query } }).lean().exec(function(err, media){
-                if(!media) return res.status(404).json("BISCUIT");
+                if(!media) return res.status(200).json("NO MEDIAS FOUND");
                 if(media.length == 1)
                 {
                   Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
@@ -63,7 +63,7 @@ var Common = function()
             return res.status(200).json({ tool:tool.name, urlSlug:media.urlSlug });  
           });
         });
-        return res.status(404).json("BISCUIT");
+        return res.status(404).json("URL SLUG NOT FOUND");
       }
       return res.status(200).json({ tool:result.name });
     });
