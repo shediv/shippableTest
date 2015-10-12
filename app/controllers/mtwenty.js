@@ -11,7 +11,7 @@ var Mtwenty = function()
 	var nodeMailer = require('nodemailer');
 	var crypto =require('crypto');
 	var Contact = require('../models/contact').Contact;
-	
+
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
 	var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
@@ -31,24 +31,24 @@ var Mtwenty = function()
 
 	//Contact mail coming from M20
   self.contact = function(req, res){
-  	//return res.status(200).json("data");    
+  	//return res.status(200).json("data");
     var mailOptions = {};
     mailOptions.email = req.body.email;
     mailOptions.name = req.body.name;
     mailOptions.message = req.body.message;
     mailOptions.toolName =  'm20';
     mailOptions.appHost = self.config.appHost;
-    var newContact = Contact(mailOptions);    
+    var newContact = Contact(mailOptions);
 
 	// save the Contact mail
-	newContact.save(function(err){      
-	  if(err) return res.status(500).json(err);          
+	newContact.save(function(err){
+	  if(err) return res.status(500).json(err);
 	  var emailTemplate = new EmailTemplate(path.join(templatesDir, 'miContact'));
-	  emailTemplate.render(mailOptions, function(err, results){            
+	  emailTemplate.render(mailOptions, function(err, results){
 	    if(err) return console.error(err)
 	    self.transporter.sendMail({
 	      from: req.body.email, // sender address
-	      to: 'help@m20.in', // list of receivers
+	      to: "help@m20.in", // list of receivers
 	      cc: req.body.email,
 	      subject: 'Message from '+req.body.name+' to m20',
 	      html: results.html
@@ -58,9 +58,9 @@ var Mtwenty = function()
 	    })
 	  });
 
-	});        
-  };	
+	});
+  };
 
 }
 
-module.exports.Mtwenty = Mtwenty;	
+module.exports.Mtwenty = Mtwenty;

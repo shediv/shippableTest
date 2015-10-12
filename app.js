@@ -68,7 +68,7 @@ app.use(function(req, res, next) {
         jwt.verify(token, config.secret, function(err, decoded){
           if(err) res.status(401).json("Invalid Token");
           else next();
-        });          
+        });
       }
       else{
          next();

@@ -10,7 +10,7 @@ var User = function()
 	var mkdirp = require('mkdirp');
 	var nodeMailer = require('nodemailer');
 	var crypto =require('crypto');
-	
+
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
 	var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
@@ -33,10 +33,10 @@ var User = function()
 		User.count({email: user.email}, function(err, result){
 			if(err) throw err;
 			if(result) return res.status(500).json("Email Already Exists");
-				
+
 			user.password = md5(user.password);
-			user.isActive = 0;	
-			user.dateOfJoin = new Date();	
+			user.isActive = 0;
+			user.dateOfJoin = new Date();
 			var newUser = User(user);
 
 			// save the User
@@ -71,15 +71,15 @@ var User = function()
 				});
 				mkdirp('../public/images/users/'+newUser._id);
 			});
-				
+
 		});
 	};
 
 	this.reVerificationMail = function(req, res){
 		//return res.status(200).json(req.body.email);
-		User.findOne({email: req.body.email, isActive:0}).lean().exec(function(err, result){			
+		User.findOne({email: req.body.email, isActive:0}).lean().exec(function(err, result){
 			if(err) throw err;
-			if(result) {											
+			if(result) {
 				var mailOptions = {
 			      email: result.email,
 			      name: {
@@ -89,7 +89,7 @@ var User = function()
 			      userId:result._id,
 			      emailHash:md5(result.email),
 			      appHost:self.config.appHost
-			    };			    			    
+			    };
 
 			    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
 
@@ -105,15 +105,15 @@ var User = function()
 					   	console.log("responseStatus.message");
 					})
 				});
-			}				
+			}
 		});
 	};
 
 	this.verify = function(req, res){
 		var confirmationCode = req.params.confirmationCode;
-		var confirmationCode = confirmationCode.split(":");		
+		var confirmationCode = confirmationCode.split(":");
 		var dbEmail = false;
-		
+
 		User.findOne({_id : confirmationCode[1]}, function(err, result){
 			var dbEmailHash = md5(result.email);
 			if(confirmationCode[0] != dbEmailHash) return res.status(500).json("not verified");
@@ -130,13 +130,13 @@ var User = function()
 			{email: user.email},
 			function(err, result){
 				if(err) return res.status(500).json(err);
-				if(result) 
+				if(result)
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
-					
+
 					result.userAgent= req.headers['user-agent'];
-					result.clientIPAddress = req.connection.remoteAddress;		
+					result.clientIPAddress = req.connection.remoteAddress;
 					self.userLoginInfo(result);
 
 					if(result.facebookId === undefined)
@@ -147,7 +147,7 @@ var User = function()
 				}
 				else
 				{
-					user.dateOfJoin = new Date();	
+					user.dateOfJoin = new Date();
 					user.isActive = 1;
 					user.firstName = user.first_name; delete user.first_name;
 					user.lastName = user.last_name; delete user.last_name;
@@ -174,16 +174,16 @@ var User = function()
 			{email: user.email},
 			function(err, result){
 				if(err) return res.status(500).json(err);
-				if(result) 
+				if(result)
 				{
 					var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 					res.status(200).json({token:token});
-					
+
 					result.userAgent= req.headers['user-agent'];
-					result.clientIPAddress = req.connection.remoteAddress;		
+					result.clientIPAddress = req.connection.remoteAddress;
 					self.userLoginInfo(result);
-					
-					
+
+
 					if(result.googleId === undefined)
 					{
 						result.googleId = user.id;
@@ -193,7 +193,7 @@ var User = function()
 				else
 				{
 					delete user.result;
-					user.dateOfJoin = new Date();	
+					user.dateOfJoin = new Date();
 					user.isActive = 1; delete user.verified_email;
 					user.firstName = user.given_name; delete user.given_name;
 					user.lastName = user.family_name; delete user.family_name;
@@ -239,7 +239,7 @@ var User = function()
 			  srcPath: './public'+destPath,
 			  dstPath: "./public/images/users/"+userId+"/"+userId+"_thumbnail."+extension,
 			  width: 200
-			}, 
+			},
 			function(err, stdout, stderr)
 			{
 			  if(err) throw err;
@@ -260,7 +260,7 @@ var User = function()
 		User.findOne({email: user.username}).lean().exec(function(err, result){
 			if(err) return res.status(500).json(err);
 			if(!result) return res.status(404).json("User Does Not Exist");
-				
+
 			//Verify Password
 			if(md5(user.password) != result.password) return res.status(401).json("Invalid Password");
 			if(!result.isActive) return res.status(401).json("Account Not Verified");
@@ -269,9 +269,9 @@ var User = function()
 				var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
 		        res.status(200).json({token:token});
 		    }
-			
+
 			result.userAgent= req.headers['user-agent'];
-			result.clientIPAddress = req.connection.remoteAddress;	
+			result.clientIPAddress = req.connection.remoteAddress;
 			self.userLoginInfo(result);
 		});
 	};
@@ -292,7 +292,7 @@ var User = function()
 	this.forgotPassword	= function(req,res){
 		User.findOne({ email:req.body.email }).lean().exec(function(err, user){
 			if(!user) return res.status(404).json("No account with that email address exists.");
-			
+
 			var token = jwt.sign(user, self.config.secret, { expiresInMinutes: (24*60) });
 			var mailOptions = {
 	      email: user.email,
@@ -305,7 +305,7 @@ var User = function()
 	    };
 
 	    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'forgotPassword'));
-	    
+
 	    emailTemplate.render(mailOptions, function(err, results){
 				if(err) return res.status(500).json(err);
 				self.transporter.sendMail({
@@ -337,16 +337,16 @@ var User = function()
 		req.body.oldPassword = md5(req.body.oldPassword);
 		req.body.newPassword = md5(req.body.newPassword);
 		var token = req.body.token || req.query.token || req.headers['x-access-token'];
-		if(!token) { 
+		if(!token) {
 			return res.status(401).json("Token not found");
 		} else {
 			jwt.verify(token, self.config.secret, function(err, decoded){
 				if(err) res.status(401).json("Invalid Token");
-				
+
 				User.findOne({ _id:decoded.id, password:req.body.oldPassword }).lean().exec(function(err, result){
 					if(err) return res.status(500).json(err);
 					if(!result) return res.status(404).json("The Old password doesn't match");
-					User.update( { _id:result._id },{ password:req.body.newPassword }, function(err, result){
+					User.update( { _id:result._id },{ password:md5(req.body.newPassword) }, function(err, result){
 						if(err) return res.status(404).json("password not updated :"+ err);
 				    res.status(200).json("OK");
 					});
@@ -365,11 +365,11 @@ var User = function()
 
 		  var userlogs = UsersLogs(userDetails);
 
-		  userlogs.save( function(err) { 
+		  userlogs.save( function(err) {
 		  	if(err)return err;
 		  	else return "user logged";
 		  });
 		};
 }
 
-module.exports.User = User;	
+module.exports.User = User;
