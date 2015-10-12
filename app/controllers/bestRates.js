@@ -496,7 +496,7 @@ var BestRates = function()
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
-            cc: "help@themediaant.com",
+            cc: self.config.help,
             subject: 'Discounted Rates',
             html: results.html,
             attachments: attachments

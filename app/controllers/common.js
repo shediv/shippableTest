@@ -26,7 +26,7 @@ var Common = function()
 
   this.isToolExists = function(req, res){
     var toolName = req.query.toolName;
-    if(toolName == '12thcross') return res.status(200).json("OK");
+    if(toolName == '12thcross') return res.status(200).json({ tool:toolName });
     Tools.findOne({ name:toolName }, function(err, result){
       if(err) return res.status(500).json(err);
       if(!result) 
@@ -54,7 +54,7 @@ var Common = function()
               else
               {
                 Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
-                  return res.status(200).json({ tool:tool.name });  
+                  return res.status(200).json({ tool:tool.name });
                 });
               }
             });
