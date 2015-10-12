@@ -511,6 +511,9 @@ var Campaign = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) console.log("Invalid Token");
         var user = decoded;
+        date = new Date();
+        var curr_month = date.getMonth() + 1;
+        var currentDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
         var mailOptions = {
           email: user.email,
           name: {
@@ -518,8 +521,9 @@ var Campaign = function()
             last: CommonLib.capitalizeFirstLetter(user.lastName)
           },
           appHost: self.config.appHost,
-          emailContent: data
-        };
+          emailContent: data,
+          currentDate : currentDate
+        };            
 
         var attachments = [];
         for(i in excelPath){
@@ -534,7 +538,7 @@ var Campaign = function()
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
             cc: "help@themediaant.com",
-            subject: 'Discounted Rates',
+            subject: 'The Media Ant Campaign Saved - '+mailOptions.currentDate,
             html: results.html,
             attachments: attachments
           }, function(err, responseStatus){
