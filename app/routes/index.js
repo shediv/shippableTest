@@ -9,6 +9,7 @@ router.get('/', function(req, res, next) {
 
 router.get('/isToolExists', CommonCtrl.isToolExists);
 router.post('/customerQuery', CommonCtrl.addCustomerQuery);
+router.post('/contact', CommonCtrl.contactMail);
 router.get('/sitemap', CommonCtrl.getSiteMap);
 router.get('/metaTags/:toolName', CommonCtrl.getMetaTags);
 router.get('/mediaName', CommonCtrl.getMediaName);
