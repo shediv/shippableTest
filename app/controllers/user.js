@@ -136,7 +136,7 @@ var User = function()
 					res.status(200).json({token:token});
 
 					result.userAgent= req.headers['user-agent'];
-					result.clientIPAddress = req.connection.remoteAddress;
+					result.clientIPAddress = req.headers['x-forwarded-for'] || req.ip;
 					self.userLoginInfo(result);
 
 					if(result.facebookId === undefined)
@@ -180,7 +180,7 @@ var User = function()
 					res.status(200).json({token:token});
 
 					result.userAgent= req.headers['user-agent'];
-					result.clientIPAddress = req.connection.remoteAddress;
+					result.clientIPAddress = req.headers['x-forwarded-for'] || req.ip;
 					self.userLoginInfo(result);
 
 
@@ -271,7 +271,7 @@ var User = function()
 		    }
 
 			result.userAgent= req.headers['user-agent'];
-			result.clientIPAddress = req.connection.remoteAddress;
+			result.clientIPAddress = req.headers['x-forwarded-for'] || req.ip;
 			self.userLoginInfo(result);
 		});
 	};

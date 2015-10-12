@@ -934,7 +934,7 @@ var Magazine = function()
 
     var visitor = {
       userAgent: req.headers['user-agent'],
-      clientIPAddress: req.connection.remoteAddress,
+      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
       urlSlug: req.params.urlSlug,
       type: 'media',
       tool: self.toolName

@@ -12,7 +12,7 @@ var Common = function()
   
   this.isToolExists = function(req, res){
     var toolName = req.query.toolName;
-    console.log(toolName);
+    if(toolName == '12thcross') return res.status(200).json("OK");
     Tools.findOne({ name:toolName }, function(err, result){
       if(err) return res.status(500).json(err);
       if(!result) return res.status(404).json("NOT OK");
@@ -22,7 +22,7 @@ var Common = function()
 
   this.addCustomerQuery = function(req, res){
     req.body.userAgent = req.headers['user-agent'];
-    req.body.remoteAddress = req.connection.remoteAddress;
+    req.body.remoteAddress = req.headers['x-forwarded-for'] || req.ip;
     var customerQuery = CustomerQuery(req.body);
     customerQuery.save(function(err,result){
       if(err) return res.status(500).json(err);
@@ -86,6 +86,35 @@ var Common = function()
 
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
+
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+      type: 'tool',
+      tool: toolName
+    };
+    CommonLib.uniqueVisits(visitor);
+
+    if(toolName == '12thcross')
+    {
+      return res.status(200).json({
+        title : '12th Cross || Question & Answer Forum || The Media Ant',
+        description : '12th Cross is a question and answers forum for advertising and related mediums',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook
+      });
+    }
+    if(toolName == 'cafe')
+    {
+      return res.status(200).json({
+        title : 'Cafe || The Media Ant',
+        description : 'Cafe, browse popular URLs and articles',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook
+      });
+    }
     Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
       res.status(200).json(result.metaTags);
