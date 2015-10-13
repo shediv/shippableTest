@@ -21,7 +21,7 @@ var Common = function()
 			callback(err, categoryNames);
 		});
 	};
-	
+
 	this.removeHiddenAttributes = function(attributes){
 		for(key in attributes) {
 			if(attributes[key].hidden) delete attributes[key];
@@ -49,8 +49,8 @@ var Common = function()
 		});
 	};
 
-	this.isNumber = function(n){ 
-		return /^-?[\d.]+(?:e-?\d+)?$/.test(n); 
+	this.isNumber = function(n){
+		return /^-?[\d.]+(?:e-?\d+)?$/.test(n);
 	}
 
 	this.capitalizeFirstLetter= function(string){
@@ -60,18 +60,18 @@ var Common = function()
 	this.humanReadable = function(str){
     returnString = str[0].toUpperCase();
 
-    for(var i = 1; i < str.length; i++) 
+    for(var i = 1; i < str.length; i++)
     {
-      if(str[i] >= 'A' && str[i] <= 'Z') 
+      if(str[i] >= 'A' && str[i] <= 'Z')
       {
         returnString += ' ' + str[i];
       }
-      else 
-      if(str[i] == '-' || str[i] == '_') 
+      else
+      if(str[i] == '-' || str[i] == '_')
       {
         returnString += ' ';
       }
-      else 
+      else
       {
         returnString += str[i];
       }

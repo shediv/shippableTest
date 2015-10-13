@@ -1,9 +1,10 @@
-var BestRates = function()
+var Campaign = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var nodeMailer = require('nodemailer');
+  var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
   var jwt = require('jsonwebtoken');
 
   var xlReader = require('node-xlsx');
@@ -105,8 +106,15 @@ var BestRates = function()
   }
 
   this.emailBestRates = function(req, res){
-    //return res.status(200).json(req.body.medias);
-    self.medias = req.body.medias;
+    // create a new campaign
+    var newCampaign = SaveCampaigns(req.body);
+    // save the campaign
+    newCampaign.save(function(err) {
+      if(err) return res.status(500).json(err);
+      res.status(200).json("Campaign Created Successfully");
+    });
+
+    self.medias = req.body.bestRates;
     self.emailContent = [];
     self.excelContent = [];
     self.filename;
@@ -147,6 +155,7 @@ var BestRates = function()
     },function(err){
       if(err) return res.status(500).json(err);
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
+
       res.status(200).json({email:self.emailContent,excel:self.excelContent});
       excelContent = self.createExcel(self.excelContent, token);
 
@@ -172,6 +181,9 @@ var BestRates = function()
                   var option = {};
                   option.tool = tool + ' - Print';
                   option.name = data[id].name;
+                  date = new Date(data[id].startDate);
+                  var curr_month = date.getMonth() + 1;
+                  option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
                   option.mediaOption = CommonLib.humanReadable(k);
                   option.campaignDetails = data[id].selectedOptions[i][k].qty + ' ' + unit;
                   if(data[id].selectedOptions[i][k].qty <= 2 && data[id].selectedOptions[i][k].qty >= 1)
@@ -221,6 +233,9 @@ var BestRates = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].name + ', ' + data[id].editionName + ', ' + data[id].areaCovered;
+              date = new Date(data[id].startDate);
+              var curr_month = date.getMonth() + 1;
+              option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               option.mediaOption = CommonLib.humanReadable(k);
               option.campaignDetails = data[id].selectedOptions[i][k].noOfInserts + ' ' + unit;
               option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions[i][k].totalPrice);
@@ -246,6 +261,9 @@ var BestRates = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].station + ', ' + data[id].city;
+              date = new Date(data[id].startDate);
+              var curr_month = date.getMonth() + 1;
+              option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               if(i == 'rjOptions')
                 option.mediaOption = 'RJ Mention - ' + data[id].selectedOptions[i][k].rjName + data[id].selectedOptions[i][k].showName;
               else
@@ -286,6 +304,9 @@ var BestRates = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
+            date = new Date(data[id].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].time;
 
             option.campaignDetails = data[id].selectedOptions[i].adLength + ' Seconds';
@@ -311,10 +332,13 @@ var BestRates = function()
           {
             var option = {};
             option.tool = tool + ' - On Screen';
-            option.name = 'Cinema Plan - ' + parseInt( parseInt(i)+1);
+            option.name = 'Cinema Plan - ' + parseInt( parseInt(i)+1);            
             option.mediaOption = CommonLib.humanReadable(data[type][i].selectedOption);
             option.campaignDetails = data[type][i].noOfWeeks + ' Week(s)';
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[type][i].totalPrice);
+            date = new Date(data[type][i].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();                      
             self.emailContent.push(option);
 
             var option = [];
@@ -347,6 +371,9 @@ var BestRates = function()
                 var option = {};
                 option.tool = tool;
                 option.name = data[type][id].cinemaChain + ' - ' + data[type][id].mallName;
+                date = new Date(data[id].startDate);
+                var curr_month = date.getMonth() + 1;
+                option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
                 option.mediaOption = CommonLib.humanReadable(i);
 
                 option.campaignDetails = data[type][id].selectedOptions[i].inputUnit1 + ' ' + data[type][id].selectedOptions[i].pricingUnit1;
@@ -376,7 +403,10 @@ var BestRates = function()
           {
             var option = {};
             option.tool = tool;
-            option.name = data[id].name;
+            option.name = data[id].name;            
+            date = new Date(data[id].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -405,6 +435,9 @@ var BestRates = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
+            date = new Date(data[id].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -431,6 +464,9 @@ var BestRates = function()
           var option = {};
           option.tool = tool;
           option.name = data[id].name;
+          date = new Date(data[id].startDate);
+          var curr_month = date.getMonth() + 1;
+          option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
           option.mediaOption = data[id].selectedOptions.mediaType;
           option.campaignDetails = data[id].selectedOptions.noOfMonths + ' Month(s)';
           option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[id].selectedOptions.totalPrice);
@@ -452,6 +488,7 @@ var BestRates = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
+            option.startDate = data[id].startDate;            
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -474,6 +511,9 @@ var BestRates = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) console.log("Invalid Token");
         var user = decoded;
+        date = new Date();
+        var curr_month = date.getMonth() + 1;
+        var currentDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
         var mailOptions = {
           email: user.email,
           name: {
@@ -481,23 +521,24 @@ var BestRates = function()
             last: CommonLib.capitalizeFirstLetter(user.lastName)
           },
           appHost: self.config.appHost,
-          emailContent: data
-        };
+          emailContent: data,
+          currentDate : currentDate
+        };            
 
         var attachments = [];
         for(i in excelPath){
           attachments.push({path : excelPath[i]});
         }
 
-        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'bestRates'));
+        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'campaign'));
 
         emailTemplate.render(mailOptions, function(err, results){
           if(err) return console.error(err)
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
-            cc: self.config.help,
-            subject: 'Discounted Rates',
+            cc: "help@themediaant.com",
+            subject: 'The Media Ant Campaign Saved - '+mailOptions.currentDate,
             html: results.html,
             attachments: attachments
           }, function(err, responseStatus){
@@ -560,4 +601,4 @@ var BestRates = function()
     }
 };
 
-module.exports.BestRates = BestRates;
+module.exports.Campaign = Campaign;

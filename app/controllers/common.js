@@ -5,18 +5,68 @@ var Common = function()
   var Tools = require('../models/tool').Tools;
   var CustomerQuery = require('../models/customerQuery').CustomerQuery;
   var Media = require('../models/media').Media;
+  var nodeMailer = require('nodemailer');
+  var Contact = require('../models/contact').Contact;
   var TwelthCross = require('../models/12thCross').TwelthCross;
   var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
+  var SearchIgnore = require('../config/searchignore.js');
   this.config = require('../config/config.js');
   var self = this;
-  
+
+  this.transporter = nodeMailer.createTransport({
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
+  });
+
+  var path = require('path');
+  var EmailTemplate = require('email-templates').EmailTemplate;
+  var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
+
   this.isToolExists = function(req, res){
     var toolName = req.query.toolName;
-    if(toolName == '12thcross') return res.status(200).json("OK");
+    if(toolName == '12thcross') return res.status(200).json({ tool:toolName });
     Tools.findOne({ name:toolName }, function(err, result){
       if(err) return res.status(500).json(err);
-      if(!result) return res.status(404).json("NOT OK");
-      return res.status(200).json("OK");
+      if(!result) 
+      {
+        Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
+          if(!media)
+          {
+            var find = '-';
+            var regExp = new RegExp(find, 'g');
+            toolName = toolName.replace(regExp, ' ').split(' ');
+            for(i in toolName)
+            {
+              if( SearchIgnore.indexOf(toolName[i]) > -1 ) continue;
+              var qRegExp = new RegExp('\\b'+toolName[i], "i");
+              toolName[i] = qRegExp;
+            }
+            Media.find({ searchKeyWords:{ $all:toolName } }).lean().exec(function(err, media){
+              if(!media.length) return res.status(404).json("NO MEDIAS FOUND");
+              if(media.length == 1)
+              {
+                Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                  return res.status(200).json({ tool:tool.name, urlSlug:media[0].urlSlug });  
+                });
+              }
+              else
+              {
+                Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
+                  return res.status(200).json({ tool:tool.name });
+                });
+              }
+            });
+          }
+          else
+          Tools.findOne({ _id:media.toolId }).lean().exec(function(err, tool){
+            return res.status(200).json({ tool:tool.name, urlSlug:media.urlSlug });  
+          });
+        });
+      }
+      else
+      return res.status(200).json({ tool:result.name });
     });
   }
 
@@ -31,54 +81,84 @@ var Common = function()
     });
   }
 
+  this.contactMail = function(req, res){
+    var mailOptions = {};
+    mailOptions.email = req.body.email;
+    mailOptions.to = "help@themediaant.com";
+    mailOptions.message = req.body.message;
+    mailOptions.toolName =  req.body.toolName || 'General';
+    mailOptions.appHost = self.config.appHost;
+    var newContact = Contact(mailOptions);
+
+    // save the Contact mail
+    newContact.save(function(err){
+      if(err) return res.status(500).json(err);
+      var emailTemplate = new EmailTemplate(path.join(templatesDir, 'assistanceContact'));
+      emailTemplate.render(mailOptions, function(err, results){
+        if(err) return console.error(err)
+        self.transporter.sendMail({
+          from: req.body.email, // sender address
+          to: mailOptions.to, // list of receivers
+          cc: req.body.email,
+          subject: mailOptions.toolName+' - Request for Assistance ',
+          html: results.html
+        }, function(err, responseStatus){
+          if(err) return console.error(err);
+           return res.status(200).json("sucess");
+        })
+      });
+
+    });
+  }
+
   this.getSiteMap = function(req, res){
     async.parallel({
       twelthCross : function(callbackInner)
-      {          
+      {
         TwelthCross.aggregate(
           {$match: {"urlSlug": { $exists: 1} }},
           //{$skip : 0}, {$limit: 10},
           { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
           { $group : { _id : "$url"}},
-          function(error, twelthCross) 
+          function(error, twelthCross)
           {
             for(i in twelthCross) twelthCross[i] = twelthCross[i]._id;
             callbackInner(error, twelthCross);
           }
         );
-      },      
+      },
       media : function(callbackInner)
-      {          
+      {
         Media.aggregate(
           {$match: {"urlSlug": { $exists: 1} }},
           //{$skip : 0}, {$limit: 5},
-          { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},            
-          function(error, results) 
+          { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},
+          function(error, results)
           {
             var toolIds = [];
             var toolName = [];
             for(i in results) toolIds.push(results[i]._id);
-              Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){                                
-              for(i in tool) toolName[tool[i]._id] = tool[i];                  
-              for(i in results) 
+              Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){
+              for(i in tool) toolName[tool[i]._id] = tool[i];
+              for(i in results)
               {
-                if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;                  
-              }                  
-              callbackInner(error, results);                
+                if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;
+              }
+              callbackInner(error, results);
             });
           }
         );
-      }        
+      }
     },
-    function(err, results) 
+    function(err, results)
     {
-      var data = [];      
+      var data = [];
       if(err) return res.status(500).json(err);
-      for(i in results.media) 
+      for(i in results.media)
       {
-        for(j in results.media[i].medias) 
+        for(j in results.media[i].medias)
           data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
-      }        
+      }
       data = data.concat(results.twelthCross);
       res.status(200).json({url:data});
     });
@@ -133,13 +213,13 @@ var Common = function()
   this.saveCampaigns =function(req, res){
     // create a new campaign
       var newCampaign = SaveCampaigns(req.body);
-  
+
     // save the campaign
       newCampaign.save(function(err) {
         if(err) return res.status(500).json(err);
         res.status(200).json("Campaign Created Successfully");
       });
-  }    
+  }
 
   this.getMoreSeller = function(req, res){
     var params = req.query;
@@ -149,14 +229,15 @@ var Common = function()
     mediaOption.push(params.mediaOption);
     var tool = ["all"];
     tool.push(params.tool);
-    
-    TwelthCross.find({servicesOffered: {$elemMatch: { media:{ $in: media }, mediaOption:{ $in: media }, tool:{ $in: tool } }}}, 
-      { "name":1, "imageUrl": 1, "urlSlug": 1}, 
+
+    TwelthCross.find({servicesOffered: {$elemMatch: { media:{ $in: media }, mediaOption:{ $in: media }, tool:{ $in: tool } }}},
+      { "name":1, "imageUrl": 1, "urlSlug": 1},
       function(err, results){
-        if(err) return res.status(500).json(err);            
+        if(err) return res.status(500).json(err);
         return res.status(200).json(results);
-    }); 
+    });
   }
+
 };
 
 module.exports.CommonCtrl = Common;
