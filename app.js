@@ -47,7 +47,9 @@ app.use(cors({
         'http://themediaant.com', 
         'http://www.themediaant.com',
         'http://www.m20.in',
-        'http://m20.in'
+        'http://m20.in',
+		'http://tma.dev:3000',
+		'http://www.tma.dev:3000'
     ],
 	headers: [
 		'x-access-token', 'Content-Type'
