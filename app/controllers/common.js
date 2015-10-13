@@ -103,10 +103,10 @@ var Common = function()
             for(i in results) toolIds.push(results[i]._id);
               Tools.find({_id : {$in: toolIds}},'name').lean().exec(function(err, tool){
               for(i in tool) toolName[tool[i]._id] = tool[i];
-              // for(i in results)
-              // {
-              //   if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;
-              // }
+              for(i in results)
+              {
+                if(toolName[results[i]._id].name !== undefined) results[i]['_id'] = toolName[results[i]._id].name;
+              }
               callbackInner(error, results);
             });
           }
