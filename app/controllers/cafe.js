@@ -2,6 +2,7 @@ var Cafe = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
+  var User = require('../models/user').User;
   var Cafe = require('../models/cafe').Cafe;
   var underscore = require('underscore');
   var jwt = require('jsonwebtoken');
@@ -14,7 +15,6 @@ var Cafe = function()
   var self = this;
 
   this.store = function(req, res){
-
     Cafe.findOne({ url:req.body.cafe.url }).lean().exec(function(err, cafe){
       if(cafe) return res.status(500).json("Cafe already exists");
       // create a new Media
@@ -25,7 +25,7 @@ var Cafe = function()
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, user){
-          req.body.userID = user._id;
+          req.body.cafe.userId = user._id;
           var newCafe = Cafe(req.body);           
           // save the Media
           newCafe.save(function(err) {
@@ -34,7 +34,6 @@ var Cafe = function()
           });  
       });    
     });
-    
   };
 
   this.update = function(req, res){
@@ -133,14 +132,21 @@ var Cafe = function()
             //{$project: query.projection}, 
             function(err, results) 
             {
-              for(i in results) {
-                if(results[i].userID){
-                  userIDs = userIDs.concat(results[i].userID);
-                }else{
-                  results[i].createdBy = results[i].createdBy;
-                }               
-              }              
-              callbackInner(err,results);
+              var userIds = [];
+              for(i in results)
+              {
+                if(results[i].userId != undefined) userIds = userIds.push(results[i].userId);              
+              }
+              User.find({ _id:{ $in:userIds } }).lean().exec(function(err, users){
+                userIds = [];
+                for(i in users) userIds[users[i]._id] = users[i];
+                for(i in results)
+                {
+                  if(results[i].userId != undefined) 
+                    results[i].createdBy = userIds[results[i].userId].firstName + ' ' + userIds[results[i].userId].lastName;
+                }
+                callbackInner(err,results);
+              });
             }
           );
         }
