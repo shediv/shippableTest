@@ -32,7 +32,7 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-    self.sortFilteredMedia(query, callback);
+        self.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result)
@@ -78,11 +78,10 @@ var NonTraditional = function()
         }
       }      
 
-      var match = { $or:or, pincode : { $exists:1 } };
-
+      var match = { $or:or};
       async.series([
         function(callbackInner){
-          Geography.distinct('pincode', match, function(err, pincodes){
+          Geography.distinct('pincode', match, function(err, pincodes){   /*get pincodes in an array*/
             Geography.find({pincode:{$in:pincodes}}).lean().exec(function(err, results){
               var geographies = [];
               if(!results) return callbackInner(err, geographies);
@@ -94,22 +93,22 @@ var NonTraditional = function()
               callbackInner(err, geographies); 
             });
           });
-        }
+        } 
       ],
       function(err, geographies)
       {
-        callback(err, geographies[0]);
+       callback(err, geographies[0]);
       });
     };
 
     self.applyFilters = function(geographies){
+
       var query = {};
       query.sortBy = self.params.sortBy || 'views';
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
       query.projection = ToolsProject[self.toolName];
-      
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
       if(self.params.filters.hyperlocal) query.match['hyperLocal'] = self.params.filters.hyperlocal;
@@ -117,6 +116,7 @@ var NonTraditional = function()
       query.match.toolId = self.toolId;
 
       return query;
+
     };
 
     self.sortFilteredMedia = function(query, callback){ 
@@ -330,31 +330,6 @@ var NonTraditional = function()
           var mediaOptions = underscore.uniq(keys)
           return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
         });                 
-  };
-
-  this.bigsearch =function(req, res){
-
-    var nonTradData= {};
-    var cursor = Media.aggregate(
-      {$match:{"isActive": 1,"toolId": "55f180b344aef45d8f1531d5"}},
-      {$project: {
-        "_id": 1,
-        "name": 1,
-        "about": 1,
-        "mediaOptions": 1,
-        "geography": 1,
-        "urlSlug": 1,
-        "logo": 1,
-        "serviceTaxPercentage": 1}
-      }).cursor({ batchSize: 5000}).exec();
-
-    cursor.forEach(function(doc) {
-     /* if(error)res.status(200).json(error);*/
-       nonTradData.data=doc;
-       console.log(doc);
-
-    });
-   res.send(nonTradData);    
   };
 };
 
