@@ -78,7 +78,7 @@ var NonTraditional = function()
         }
       }      
 
-      var match = { $or:or};
+      var match = { $or:or, pincode : { $exists:1 } };
       async.series([
         function(callbackInner){
           Geography.distinct('pincode', match, function(err, pincodes){   /*get pincodes in an array*/
@@ -331,6 +331,30 @@ var NonTraditional = function()
           return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
         });                 
   };
+
+  /*this.bigsearch =function(req, res){
+
+    var nonTradData= null;
+    var cursor = Media.aggregate(
+      {$match:{"isActive": 1,"toolId": "55f180b344aef45d8f1531d5"}},
+      {$project: {
+        "_id": 1,
+        "name": 1,
+        "about": 1,
+        "mediaOptions": 1,
+        "geography": 1,
+        "urlSlug": 1,
+        "logo": 1,
+        "serviceTaxPercentage": 1}
+      }).cursor({ batchSize:1}).exec();
+    
+    cursor.toArray(function(err,results){
+        //nonTradData = results;
+        res.send(results);
+    });
+    
+        
+  };*/
 };
 
 module.exports.NonTraditional = NonTraditional;
