@@ -319,7 +319,7 @@ var _12thCross = function()
 
       var firstName = decoded.firstName;
       firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
-      mailOptions.name = firstName;
+      mailOptions.name = req.body.to.name;
       if(err) res.status(401).json("Invalid Token");
         // save the Contact mail
         newContact.save(function(err){      

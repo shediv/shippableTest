@@ -81,14 +81,12 @@ var Common = function()
     });
   }
 
-  this.contactMail = function(req, res){
-    var toolName;
-    if(req.body.toolName) { var toolName = CommonLib.capitalizeFirstLetter(user.firstName); }
+  this.contactMail = function(req, res){        
     var mailOptions = {};
     mailOptions.email = req.body.email;
     mailOptions.to = "help@themediaant.com";
     mailOptions.message = req.body.message;
-    mailOptions.toolName = toolName || 'General';
+    mailOptions.toolName = req.body.toolName || 'General';
     mailOptions.appHost = self.config.appHost;
     var newContact = Contact(mailOptions);
 
