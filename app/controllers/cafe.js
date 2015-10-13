@@ -26,7 +26,7 @@ var Cafe = function()
       if(!token) return res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, user){
           req.body.cafe.userId = user._id;
-          var newCafe = Cafe(req.body);           
+          var newCafe = Cafe(req.body.cafe);           
           // save the Media
           newCafe.save(function(err) {
             if(err) return res.status(500).json(err);
