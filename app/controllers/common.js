@@ -82,11 +82,13 @@ var Common = function()
   }
 
   this.contactMail = function(req, res){
+    var toolName;
+    if(req.body.toolName) { var toolName = CommonLib.capitalizeFirstLetter(user.firstName); }
     var mailOptions = {};
     mailOptions.email = req.body.email;
     mailOptions.to = "help@themediaant.com";
     mailOptions.message = req.body.message;
-    mailOptions.toolName =  req.body.toolName || 'General';
+    mailOptions.toolName = toolName || 'General';
     mailOptions.appHost = self.config.appHost;
     var newContact = Contact(mailOptions);
 
