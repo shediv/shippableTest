@@ -135,7 +135,7 @@ var Cafe = function()
               var userIds = [];
               for(i in results)
               {
-                if(results[i].userId != undefined) userIds = userIds.push(results[i].userId);              
+                if(results[i].userId != undefined) userIds.push(results[i].userId);              
               }
               User.find({ _id:{ $in:userIds } }).lean().exec(function(err, users){
                 userIds = [];
