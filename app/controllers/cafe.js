@@ -4,8 +4,13 @@ var Cafe = function()
   var CommonLib = require('../libraries/common').Common;
   var Cafe = require('../models/cafe').Cafe;
   var underscore = require('underscore');
+  var jwt = require('jsonwebtoken');
   
   this.params = {};
+  var self = this;
+
+  this.params = {};
+  this.config = require('../config/config.js');
   var self = this;
 
   this.store = function(req, res){
@@ -16,13 +21,18 @@ var Cafe = function()
       req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
       req.body.cafe.createdAt = new Date();
       if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
-      var newCafe = Cafe(req.body.cafe);
 
-      // save the Media
-      newCafe.save(function(err) {
-        if(err) return res.status(500).json(err);
-        res.status(200).json("Cafe Created Successfully");
-      });  
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, user){
+          req.body.userID = user._id;
+          var newCafe = Cafe(req.body);           
+          // save the Media
+          newCafe.save(function(err) {
+            if(err) return res.status(500).json(err);
+            res.status(200).json("Cafe Created Successfully");
+          });  
+      });    
     });
     
   };
@@ -95,7 +105,8 @@ var Cafe = function()
     };
 
     self.sortFilteredMedia = function(query, callback){ 
-      async.parallel({
+      var userIDs = [];
+      async.parallel({        
         count : function(callbackInner)
         {          
           Cafe.aggregate(
@@ -122,6 +133,13 @@ var Cafe = function()
             //{$project: query.projection}, 
             function(err, results) 
             {
+              for(i in results) {
+                if(results[i].userID){
+                  userIDs = userIDs.concat(results[i].userID);
+                }else{
+                  results[i].createdBy = results[i].createdBy;
+                }               
+              }              
               callbackInner(err,results);
             }
           );
