@@ -177,11 +177,11 @@ var Campaign = function()
               case 'print':
               {
                 for(k in data[id].selectedOptions[i])
-                {
+                {                  
                   var option = {};
                   option.tool = tool + ' - Print';
                   option.name = data[id].name;
-                  date = new Date(data[id].startDate);
+                  date = new Date(data[id].selectedOptions[i][k].startDate);
                   var curr_month = date.getMonth() + 1;
                   option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
                   option.mediaOption = CommonLib.humanReadable(k);
@@ -233,7 +233,7 @@ var Campaign = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].name + ', ' + data[id].editionName + ', ' + data[id].areaCovered;
-              date = new Date(data[id].startDate);
+              date = new Date(data[id].selectedOptions[i][k].startDate);
               var curr_month = date.getMonth() + 1;
               option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               option.mediaOption = CommonLib.humanReadable(k);
@@ -300,11 +300,11 @@ var Campaign = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {
+          {            
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].time;
@@ -404,7 +404,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;            
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -435,7 +435,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -464,7 +464,7 @@ var Campaign = function()
           var option = {};
           option.tool = tool;
           option.name = data[id].name;
-          date = new Date(data[id].startDate);
+          date = new Date(data[id].selectedOptions.startDate);
           var curr_month = date.getMonth() + 1;
           option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
           option.mediaOption = data[id].selectedOptions.mediaType;
@@ -488,7 +488,9 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            option.startDate = data[id].startDate;            
+            date = new Date(data[id].selectedOptions[i].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();            
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -537,7 +539,7 @@ var Campaign = function()
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
-            //cc: "help@themediaant.com",
+            cc: "help@themediaant.com",
             subject: 'The Media Ant Campaign Saved - '+mailOptions.currentDate,
             html: results.html,
             attachments: attachments
