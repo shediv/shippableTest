@@ -157,7 +157,7 @@ var Campaign = function()
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
 
       res.status(200).json({email:self.emailContent,excel:self.excelContent});
-      //excelContent = self.createExcel(self.excelContent, token);
+      excelContent = self.createExcel(self.excelContent, token);
 
     });
   };
@@ -181,7 +181,7 @@ var Campaign = function()
                   var option = {};
                   option.tool = tool + ' - Print';
                   option.name = data[id].name;
-                  date = new Date(data[id].selectedOptions[i][k].startDate);                  
+                  date = new Date(data[id].startDate);
                   var curr_month = date.getMonth() + 1;
                   option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
                   option.mediaOption = CommonLib.humanReadable(k);
@@ -233,8 +233,7 @@ var Campaign = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].name + ', ' + data[id].editionName + ', ' + data[id].areaCovered;
-              //date = new Date(data[id].startDate);
-              date = new Date(data[id].selectedOptions[i][k].startDate);
+              date = new Date(data[id].startDate);
               var curr_month = date.getMonth() + 1;
               option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               option.mediaOption = CommonLib.humanReadable(k);
@@ -305,8 +304,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].selectedOptions[i][k].startDate);
-            //date = new Date(data[id].startDate);
+            date = new Date(data[id].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].time;
@@ -338,8 +336,7 @@ var Campaign = function()
             option.mediaOption = CommonLib.humanReadable(data[type][i].selectedOption);
             option.campaignDetails = data[type][i].noOfWeeks + ' Week(s)';
             option.totalPrice = 'Rs. ' + CommonLib.addCommas(data[type][i].totalPrice);
-            date = new Date(data[id].selectedOptions[i][k].startDate);
-            //date = new Date(data[type][i].startDate);
+            date = new Date(data[type][i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();                      
             self.emailContent.push(option);
@@ -406,9 +403,8 @@ var Campaign = function()
           {
             var option = {};
             option.tool = tool;
-            option.name = data[id].name;
-            date = new Date(data[id].selectedOptions[i][k].startDate);            
-            //date = new Date(data[id].startDate);
+            option.name = data[id].name;            
+            date = new Date(data[id].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -439,8 +435,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].selectedOptions[i][k].startDate);
-            //date = new Date(data[id].startDate);
+            date = new Date(data[id].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -469,8 +464,7 @@ var Campaign = function()
           var option = {};
           option.tool = tool;
           option.name = data[id].name;
-          date = new Date(data[id].selectedOptions[i][k].startDate);
-          //date = new Date(data[id].startDate);
+          date = new Date(data[id].startDate);
           var curr_month = date.getMonth() + 1;
           option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
           option.mediaOption = data[id].selectedOptions.mediaType;
@@ -494,10 +488,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].selectedOptions[i][k].startDate);
-            //date = new Date(data[id].startDate);
-            var curr_month = date.getMonth() + 1;
-            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();            
+            option.startDate = data[id].startDate;            
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -546,7 +537,7 @@ var Campaign = function()
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
-            cc: "help@themediaant.com",
+            //cc: "help@themediaant.com",
             subject: 'The Media Ant Campaign Saved - '+mailOptions.currentDate,
             html: results.html,
             attachments: attachments
