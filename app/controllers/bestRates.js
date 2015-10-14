@@ -496,7 +496,7 @@ var BestRates = function()
           self.transporter.sendMail({
             from: self.config.noreply, // sender address
             to: mailOptions.email, // list of receivers
-            cc: self.config.help,
+            //cc: self.config.help,
             subject: 'Discounted Rates',
             html: results.html,
             attachments: attachments
@@ -510,7 +510,7 @@ var BestRates = function()
 
     self.createExcel = function(data, token)
     {
-      if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
+      //if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
       async.each(data, function(media, callback){
         var length = parseInt(media.length);
         var path = 'public/bestRate';
