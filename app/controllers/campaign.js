@@ -393,7 +393,7 @@ var Campaign = function()
     };
 
     self.airport = function(data, tool, callback){
-      tool = 'Airort/Inflight';
+      tool = 'Airline/Airport';
 
       for(id in data)
       {
