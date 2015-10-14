@@ -106,13 +106,19 @@ var Campaign = function()
   }
 
   this.emailBestRates = function(req, res){
-    // create a new campaign
-    var newCampaign = SaveCampaigns(req.body);
-    // save the campaign
-    newCampaign.save(function(err) {
-      if(err) return res.status(500).json(err);
-      res.status(200).json("Campaign Created Successfully");
-    });
+
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, user){
+        req.body.user = user;
+        // create a new campaign
+        var newCampaign = SaveCampaigns(req.body);
+        // save the campaign
+        newCampaign.save(function(err) {
+          if(err) return res.status(500).json(err);
+          res.status(200).json("Campaign Created Successfully");
+        });
+      });  
 
     self.medias = req.body.bestRates;
     self.emailContent = [];
