@@ -73,6 +73,7 @@ var Magazine = function()
             }
           };          
           var project = ToolsProject[self.toolName];
+          project = {"$project" : project};
 
           Media.aggregate([match, project], function(err, media){            
             callback(err, media);});
