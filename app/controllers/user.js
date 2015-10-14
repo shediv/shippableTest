@@ -311,7 +311,7 @@ var User = function()
 				self.transporter.sendMail({
 	        from: self.config.noreply, // sender address
 	        to: mailOptions.email, // list of receivers
-	        subject: 'Reset Your Password!',
+	        subject: 'Reset Your Password - The Media Ant',
 	        html: results.html
 				}, function(err, responseStatus){
 					if(err) res.status(500).json(err);
