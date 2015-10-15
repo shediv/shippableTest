@@ -179,7 +179,8 @@ var Common = function()
       description : 'The Media Ant is a paltform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
       image : 'image',
       twitter : self.config.twitter,
-      facebook : self.config.facebook
+      facebook : self.config.facebook,
+      keyWords : []
     });    
   };
 
