@@ -564,7 +564,8 @@ var Campaign = function()
         var length = parseInt(media.length);
         var path = 'public/bestRate';
         date = new Date();
-        var file_name = 'cinema'+self.path.length+'.xlsx';
+        var number = self.path.length + 1;        
+        var file_name = 'cinema'+number+'.xlsx';
         self.filename = file_name;
         self.path.push(path+'/'+file_name);
         var workbook = excelbuilder.createWorkbook(path, file_name);

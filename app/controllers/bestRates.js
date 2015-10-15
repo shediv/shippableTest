@@ -515,7 +515,8 @@ var BestRates = function()
         var length = parseInt(media.length);
         var path = 'public/bestRate';
         date = new Date();
-        var file_name = 'cinema'+self.path.length+'.xlsx';
+        var number = self.path.length + 1;        
+        var file_name = 'cinema'+number+'.xlsx';
         self.filename = file_name;
         self.path.push(path+'/'+file_name);
         var workbook = excelbuilder.createWorkbook(path, file_name);
@@ -543,12 +544,8 @@ var BestRates = function()
         workbook.save(function(err){
           if (err) {
               workbook.cancel();
-              //res.status(500).json(err);
-              //return 0;
           }
           else {
-              //res.status(200).json("success");
-              //return 1;
           }
 
           callback(err);

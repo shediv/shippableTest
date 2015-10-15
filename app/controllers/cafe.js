@@ -97,8 +97,10 @@ var Cafe = function()
       query.limit = self.params.limit || 9;
       query.match = {};
 
-      if(self.params.filters.topics.length) query.match['topics'] = { $in:self.params.filters.topics };
+      if(self.params.filters.topics.length) query.match['topics'] = { $all:self.params.filters.topics };
       //query.match.isActive = 1;
+
+      console.log(query.length);
       
       return query;
     };
