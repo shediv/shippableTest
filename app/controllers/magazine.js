@@ -700,6 +700,7 @@ var Magazine = function()
       {
         var tmp = {};
         tmp['_id'] = mediaCategoryBuckets_nonGeo[i]._id;
+        tmp['name'] = mediaCategoryBuckets_nonGeo[i].name;
         tmp['attributes'] = mediaCategoryBuckets_nonGeo[i].attributes;
         tmp['print'] = mediaCategoryBuckets_nonGeo[i].print;        
         tmp['categoryId'] = mediaCategoryBuckets_nonGeo[i].categoryId;
