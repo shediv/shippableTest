@@ -205,6 +205,7 @@ var Common = function()
         facebook : self.config.facebook
       });
     }
+    else
     if(toolName == 'cafe')
     {
       return res.status(200).json({
@@ -215,10 +216,17 @@ var Common = function()
         facebook : self.config.facebook
       });
     }
-    Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
-      if(err) return res.status(500).json(err);
-      res.status(200).json(result.metaTags);
-    });
+    else
+    {
+      Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+        Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+          if(err) return res.status(500).json(err);
+          result.metaTags.medias = medias;
+          res.status(200).json(result.metaTags);  
+        });
+        
+      });
+    }
   }
 
   this.getMediaName = function(req, res){
@@ -228,7 +236,6 @@ var Common = function()
       res.status(200).json({medias:medias});
     });
   };
-
 
   this.saveCampaigns =function(req, res){
     // create a new campaign
