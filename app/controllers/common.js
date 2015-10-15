@@ -197,7 +197,7 @@ var Common = function()
 
     if(toolName == '12thcross')
     {
-      TwelthCross.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+      TwelthCross.distinct('urlSlug',{},function(err, medias){
         if(err) return res.status(500).json(err);
         return res.status(200).json({
           title : '12th Cross || Question & Answer Forum || The Media Ant',
