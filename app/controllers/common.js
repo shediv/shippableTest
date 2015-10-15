@@ -197,12 +197,16 @@ var Common = function()
 
     if(toolName == '12thcross')
     {
-      return res.status(200).json({
-        title : '12th Cross || Question & Answer Forum || The Media Ant',
-        description : '12th Cross is a question and answers forum for advertising and related mediums',
-        image : 'image',
-        twitter : self.config.twitter,
-        facebook : self.config.facebook
+      TwelthCross.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+        if(err) return res.status(500).json(err);
+        return res.status(200).json({
+          title : '12th Cross || Question & Answer Forum || The Media Ant',
+          description : '12th Cross is a question and answers forum for advertising and related mediums',
+          image : 'image',
+          twitter : self.config.twitter,
+          facebook : self.config.facebook,
+          medias : medias
+        });
       });
     }
     else
@@ -222,9 +226,8 @@ var Common = function()
         Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
           if(err) return res.status(500).json(err);
           result.metaTags.medias = medias;
-          res.status(200).json(result.metaTags);  
+          return res.status(200).json(result.metaTags);  
         });
-        
       });
     }
   }
