@@ -166,6 +166,23 @@ var Common = function()
     });
   };
 
+  this.getCommonMetaTags = function(req, res){
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+      type: 'common'
+    };
+    CommonLib.uniqueVisits(visitor);
+
+    return res.status(200).json({
+      title : 'The Media Ant',
+      description : 'The Media Ant is a paltform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
+      image : 'image',
+      twitter : self.config.twitter,
+      facebook : self.config.facebook
+    });    
+  };
+
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
 
