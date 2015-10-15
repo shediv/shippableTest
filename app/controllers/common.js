@@ -132,7 +132,7 @@ var Common = function()
       media : function(callbackInner)
       {
         Media.aggregate(
-          {$match: {"urlSlug": { $exists: 1} }},
+          {$match: {"urlSlug": { $exists: 1}, "toolId": { $exists: 1} }},
           //{$skip : 0}, {$limit: 5},
           { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},
           function(error, results)
@@ -162,7 +162,7 @@ var Common = function()
           data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
       }
       data = data.concat(results.twelthCross);
-      res.status(200).json({url:data});
+      res.status(200).json({url:data, count:data.length});
     });
   };
 
