@@ -54,7 +54,9 @@ app.use(cors({
 	]
 }));
 
-mongoose.connect(config.mongoUrl);
+mongoose.connect(config.mongoUrl, function(err){
+  mongooseLog('Mongoose error: ' + err);
+});
 
 // CONNECTION EVENTS
 // When successfully connected
