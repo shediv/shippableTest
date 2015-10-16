@@ -121,10 +121,9 @@ var Search = function()
         if(self.nameQuery.test(medias[i].name)) closest.push(medias[i]);
         else others.push(medias[i]);
       }
-      return closest.sort(function(a,b){ return a.views < b.views });
+      closest.sort(function(a,b){ return a.views < b.views });
       others.sort(function(a,b){ return a.views < b.views });
-      closest = [].concat(closest);
-      return closest.concat(others);
+      return [].concat(closest,others);
     };
 
     self.searchTwelthCross = function(query, callback){
