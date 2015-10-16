@@ -174,7 +174,7 @@ var Common = function()
     };
     CommonLib.uniqueVisits(visitor);
 
-    Tools.distinct('name', {}), function(err, tools){
+    Tools.distinct('name', {}, function(err, tools){
       return res.status(200).json({
         title : 'The Media Ant',
         description : 'The Media Ant is a platform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
