@@ -121,6 +121,7 @@ var Search = function()
         if(self.nameQuery.test(medias[i].name)) closest.push(medias[i]);
         else others.push(medias[i]);
       }
+      console.log(self.nameQuery);
       closest.sort(function(a,b){ return a.views < b.views });
       others.sort(function(a,b){ return a.views < b.views });
       return [].concat(closest,others);
