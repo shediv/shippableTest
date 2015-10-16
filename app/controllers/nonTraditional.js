@@ -320,41 +320,18 @@ var NonTraditional = function()
 
   this.getMediaOption = function(req, res){    
     Media.distinct('mediaOptions',
-        { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
-        function(error, result) 
-        {          
-          var keys = [];
-          for(i in result){
-            keys = keys.concat(Object.keys(result[i]));
-          }          
-          var mediaOptions = underscore.uniq(keys)
-          return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
-        });                 
+      { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
+      function(error, result) 
+      {          
+        var keys = [];
+        for(i in result){
+          keys = keys.concat(Object.keys(result[i]));
+        }          
+        var mediaOptions = underscore.uniq(keys)
+        return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
+      }
+    );                 
   };
-
-  /*this.bigsearch =function(req, res){
-
-    var nonTradData= null;
-    var cursor = Media.aggregate(
-      {$match:{"isActive": 1,"toolId": "55f180b344aef45d8f1531d5"}},
-      {$project: {
-        "_id": 1,
-        "name": 1,
-        "about": 1,
-        "mediaOptions": 1,
-        "geography": 1,
-        "urlSlug": 1,
-        "logo": 1,
-        "serviceTaxPercentage": 1}
-      }).cursor({ batchSize:1}).exec();
-    
-    cursor.toArray(function(err,results){
-        //nonTradData = results;
-        res.send(results);
-    });
-    
-        
-  };*/
 };
 
 module.exports.NonTraditional = NonTraditional;
