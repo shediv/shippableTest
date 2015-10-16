@@ -120,7 +120,7 @@ var Common = function()
         TwelthCross.aggregate(
           {$match: {"urlSlug": { $exists: 1} }},
           //{$skip : 0}, {$limit: 10},
-          { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
+          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
           { $group : { _id : "$url"}},
           function(error, twelthCross)
           {
@@ -155,13 +155,16 @@ var Common = function()
     function(err, results)
     {
       var data = [];
+      var toolUrl = [];
       if(err) return res.status(500).json(err);
       for(i in results.media)
       {
         for(j in results.media[i].medias)
-          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
+          data.push('http://www.'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
       }
+      toolUrl = ['http://www.themediaant.com/magazine', 'http://www.themediaant.com/cinema', 'http://www.themediaant.com/newspaper', 'http://www.themediaant.com/radio', 'http://www.themediaant.com/television', 'http://www.themediaant.com/outdoor', 'http://www.themediaant.com/airport', 'http://www.themediaant.com/digital', 'http://www.themediaant.com/nontraditional'];
       data = data.concat(results.twelthCross);
+      data = data.concat(toolUrl);
       res.status(200).json({url:data, count:data.length});
     });
   };
