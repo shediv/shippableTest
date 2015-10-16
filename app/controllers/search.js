@@ -102,7 +102,7 @@ var Search = function()
             }
           }
           result['medias'] = self.sortClosestMatch(result['medias']);
-          //result['medias'] = result['medias'].slice(0, 10);
+          result['medias'] = result['medias'].slice(0, 10);
           callbackEach(err);
         });
       }, function(err){
