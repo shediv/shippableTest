@@ -106,13 +106,19 @@ var Campaign = function()
   }
 
   this.emailBestRates = function(req, res){
-    // create a new campaign
-    var newCampaign = SaveCampaigns(req.body);
-    // save the campaign
-    newCampaign.save(function(err) {
-      if(err) return res.status(500).json(err);
-      res.status(200).json("Campaign Created Successfully");
-    });
+
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, user){
+        req.body.user = user;
+        // create a new campaign
+        var newCampaign = SaveCampaigns(req.body);
+        // save the campaign
+        newCampaign.save(function(err) {
+          if(err) return res.status(500).json(err);
+          res.status(200).json("Campaign Created Successfully");
+        });
+      });  
 
     self.medias = req.body.bestRates;
     self.emailContent = [];
@@ -177,11 +183,11 @@ var Campaign = function()
               case 'print':
               {
                 for(k in data[id].selectedOptions[i])
-                {
+                {                  
                   var option = {};
                   option.tool = tool + ' - Print';
                   option.name = data[id].name;
-                  date = new Date(data[id].startDate);
+                  date = new Date(data[id].selectedOptions[i][k].startDate);
                   var curr_month = date.getMonth() + 1;
                   option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
                   option.mediaOption = CommonLib.humanReadable(k);
@@ -233,7 +239,7 @@ var Campaign = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].name + ', ' + data[id].editionName + ', ' + data[id].areaCovered;
-              date = new Date(data[id].startDate);
+              date = new Date(data[id].selectedOptions[i][k].startDate);
               var curr_month = date.getMonth() + 1;
               option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               option.mediaOption = CommonLib.humanReadable(k);
@@ -261,7 +267,7 @@ var Campaign = function()
               var option = {};
               option.tool = tool;
               option.name = data[id].station + ', ' + data[id].city;
-              date = new Date(data[id].startDate);
+              date = new Date(data[id].selectedOptions[i][k].startDate);
               var curr_month = date.getMonth() + 1;
               option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
               if(i == 'rjOptions')
@@ -300,11 +306,11 @@ var Campaign = function()
         if(data[id].selectedOptions != undefined)
         {
           for(i in data[id].selectedOptions)
-          {
+          {            
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].time;
@@ -393,7 +399,7 @@ var Campaign = function()
     };
 
     self.airport = function(data, tool, callback){
-      tool = 'Airort/Inflight';
+      tool = 'Airline/Airport';
 
       for(id in data)
       {
@@ -404,7 +410,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;            
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -435,7 +441,7 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            date = new Date(data[id].startDate);
+            date = new Date(data[id].selectedOptions[i].startDate);
             var curr_month = date.getMonth() + 1;
             option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
             option.mediaOption = data[id].selectedOptions[i].name;
@@ -464,7 +470,7 @@ var Campaign = function()
           var option = {};
           option.tool = tool;
           option.name = data[id].name;
-          date = new Date(data[id].startDate);
+          date = new Date(data[id].selectedOptions.startDate);
           var curr_month = date.getMonth() + 1;
           option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();
           option.mediaOption = data[id].selectedOptions.mediaType;
@@ -488,7 +494,9 @@ var Campaign = function()
             var option = {};
             option.tool = tool;
             option.name = data[id].name;
-            option.startDate = data[id].startDate;            
+            date = new Date(data[id].selectedOptions[i].startDate);
+            var curr_month = date.getMonth() + 1;
+            option.startDate = date.getDate() + '/'+ curr_month + '/'+date.getFullYear();            
             option.mediaOption = data[id].selectedOptions[i].name;
 
             option.campaignDetails = data[id].selectedOptions[i].inputUnit1 + ' ' + data[id].selectedOptions[i].pricingUnit1;
@@ -551,12 +559,13 @@ var Campaign = function()
 
     self.createExcel = function(data, token)
     {
-      if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
+      //if(!data.length) self.sendEmail(self.emailContent, token, self.filename, self.path);
       async.each(data, function(media, callback){
         var length = parseInt(media.length);
         var path = 'public/bestRate';
         date = new Date();
-        var file_name = 'cinema'+self.path.length+'.xlsx';
+        var number = self.path.length + 1;        
+        var file_name = 'cinema'+number+'.xlsx';
         self.filename = file_name;
         self.path.push(path+'/'+file_name);
         var workbook = excelbuilder.createWorkbook(path, file_name);
