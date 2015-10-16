@@ -73,9 +73,7 @@ mongoose.connection.on('disconnected', function () {
 });
 
 function mongooseLog(data) {
-  fs.appendFile('mongooseLog.txt', new Date()+": "+data+"\r\n", function (err) {
-    if(err) return console.log(err);
-  });
+  return console.log(data);
 }
 
 app.use(logger('dev'));
