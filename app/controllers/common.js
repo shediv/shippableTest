@@ -169,6 +169,28 @@ var Common = function()
     });
   };
 
+  this.getCommonMetaTags = function(req, res){
+    var visitor = {
+      userAgent: req.headers['user-agent'],
+      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+      type: 'common'
+    };
+    CommonLib.uniqueVisits(visitor);
+
+    Tools.distinct('name', {}, function(err, tools){
+      return res.status(200).json({
+        title : 'The Media Ant',
+        description : 'The Media Ant is a platform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook,
+        keyWords : [],
+        tools : tools
+      });
+    });
+    
+  };
+
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
 
@@ -182,14 +204,19 @@ var Common = function()
 
     if(toolName == '12thcross')
     {
-      return res.status(200).json({
-        title : '12th Cross || Question & Answer Forum || The Media Ant',
-        description : '12th Cross is a question and answers forum for advertising and related mediums',
-        image : 'image',
-        twitter : self.config.twitter,
-        facebook : self.config.facebook
+      TwelthCross.distinct('urlSlug',{},function(err, medias){
+        if(err) return res.status(500).json(err);
+        return res.status(200).json({
+          title : '12th Cross || Question & Answer Forum || The Media Ant',
+          description : '12th Cross is a question and answers forum for advertising and related mediums',
+          image : 'image',
+          twitter : self.config.twitter,
+          facebook : self.config.facebook,
+          medias : medias
+        });
       });
     }
+    else
     if(toolName == 'cafe')
     {
       return res.status(200).json({
@@ -200,10 +227,17 @@ var Common = function()
         facebook : self.config.facebook
       });
     }
-    Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
-      if(err) return res.status(500).json(err);
-      res.status(200).json(result.metaTags);
-    });
+    else
+    {
+      Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+        if(!result) {console.log('Meta error: ',toolName); return res.status(500).json("NOT OK");}
+        Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+          if(err) return res.status(500).json(err);
+          result.metaTags.medias = medias;
+          return res.status(200).json(result.metaTags);  
+        });
+      });
+    }
   }
 
   this.getMediaName = function(req, res){
@@ -213,7 +247,6 @@ var Common = function()
       res.status(200).json({medias:medias});
     });
   };
-
 
   this.saveCampaigns =function(req, res){
     // create a new campaign
