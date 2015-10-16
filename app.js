@@ -54,7 +54,7 @@ app.use(cors({
 	]
 }));
 
-//mongoose.connect(config.mongoUrl);
+mongoose.connect(config.mongoUrl);
 
 // CONNECTION EVENTS
 // When successfully connected
