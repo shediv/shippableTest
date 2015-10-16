@@ -56,6 +56,28 @@ app.use(cors({
 
 mongoose.connect(config.mongoUrl);
 
+// CONNECTION EVENTS
+// When successfully connected
+mongoose.connection.on('connected', function () {
+  mongooseLog('Connection open to ' + server.mongoUrl);
+});
+
+// If the connection throws an error
+mongoose.connection.on('error',function (err) {
+  mongooseLog('Connection error: ' + err);
+});
+
+// When the connection is disconnected
+mongoose.connection.on('disconnected', function () {
+  mongooseLog('Connection disconnected');
+});
+
+function mongooseLog(data) {
+  fs.appendFile('mongooseLog.txt', new Date()+": "+data+"\r\n", function (err) {
+    if(err) return console.log(err);
+  });
+}
+
 app.use(logger('dev'));
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
