@@ -54,12 +54,12 @@ app.use(cors({
 	]
 }));
 
-mongoose.connect(config.mongoUrl);
+//mongoose.connect(config.mongoUrl);
 
 // CONNECTION EVENTS
 // When successfully connected
 mongoose.connection.on('connected', function () {
-  mongooseLog('Connection open to ' + server.mongoUrl);
+  mongooseLog('Connection open to ' + config.mongoUrl);
 });
 
 // If the connection throws an error
