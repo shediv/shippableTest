@@ -123,7 +123,8 @@ var Search = function()
       }
       closest.sort(function(a,b){ return a.views < b.views });
       others.sort(function(a,b){ return a.views < b.views });
-      return [].concat(closest, others);
+      closest = [].concat(closest);
+      return closest.concat(others);
     };
 
     self.searchTwelthCross = function(query, callback){
