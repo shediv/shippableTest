@@ -40,7 +40,7 @@ var Search = function()
         'urlSlug' : 1,
         'logo' : 1,
         'toolId' : 1,
-        'views' : 1,
+        'uniqueViews' : 1,
         //For Cinema
         'theatreName' : 1,
         'resultMallName' : 1,
@@ -119,12 +119,12 @@ var Search = function()
       var others = [];
       for(i in medias)
       {
+        console.log()
         if(self.nameQuery.test(medias[i].name)) closest.push(medias[i]);
         else others.push(medias[i]);
       }
-      console.log(self.nameQuery);
-      closest.sort(function(a,b){ return a.views < b.views });
-      others.sort(function(a,b){ return a.views < b.views });
+      closest.sort(function(a,b){ return parseInt(b.uniqueViews) - parseInt(a.uniqueViews) });
+      others.sort(function(a,b){ return parseInt(b.uniqueViews) - parseInt(a.uniqueViews) });
       return [].concat(closest,others);
     };
 
