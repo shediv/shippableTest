@@ -13,6 +13,7 @@ var Search = function()
   this.getResults = function(req, res){
     Tools.distinct('name',{},function(err, tools){
       var queryTerms = req.query.q;
+      self.nameQuery = '';
       queryTerms = queryTerms.split(' ');
       var query = [];
       for(i in queryTerms)
