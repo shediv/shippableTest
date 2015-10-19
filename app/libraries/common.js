@@ -2,13 +2,14 @@ var Common = function()
 {
 	var Media = require('../models/media').Media;
 	var TwelthCross = require('../models/12thCross').TwelthCross;
-  var Cafe = require('../models/cafe').Cafe;
+  	var Cafe = require('../models/cafe').Cafe;
 	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
 	var Tools = require('../models/tool').Tools;
 	var Products = require('../models/product').Products;
 	var Geography = require('../models/geography').Geography;
 	var Category = require('../models/category').Category;
 	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
+	var User = require('../models/user').User;
 	var nodemailer = require('nodemailer');
 
 	var scope = this;
@@ -19,6 +20,13 @@ var Common = function()
 			for(var i = 0; i < results.length; i++)
 				categoryNames[results[i]._id] = results[i].name;
 			callback(err, categoryNames);
+		});
+	};
+
+	this.getUserInfo = function(questionUserIds, callback) {
+		User.find({_id : {$in: questionUserIds}}).lean().exec(function(err, userInfo){
+			for(i in userInfo) userInfo[userInfo[i]._id] = userInfo[i];							
+			callback(err, userInfo);
 		});
 	};
 

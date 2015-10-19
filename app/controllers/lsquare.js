@@ -4,18 +4,21 @@ var Lsquare = function()
   var CommonLib = require('../libraries/common').Common;
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
+  var Lsquare = require('../models/lsquare').Lsquare;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+
 
   var imagick = require('imagemagick');
   
   this.params = {};
   var self = this;
+  var fs = require('fs');
+  var path = require('path');
 
   this.getLsquare = function(req, res){
-    //self.params = JSON.parse(req.query.params);
-    res.status(200).json("result");
+    //self.params = JSON.parse(req.query.params);    
     async.waterfall([
       function(callback)
       {
@@ -42,25 +45,31 @@ var Lsquare = function()
 
       query.projection = {
         '_id' : 1,
-        'urlSlug' : 1,
-        'name' : 1,
-        'answer' : 1,
-        'createdBy' : 1
+        'question' : 1,
+        'description' : 1,
+        'url_slug' : 1,                
+        'tags' : 1,
+        'views' : 1,
+        'createdAt' : 1,
+        'active' : 1,
+        'createdBy' : 1,
+        'answers' : 1
       };
 
-      query.match.isActive = 1;
+      query.match.active = 1;
       //query.match.toolId = self.toolId;
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){
-      var data = []; 
+    self.sortFilteredMedia = function(query, callback){      
+      var data = [];
+      var user = []; 
       async.parallel({
         count : function(callbackInner)
         {          
-          Media.aggregate(
+          Lsquare.aggregate(
             {$match : query.match},
-            {$group: { _id : null, count: {$sum: 1} }},
+            {$group: { _id : "url_slug", count: {$sum: 1} }},
             function(err, result)
             {
               if(result[0] === undefined) count = 0;
@@ -74,30 +83,27 @@ var Lsquare = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
-            case 'score': query.sortBy = { 'score' : -1}; break;
+            //case 'score': query.sortBy = { 'score' : -1}; break;
           }
           query.sortBy._id = 1;
-          Media.aggregate(
+          Lsquare.aggregate(
             {$match: query.match}, {$sort: query.sortBy},
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
             {
               var questionUserIds = [];
-              for(i in results) { questionUserIds.push(results[i].userId); }
+              for(i in results) { questionUserIds.push(results[i].createdBy); }
               CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
-                for(i in results)
-                  results[i].aksedBy = userInfo[results[i].aksedBy];
-                callbackInner(err, results);
+                for(i in results) results[i].createdBy = userInfo[results[i].createdBy];
+                callbackInner(err, results);                  
               });                  
-
-               callbackInner(err, results);
             }
           );
         }
       },
       function(err, results) 
-      {        
+      {                
         callback(err, results);
       });
     };
@@ -289,6 +295,28 @@ var Lsquare = function()
       tool: self.toolName
     };
     CommonLib.uniqueVisits(visitor);
+  };
+
+  this.dataImport = function(req, res){    
+    Lsquare.find({}).lean().limit(15).exec(function(err, doc){
+      return res.send(doc);
+    
+    });
+    var path = 'public/bestRate/lsqaure_data.json';
+    var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
+
+    // for(i in obj){
+    //   //return res.status(200).json(obj[i]);
+    //   var newLsquare = Lsquare(obj[i]);           
+    //       // save the Media
+    //       newLsquare.save(function(err) {
+    //         if(err) return res.status(500).json(err);
+    //         //res.status(200).json("Cafe Created Successfully");
+    //       });
+    // }
+
+    // console.log(obj.length);
+
   };
 };
 
