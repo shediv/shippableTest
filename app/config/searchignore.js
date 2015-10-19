@@ -1,6 +1,6 @@
 var searchIgnore = [
   "a",
-  "able",
+  //"able",
   "about",
   "above",
   "according",
