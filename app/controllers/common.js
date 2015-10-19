@@ -8,6 +8,7 @@ var Common = function()
   var nodeMailer = require('nodemailer');
   var Contact = require('../models/contact').Contact;
   var TwelthCross = require('../models/12thCross').TwelthCross;
+  var Cafe = require('../models/cafe').Cafe;
   var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
   var SearchIgnore = require('../config/searchignore.js');
   this.config = require('../config/config.js');
@@ -120,7 +121,7 @@ var Common = function()
         TwelthCross.aggregate(
           {$match: {"urlSlug": { $exists: 1} }},
           //{$skip : 0}, {$limit: 10},
-          { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
+          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
           { $group : { _id : "$url"}},
           function(error, twelthCross)
           {
@@ -150,18 +151,50 @@ var Common = function()
             });
           }
         );
+      },
+      cafe : function(callbackInner)
+      {
+        Cafe.aggregate(
+          {$match: {"url": { $exists: 1} }},
+          //{$skip : 0}, {$limit: 10},
+          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/chakra/redirect?url=", "$url" ] } } },
+          { $group : { _id : "$url"}},
+          function(error, cafe)
+          {
+            for(i in cafe) cafe[i] = cafe[i]._id;
+            callbackInner(error, cafe);
+          }
+        );
+      },
+      tool : function(callbackInner)
+      {
+        Tools.aggregate(
+          {$match: {"name": { $exists: 1} }},
+          //{$skip : 0}, {$limit: 10},
+          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/", "$name" ] } } },
+          { $group : { _id : "$url"}},
+          function(error, tool)
+          {
+            for(i in tool) tool[i] = tool[i]._id;
+            callbackInner(error, tool);
+          }
+        );
       }
     },
     function(err, results)
     {
       var data = [];
+      var toolUrl = [];
       if(err) return res.status(500).json(err);
       for(i in results.media)
       {
         for(j in results.media[i].medias)
-          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
+          data.push('http://www.'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
       }
+      toolUrl = ['http://www.themediaant.com/magazine', 'http://www.themediaant.com/cinema', 'http://www.themediaant.com/newspaper', 'http://www.themediaant.com/radio', 'http://www.themediaant.com/television', 'http://www.themediaant.com/outdoor', 'http://www.themediaant.com/airport', 'http://www.themediaant.com/digital', 'http://www.themediaant.com/nontraditional'];
       data = data.concat(results.twelthCross);
+      data = data.concat(results.cafe);
+      data = data.concat(results.tool);
       res.status(200).json({url:data, count:data.length});
     });
   };
@@ -174,14 +207,18 @@ var Common = function()
     };
     CommonLib.uniqueVisits(visitor);
 
-    return res.status(200).json({
-      title : 'The Media Ant',
-      description : 'The Media Ant is a paltform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
-      image : 'image',
-      twitter : self.config.twitter,
-      facebook : self.config.facebook,
-      keyWords : []
-    });    
+    Tools.distinct('name', {}, function(err, tools){
+      return res.status(200).json({
+        title : 'The Media Ant',
+        description : 'The Media Ant is a platform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
+        image : 'image',
+        twitter : self.config.twitter,
+        facebook : self.config.facebook,
+        keyWords : [],
+        tools : tools
+      });
+    });
+    
   };
 
   this.getMetaTags = function(req, res){
@@ -223,6 +260,7 @@ var Common = function()
     else
     {
       Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+        if(!result) {console.log('Meta error: ',toolName); return res.status(500).json("NOT OK");}
         Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
           if(err) return res.status(500).json(err);
           result.metaTags.medias = medias;
