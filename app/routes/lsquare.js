@@ -8,7 +8,7 @@ var LsquareCtrl = new (require('../controllers/lsquare')).Lsquare();
 
 router.get("/", LsquareCtrl.getLsquare);
 router.get("/filters", LsquareCtrl.getFilters);
-//router.get("/addQuestion", LsquareCtrl.addQuestion);
+//router.post("/addQuestion", LsquareCtrl.addQuestion);
 router.get("/:urlSlug", LsquareCtrl.show);
 
 module.exports = router;
