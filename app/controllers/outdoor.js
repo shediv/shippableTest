@@ -252,6 +252,7 @@ var Outdoor = function()
         if(results.about) {
           description = results.about;
         }else {
+          if(!results.geographyData.locality) console.log(results.geographyData);
           description = "This Hoarding is located at "+results.geographyData.locality+", "+results.geographyData.city;
         }
         var metaTags = {
