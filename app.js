@@ -31,7 +31,7 @@ var bestRates = require('./app/routes/bestRates');
 var cafe = require('./app/routes/cafe');
 var mtwenty = require('./app/routes/mtwenty');
 var parseExcel = require('./app/routes/parseExcel');
-
+var freelancer = require('./app/routes/freelancer');
 var app = express();
 
 // view engine setup
@@ -125,6 +125,8 @@ app.use('/bestRates', bestRates);
 app.use('/cafe', cafe);
 app.use('/mtwenty', mtwenty);
 app.use('/parseExcel', parseExcel);
+app.use('/freelancer', freelancer);
+
 
 app.use('/', routes);
 
