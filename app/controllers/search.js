@@ -119,7 +119,6 @@ var Search = function()
       var others = [];
       for(i in medias)
       {
-        console.log()
         if(self.nameQuery.test(medias[i].name)) closest.push(medias[i]);
         else others.push(medias[i]);
       }

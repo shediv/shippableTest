@@ -107,6 +107,7 @@ var Cinema = function()
       ],
       function(err, geographies)
       {
+        if(err) console.log(err);
         self.buildScreensQuery(geographies[0], callbackMain);
       });
     };
@@ -165,6 +166,7 @@ var Cinema = function()
       {
         var finalMedias = [];
         Media.aggregate(match, {$project:project}, group, function(err, medias){
+          if(err) console.log(err);
           for(key in medias)
           {
             medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
@@ -231,6 +233,7 @@ var Cinema = function()
       project['mediaOptions'] = 1;
       project['dimensions'] = 1;
       Media.aggregate(match, {$project:project}, function(err, medias){
+        if(err) console.log(err);
         if(geographies.length) callbackMain(err, self.populateOffScreenData(medias, geographies));
         else
         {

@@ -2,7 +2,7 @@ var Common = function()
 {
 	var Media = require('../models/media').Media;
 	var TwelthCross = require('../models/12thCross').TwelthCross;
-  	var Cafe = require('../models/cafe').Cafe;
+  var Cafe = require('../models/cafe').Cafe;
 	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
 	var Tools = require('../models/tool').Tools;
 	var Products = require('../models/product').Products;
@@ -38,18 +38,18 @@ var Common = function()
 	};
 
 	this.uniqueVisits = function(visitor){
-		if(visitor.type == 'media') var model = Media;
-		if(visitor.type == '12thcross') var model =  TwelthCross;
-    if(visitor.type == 'tool') var model = Tools;
+    var model = undefined;
+		if(visitor.type == 'media') model = Media;
+		if(visitor.type == '12thcross') model =  TwelthCross;
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
-				if(visitor.type != 'tool') model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
+				if(model) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
 				UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true }).exec();
 			}
 			else
 			{
-				if(visitor.type != 'tool') model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
+				if(model) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
 				visitor.views = 1;
 				var newVisitor = UniqueVisitor(visitor);
 				newVisitor.save();
