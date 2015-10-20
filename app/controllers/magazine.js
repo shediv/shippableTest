@@ -1015,7 +1015,10 @@ var Magazine = function()
       if(err) return res.status(500).json(err);
       for(i in result.medias)
       {
-        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+        if(result.categories[result.medias[i].categoryId])
+          result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+        else
+          result.medias[i].categoryName = '';
       }
       res.status(200).json({medias:result.medias});
     });
