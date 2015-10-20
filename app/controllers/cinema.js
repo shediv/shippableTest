@@ -20,7 +20,7 @@ var Cinema = function()
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
-
+  
   this.getCinemas = function(req, res){
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
