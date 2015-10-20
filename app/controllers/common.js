@@ -45,7 +45,7 @@ var Common = function()
               toolName[i] = qRegExp;
             }
             Media.find({ searchKeyWords:{ $all:toolName } }).lean().exec(function(err, media){
-              if(!media.length) return res.status(404).json("NO MEDIAS FOUND");
+              if(!media.length) return res.status(404).json({status:"NO MEDIAS FOUND"});
               if(media.length == 1)
               {
                 Tools.findOne({ _id:media[0].toolId }).lean().exec(function(err, tool){
@@ -205,7 +205,7 @@ var Common = function()
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
       type: 'common'
     };
-    CommonLib.uniqueVisits(visitor);
+    //CommonLib.uniqueVisits(visitor);
 
     Tools.distinct('name', {}, function(err, tools){
       return res.status(200).json({
@@ -262,7 +262,7 @@ var Common = function()
     else
     {
       Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
-        if(!result) {console.log('Meta error: ',toolName); return res.status(500).json("NOT OK");}
+        if(!result) {console.log('Meta error: ',toolName); return res.status(500).json({status:"NOT OK"});}
         switch(toolName)
         {
           case 'magazine':
