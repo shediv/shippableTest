@@ -916,8 +916,8 @@ var Magazine = function()
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
       Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
-        results['categoryName'] = category.name;
-
+        if(category) results['categoryName'] = category.name;
+        else results['categoryName'] = '';
         if(results.about) {
           description = results.about;
         }else {
@@ -1015,7 +1015,10 @@ var Magazine = function()
       if(err) return res.status(500).json(err);
       for(i in result.medias)
       {
-        result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+        if(result.categories[result.medias[i].categoryId])
+          result.medias[i].categoryName = result.categories[result.medias[i].categoryId];
+        else
+          result.medias[i].categoryName = '';
       }
       res.status(200).json({medias:result.medias});
     });

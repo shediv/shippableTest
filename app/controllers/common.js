@@ -218,7 +218,6 @@ var Common = function()
         tools : tools
       });
     });
-    
   };
 
   this.getMetaTags = function(req, res){
