@@ -157,7 +157,7 @@ var Common = function()
         Cafe.aggregate(
           {$match: {"url": { $exists: 1} }},
           //{$skip : 0}, {$limit: 10},
-          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/chakra/cafe/redirect?url=", "$url" ] } } },
+          { $project: { url: { $concat: [ "http://www.", self.config.appHost,"/chakra/redirect?url=", "$url" ] } } },
           { $group : { _id : "$url"}},
           function(error, cafe)
           {
