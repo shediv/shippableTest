@@ -309,6 +309,7 @@ var _12thCross = function()
     mailOptions.message = req.body.message;
     mailOptions.toolName =  '12thcross';
     mailOptions.appHost = self.config.appHost;
+    mailOptions.date = Date();
     var newContact = Contact(mailOptions);
 
     if(mailOptions.to.email){ emailTo = mailOptions.to.email;} else { emailTo = mailOptions.to.others[0].email;} 
@@ -331,6 +332,7 @@ var _12thCross = function()
               from: decoded.email, // sender address
               to: emailTo, // list of receivers
               cc: decoded.email,
+              bcc : "mukesh@themediaant.com",
               subject: 'Contacting for your service.',
               html: results.html
             }, function(err, responseStatus){
