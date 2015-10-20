@@ -318,7 +318,7 @@ var NonTraditional = function()
   };
 
 
-  this.getMediaOption = function(req, res){    
+  this.getMediaOption = function(req, res){ 
     Media.distinct('mediaOptions',
       { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
       function(error, result) 
