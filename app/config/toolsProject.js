@@ -57,6 +57,7 @@ var toolsProject= {
     'language'     : 1,        
     'logo'         : 1,
     'categoryId'   : 1,
+    'weeklyReach'  : 1,  
     "serviceTaxPercentage" : 1
 	},
 
