@@ -304,7 +304,7 @@ var NonTraditional = function()
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }
-        res.status(200).json({nonTraditional : result, metaTags : metaTags});
+        res.status(200).json({nontraditional : result, metaTags : metaTags});
       });
     });
 
