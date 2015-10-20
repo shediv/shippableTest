@@ -9,6 +9,10 @@ var NonTraditional = new (require('../controllers/nonTraditional')).NonTradition
 router.get("/", NonTraditional.getNonTraditional);
 router.get("/filters", NonTraditional.getFilters);
 router.get("/mediaOption", NonTraditional.getMediaOption);
+// router.get("/bigSearch", NonTraditional.bigSearch);
 router.get("/:urlSlug", NonTraditional.show);
+
+
+
 
 module.exports = router;
