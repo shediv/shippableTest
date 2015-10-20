@@ -127,6 +127,7 @@ var Cinema = function()
         "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
       };
       var project = ToolsProject[self.toolName];
+
       if(self.params.filters.mediaType == 'onScreen')
         self.fetchOnScreenData(geographies, match, group, project, callbackMain);
       else
