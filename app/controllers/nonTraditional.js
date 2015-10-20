@@ -10,8 +10,9 @@ var NonTraditional = function()
   var SubCategory = require('../models/subCategory').SubCategory;
   var ToolsProject = require('../config/toolsProject.js');
   var underscore = require('underscore');
-  
+
   this.params = {};
+  this.config = require('../config/config.js');
   this.toolName = "nontraditional";
   var self = this;
 
