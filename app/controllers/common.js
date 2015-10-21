@@ -262,7 +262,7 @@ var Common = function()
     else
     {
       Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
-        if(!result) {console.log('Meta error: ',toolName); return res.status(200).json({status:"NOT OK"});}
+        if(!result) {console.log('Meta error: ',toolName); return res.status(404).json({status:"NOT OK"});}
         switch(toolName)
         {
           case 'magazine':
