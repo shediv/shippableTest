@@ -5,9 +5,11 @@ var Lsquare = function()
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
+  var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var jwt = require('jsonwebtoken');
 
 
   var imagick = require('imagemagick');
@@ -16,6 +18,10 @@ var Lsquare = function()
   var self = this;
   var fs = require('fs');
   var path = require('path');
+
+  this.params = {};
+  this.config = require('../config/config.js');
+  var self = this;
 
   this.getLsquare = function(req, res){
     //self.params = JSON.parse(req.query.params);    
@@ -158,59 +164,35 @@ var Lsquare = function()
       if(!token) return res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
-        else {
-          var question = {};
-          var url = req.body.question;
-          // convert spaces to '-'
-          url = url.replace(/ /g, "-");
-          // Make lowercase
-          url = url.toLowerCase();
-          // Remove characters that are not alphanumeric or a '-'
-          url = url.replace(/[^a-z0-9-]/g, "");
-          // Combine multiple dashes (i.e., '---') into one dash '-'.
-          url = url.replace(/[-]+/g, "-");
+        else {                  
+            var question = {};
+            var url = req.body.question;
+            // convert spaces to '-'
+            url = url.replace(/ /g, "-");
+            // Make lowercase
+            url = url.toLowerCase();
+            // Remove characters that are not alphanumeric or a '-'
+            url = url.replace(/[^a-z0-9-]/g, "");
+            // Combine multiple dashes (i.e., '---') into one dash '-'.
+            url = url.replace(/[-]+/g, "-");
 
-          question.askedBy = req.body.userId;
-          question.url = req.body.url;
-          question.title = req.body.question;
-          question.description = req.body.description;          
-          question.tags = req.body.tags;
-          question.createdAt = Date();
-          question.editedAt = Date();
-
-          //Image upload
-          var sourcePath = req.file.path;
-          var extension = req.file.originalname.split(".");
-          extension = extension[extension.length - 1];
-          var destPath = "/images/lsquare/"+userId+"/"+req.body.url+"."+extension;
-          var source = fs.createReadStream(sourcePath);
-          var dest = fs.createWriteStream('./public'+destPath);
-          source.pipe(dest);
-
-          source.on('end', function(){
-            imagick.resize({
-            srcPath: './public'+destPath,
-            dstPath: "./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension,
-            width: 200
-          },
-          function(err, stdout, stderr)
-          {
-            if(err) throw err;
-            fs.writeFileSync("./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension, stdout, 'binary');
-            console.log('resized image to fit within 200x200px');
-            fs.unlinkSync(sourcePath);
-
-            question.image = destPath;
-
+            question.createdBy = decoded._id;
+            question.url_slug = url;
+            question.question = req.body.question;
+            question.description = req.body.description;          
+            question.tags = req.body.tags;
+            question.createdAt = Date();
+            question.editedAt = Date();
+            question.views = 0;
+            question.active = 1; 
+            //return  res.status(200).json(question);
             var newQuestion = Lsquare(question);
             newQuestion.save(function(err){
               if(err) return res.status(500).json(err);
               res.status(200).json({newQuestion:newQuestion._id});
             });          
-          });          
-        });
-      }      
-    });
+          }          
+        });            
   };
 
   this.addAnswer = function(req, res){
@@ -220,44 +202,14 @@ var Lsquare = function()
         if(err) res.status(401).json("Invalid Token");
         else {
           var answer = {};
-          answer.answeredBy = req.body.userId;
-          answer.answer = req.body.answer;
-          answer.createdAt = Date();
-          answer.editedAt = Date();
-
-          //Image upload
-          var sourcePath = req.file.path;
-          var extension = req.file.originalname.split(".");
-          extension = extension[extension.length - 1];
-          var destPath = "/images/lsquare/"+userId+"/"+req.body.url+"."+extension;
-          var source = fs.createReadStream(sourcePath);
-          var dest = fs.createWriteStream('./public'+destPath);
-          source.pipe(dest);
-
-          source.on('end', function(){
-            imagick.resize({
-            srcPath: './public'+destPath,
-            dstPath: "./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension,
-            width: 200
-          },
-          function(err, stdout, stderr)
-          {
-            if(err) throw err;
-            fs.writeFileSync("./public/images/lsquare/"+userId+"/"+req.body.url+"."+extension, stdout, 'binary');
-            console.log('resized image to fit within 200x200px');
-            fs.unlinkSync(sourcePath);
-
-            answer.image = destPath;
-
-            var newQuestion = Lsquare(question);
-            Lsquare.findOneAndUpdate({_id: req.body.id}, answer, {upsert:true}, function(err, doc){
+          answer = req.body.answer;
+            var newAnswer = Lsquare(answer);
+            Lsquare.findOneAndUpdate({_id: req.body.answer._id}, newAnswer, {upsert:true}, function(err, doc){
               if (err) return res.send(500, { error: err });
               return res.status(200).json("succesfully updated");
             });          
-          });          
-        });
-      }      
-    });
+          }          
+      });
   };  
 
   this.upvoteAnswer = function(req, res){
@@ -281,7 +233,7 @@ var Lsquare = function()
   };
 
   this.show = function(req, res){
-    Lsquare.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+    Lsquare.findOne({url_slug: req.params.urlSlug}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       res.status(200).json({lsquare : results});
@@ -297,27 +249,57 @@ var Lsquare = function()
     CommonLib.uniqueVisits(visitor);
   };
 
-  this.dataImport = function(req, res){    
-    Lsquare.find({}).lean().limit(15).exec(function(err, doc){
-      return res.send(doc);
-    
-    });
-    var path = 'public/bestRate/lsqaure_data.json';
-    var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
+  this.dataImport = function(req, res){ 
+  
+    // //........Insert Questions  
+    // var path = 'public/bestRate/lsqaure_Question.json';
+    // var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
 
     // for(i in obj){
-    //   //return res.status(200).json(obj[i]);
-    //   var newLsquare = Lsquare(obj[i]);           
+    //   var data = obj[i];
+    //   data['oldId'] = parseInt(data['oldId']);     
+    //   var newLsquare = Lsquare(obj[i]);
+    //   //return res.status(200).json(newLsquare);           
     //       // save the Media
     //       newLsquare.save(function(err) {
-    //         if(err) return res.status(500).json(err);
-    //         //res.status(200).json("Cafe Created Successfully");
+    //         if(err) return res.status(500).json(err);  
+    //         return res.status(200).json(newLsquare._id);
     //       });
     // }
 
+    //........Insert answers  
+    var path = 'public/bestRate/answers_list.json';
+    var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
+    //return res.status(200).json(obj.length);
+    obj = obj.reverse();
+    var iD;
+
+    for(i in obj){
+      var ID = obj[i].oldQuestionID
+      var data = obj[i];      
+      Lsquare.findOne({oldId : ID}).lean().exec(function(err, question){        
+        if(question){
+        iD = question._id;}
+
+        var newLsquare = LsquareAnswer(data);
+        return res.status(200).json({data : data, obj: obj[i], ID:question});
+        // save the Media
+          newLsquare.save(function(err) {
+            if(err) return res.status(500).json(err);  
+            return res.status(200).json(newLsquare._id);
+          });
+        //return res.status(200).json(data);        
+      });
+
+          
+      // var newLsquare = Lsquare(obj[i]);
+      // //return res.status(200).json(newLsquare);           
+          
+    }
+
     // console.log(obj.length);
 
-  };
+  };  
 };
 
 module.exports.Lsquare = Lsquare;
