@@ -12,7 +12,7 @@ router.get('/isToolExists', CommonCtrl.isToolExists);
 router.post('/customerQuery', CommonCtrl.addCustomerQuery);
 router.post('/contact', CommonCtrl.contactMail);
 router.get('/sitemap', CommonCtrl.getSiteMap);
-router.get('/sitemap2', CommonCtrl.getSiteMap2);
+router.get('/sitemap2', CommonCtrl.getSiteMapCategory);
 router.get('/metaTags', CommonCtrl.getCommonMetaTags);
 router.get('/metaTags/:toolName', CommonCtrl.getMetaTags);
 router.get('/mediaName', CommonCtrl.getMediaName);
