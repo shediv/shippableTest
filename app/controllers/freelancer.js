@@ -42,7 +42,7 @@ var Freelancer = function()
     
       var mailOptions = {
           email: freelancer.email,
-          to : "harish@themediaant.com",
+          to : "mukesh@themediaant.com",
           name: {
             first: CommonLib.capitalizeFirstLetter(freelancer.firstName),
             last: CommonLib.capitalizeFirstLetter(freelancer.lastName)
