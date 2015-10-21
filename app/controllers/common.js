@@ -417,13 +417,13 @@ var Common = function()
           else
           {
             return res.status(200).json({
-              title : 'Cafe || The Media Ant',
-              description : 'Cafe, browse popular URLs and articles<br><b>'+cafe.title+'</b>',
+              title : cafe.title + 'Cafe || The Media Ant',
+              description : cafe.title + ' Cafe, browse popular URLs and articles',
               image : 'image',
               twitter : self.config.twitter,
               facebook : self.config.facebook,
               medias : [],
-              keyWords : []
+              keyWords : [cafe.title]
             });
           }
         });
