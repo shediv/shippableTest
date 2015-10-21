@@ -11,7 +11,10 @@ var Common = function()
   var Cafe = require('../models/cafe').Cafe;
   var SaveCampaigns = require('../models/saveCampaigns').SaveCampaigns;
   var SearchIgnore = require('../config/searchignore.js');
+  var Category = require('../models/category').Category;
+  var Geography = require('../models/geography').Geography;
   this.config = require('../config/config.js');
+  var underscore = require('underscore');
   var self = this;
 
   this.transporter = nodeMailer.createTransport({
@@ -198,6 +201,172 @@ var Common = function()
       res.status(200).json({url:data, count:data.length});
     });
   };
+
+  this.getSiteMap2 = function(req, res){
+    var cinemaChainData = {};
+    async.parallel({
+      magazine : function(callbackInner)
+      {
+        Media.aggregate(
+        {$match: {toolId:"55755d6c66579f76671b1a1d", isActive : 1}},
+        {$group : { _id : '$categoryId', count : {$sum : 1}}},
+        function(err, results) 
+        {
+          var catIds = [];
+          results.map(function(o){ catIds.push(o._id); });
+          Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){            
+            for(i in cats) {
+              // var name = cats[i].name.toLowerCase();
+              // name = name.split(' ').join('-');
+              cats[i] = 'http://www.themediaant.com/magazine?category='+cats[i].name;
+            }
+            callbackInner(err, cats);
+          });
+        }
+        );
+      },      
+      cinemaChain : function(callbackInner)
+      {
+        Media.aggregate(
+          {$match: {toolId:"55755d8a66579f76671b1a1e", "cinemaChain": { $exists: 1}, "cinemaChain" : { "$ne": "Single Screen" }, isActive : 1}},
+          {$group : { _id : '$cinemaChain', count : {$sum : 1}}},
+          function(error, results)
+          {
+            for(i in results) {              
+              results[i] = 'http://www.themediaant.com/cinema?cinemaChain='+results[i]._id;                          
+              //results[i] = results[i]._id;                          
+            }
+            callbackInner(error, results);
+          }
+          );
+      },
+      cinemaCity : function(callbackInner)
+      {
+        Media.aggregate(
+          {$match: {toolId:"55755d8a66579f76671b1a1e", "geography": { $exists: 1}, isActive : 1}},
+          {$group : { _id : '$geography', count : {$sum : 1}}},
+          function(error, results)
+          {
+            var geographyIDs = [];
+            var citiesList = [];
+            for(i in results){
+              for (var key in results[i]._id) {
+              if (results[i]._id.hasOwnProperty(key)) {
+                geographyIDs.push(results[i]._id[key]);  
+                }
+              }
+            }
+
+            Geography.find({ _id:{ $in:geographyIDs } }).distinct('city').lean().exec(function(err, cities){
+              for(i in cities){                
+              var name = cities[i].toLowerCase();
+              name = name.split(' ').join('-');
+              results[i] = 'http://www.themediaant.com/cinema?city='+cities[i];   
+              }                
+              callbackInner(error, results);
+            });            
+          }
+          );
+      },
+      newspaper : function(callbackInner)
+      {
+        Media.aggregate(
+        {$match: {toolId:"55e8a3df44ae8f1f87fb6025", isActive : 1}},
+        {$group : { _id : '$categoryId', count : {$sum : 1}}},
+        function(err, results) 
+        {
+          var catIds = [];
+          results.map(function(o){ catIds.push(o._id); });
+          Category.find({_id : {$in: catIds}},'name').lean().exec(function(err, cats){            
+            for(i in cats) {
+              var name = cats[i].name.toLowerCase();
+              name = name.split(' ').join('-');
+              cats[i] = 'http://www.themediaant.com/newspaper?category='+cats[i].name;
+            }
+            callbackInner(err, cats);
+          });
+        }
+        );
+      },
+      radioStation : function(callbackInner)
+      {
+        Media.aggregate(
+        {$match: {toolId:"55755da066579f76671b1a1f", isActive : 1}},
+        {$group : { _id : '$station', count : {$sum : 1}}},
+        function(err, results) 
+        {                    
+          for(i in results) {
+            //var name = results[i]._id.toLowerCase();
+            //name = name.split(' ').join('-');
+            results[i] = 'http://www.themediaant.com/radio?station='+results[i]._id;
+          }
+          callbackInner(err, results);
+        }
+        );
+      },
+      radioCity : function(callbackInner)
+      {
+        Media.aggregate(
+        {$match: {toolId:"55755da066579f76671b1a1f", isActive : 1}},
+        {$group : { _id : '$city', count : {$sum : 1}}},
+        function(err, results) 
+        {            
+          for(i in results) {
+            //var name = results[i]._id.toLowerCase();
+            //name = name.split(' ').join('-');
+            results[i] = 'http://www.themediaant.com/radio?city='+results[i]._id;
+          }
+          callbackInner(err, results);
+        }
+        );
+      }
+    },
+    function(err, results)
+    {
+      // var finalData = [];
+      // finalData = finalData.push(results.magazine);
+      // finalData = finalData.push(results.cinemaChain);
+      // finalData = finalData.push(results.cinemaCity);
+      // finalData = finalData.push(results.newspaper);
+      // finalData = finalData.push(results.radioStation);
+      // finalData = finalData.push(results.radioCity);      
+      //console.log(results.cinemaChain.length);
+      //..res.status(200).json({radioStation:results.radioStation, radioStationCount:results.radioStation.length, radioCity:results.radioCity, magazinurl:results.magazine, magazinecount:results.magazine.length, cinemacinemaChainurl:results.cinemaChain, cinemacinemaChaincount:results.cinemaChain.length, cinemacinemaCityurl:results.cinemaCity, cinemacinemaCitycount:results.cinemaCity.length, newspaper:results.newspaper, newspaperCount:results.newspaper.length});
+      //res.status(200).json({radioStation:results.radioStation, radioStationCount:results.radioStation.length, radioCity:results.radioCity, magazinurl:results.magazine, magazinecount:results.magazine.length, newspaper:results.newspaper, newspaperCount:results.newspaper.length});
+      res.status(200).json({url : results});
+    });
+  };
+
+  self.getCityForCinemaChain = function(cinemaChain){
+    Media.aggregate(
+          {$match: {toolId:"55755d8a66579f76671b1a1e", "geography": { $exists: 1}, isActive : 1}},
+          {$group : { _id : '$geography', count : {$sum : 1}}},
+          function(error, results)
+          {
+            return 1;
+            // var newgeographyIDs = [];
+            // var citiesList = [];
+            // for(i in results){
+            //   for (var key in results[i]._id) {
+            //   if (results[i]._id.hasOwnProperty(key)) {
+            //     geographyIDs.push(results[i]._id[key]);  
+            //     }
+            //   }
+            // }
+
+            // Geography.find({ _id:{ $in:geographyIDs } }).distinct('city').lean().exec(function(err, cities){
+            //   for(i in cities){                
+            //   var name = cities[i].toLowerCase();
+            //   name = name.split(' ').join('-');
+            //   results[i] = 'http://www.themediaant.com/cinema?city='+cities[i];   
+            //   }                
+            //   callbackInner(error, results);
+            // });            
+          }
+          );
+    
+    
+  }
 
   this.getCommonMetaTags = function(req, res){
     var visitor = {
