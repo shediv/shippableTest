@@ -11,6 +11,7 @@ router.get("/filters", LsquareCtrl.getFilters);
 router.get("/dataImport", LsquareCtrl.dataImport);
 router.post("/addQuestion", LsquareCtrl.addQuestion);
 router.post("/addAnswer", LsquareCtrl.addAnswer);
+//router.get("/addQuestion", LsquareCtrl.addQuestion);
 router.get("/:urlSlug", LsquareCtrl.show);
 
 module.exports = router;

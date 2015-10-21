@@ -329,7 +329,7 @@ var User = function()
 			User.update( { _id:user._id },{ password:md5(req.body.newPassword) }, function(err, result){
 				if(err) return res.status(404).json("password not updated :"+ err);
 		    res.status(200).json("OK");
-			});
+			});	
 		})
 	}
 
@@ -355,21 +355,21 @@ var User = function()
 		}
 	};
 
-		self.userLoginInfo = function(result){
-		  var userDetails= {
-		  	userId : result._id.toString(),
-		  	userAgent : result.userAgent,
-		  	clientIPAddress : result.clientIPAddress,
-		  	timeStamp : new Date()
-		  };
+	self.userLoginInfo = function(result){
+	  var userDetails= {
+	  	userId : result._id.toString(),
+	  	userAgent : result.userAgent,
+	  	clientIPAddress : result.clientIPAddress,
+	  	timeStamp : new Date()
+	  };
 
-		  var userlogs = UsersLogs(userDetails);
+	  var userlogs = UsersLogs(userDetails);
 
-		  userlogs.save( function(err) {
-		  	if(err)return err;
-		  	else return "user logged";
-		  });
-		};
+	  userlogs.save( function(err) {
+	  	if(err)return err;
+	  	else return "user logged";
+	  });
+	};
 }
 
 module.exports.User = User;

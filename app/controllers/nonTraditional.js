@@ -10,15 +10,12 @@ var NonTraditional = function()
   var SubCategory = require('../models/subCategory').SubCategory;
   var ToolsProject = require('../config/toolsProject.js');
   var underscore = require('underscore');
-  
-  this.params = {};
-  this.toolName = "nontraditional";
-  var self = this;
 
   this.params = {};
+  this.toolName = "nontraditional";
   this.config = require('../config/config.js');
   var self = this;
-  
+
   Tools.findOne({name: this.toolName}, function(err, result){
     self.toolId = result._id.toString();
   });
@@ -36,7 +33,7 @@ var NonTraditional = function()
       },
       function(query, callback)
       {
-    self.sortFilteredMedia(query, callback);
+        self.sortFilteredMedia(query, callback);
       }
     ],
     function (err, result)
@@ -83,10 +80,9 @@ var NonTraditional = function()
       }      
 
       var match = { $or:or, pincode : { $exists:1 } };
-
       async.series([
         function(callbackInner){
-          Geography.distinct('pincode', match, function(err, pincodes){
+          Geography.distinct('pincode', match, function(err, pincodes){   /*get pincodes in an array*/
             Geography.find({pincode:{$in:pincodes}}).lean().exec(function(err, results){
               var geographies = [];
               if(!results) return callbackInner(err, geographies);
@@ -98,22 +94,22 @@ var NonTraditional = function()
               callbackInner(err, geographies); 
             });
           });
-        }
+        } 
       ],
       function(err, geographies)
       {
-        callback(err, geographies[0]);
+       callback(err, geographies[0]);
       });
     };
 
     self.applyFilters = function(geographies){
+
       var query = {};
       query.sortBy = self.params.sortBy || 'views';
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
       query.projection = ToolsProject[self.toolName];
-      
       if(self.params.filters.geographies !== undefined) query.match['geography'] = { $in:self.params.geographyIds };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
       if(self.params.filters.hyperlocal) query.match['hyperLocal'] = self.params.filters.hyperlocal;
@@ -121,6 +117,7 @@ var NonTraditional = function()
       query.match.toolId = self.toolId;
 
       return query;
+
     };
 
     self.sortFilteredMedia = function(query, callback){ 
@@ -307,7 +304,7 @@ var NonTraditional = function()
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }
-        res.status(200).json({nonTraditional : result, metaTags : metaTags});
+        res.status(200).json({nontraditional : result, metaTags : metaTags});
       });
     });
 
@@ -322,21 +319,20 @@ var NonTraditional = function()
   };
 
 
-  this.getMediaOption = function(req, res){    
+  this.getMediaOption = function(req, res){ 
     Media.distinct('mediaOptions',
-        { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
-        function(error, result) 
-        {          
-          var keys = [];
-          for(i in result){
-            keys = keys.concat(Object.keys(result[i]));
-          }          
-          var mediaOptions = underscore.uniq(keys)
-          return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
-        });                 
+      { toolId:"55f180b344aef45d8f1531d5", isActive:1 },
+      function(error, result) 
+      {          
+        var keys = [];
+        for(i in result){
+          keys = keys.concat(Object.keys(result[i]));
+        }          
+        var mediaOptions = underscore.uniq(keys)
+        return res.status(200).json({mediaOptions : mediaOptions, count : mediaOptions});
+      }
+    );                 
   };
-
-
 };
 
 module.exports.NonTraditional = NonTraditional;
