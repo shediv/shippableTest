@@ -46,8 +46,7 @@ var Freelancer = function()
           name: {
             first: CommonLib.capitalizeFirstLetter(freelancer.firstName),
             last: CommonLib.capitalizeFirstLetter(freelancer.lastName)
-          },
-          appHost:self.config.appHost
+          }
       };
 
       var emailTemplate = new EmailTemplate(path.join(templatesDir, 'freelancerRegister'));

@@ -12,8 +12,8 @@ var NonTraditional = function()
   var underscore = require('underscore');
 
   this.params = {};
-  this.config = require('../config/config.js');
   this.toolName = "nontraditional";
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
