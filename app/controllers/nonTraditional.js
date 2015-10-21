@@ -13,6 +13,7 @@ var NonTraditional = function()
   
   this.params = {};
   this.toolName = "nontraditional";
+  this.config = require('../config/config.js');
   var self = this;
 
   Tools.findOne({name: this.toolName}, function(err, result){
