@@ -42,12 +42,11 @@ var Freelancer = function()
     
       var mailOptions = {
           email: freelancer.email,
-          to : "mukesh@themediaant.com",
+          to : "harish@themediaant.com",
           name: {
             first: CommonLib.capitalizeFirstLetter(freelancer.firstName),
             last: CommonLib.capitalizeFirstLetter(freelancer.lastName)
-          },
-          appHost:self.config.appHost
+          }
       };
 
       var emailTemplate = new EmailTemplate(path.join(templatesDir, 'freelancerRegister'));
