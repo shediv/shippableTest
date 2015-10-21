@@ -10,8 +10,9 @@ var NonTraditional = function()
   var SubCategory = require('../models/subCategory').SubCategory;
   var ToolsProject = require('../config/toolsProject.js');
   var underscore = require('underscore');
-  
+
   this.params = {};
+  this.config = require('../config/config.js');
   this.toolName = "nontraditional";
   this.config = require('../config/config.js');
   var self = this;
@@ -304,7 +305,7 @@ var NonTraditional = function()
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }
-        res.status(200).json({nonTraditional : result, metaTags : metaTags});
+        res.status(200).json({nontraditional : result, metaTags : metaTags});
       });
     });
 
