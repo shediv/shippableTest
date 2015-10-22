@@ -306,7 +306,8 @@ var Common = function()
           });
         }*/
       },function(err, results){
-        callbackInner(err, [].concat(results.cinemaChain, results.city, results.cityPlusCinemaChain));
+        //callbackInner(err, [].concat(results.cinemaChain, results.city, results.cityPlusCinemaChain));
+        callbackInner(err, [].concat(results.city));
       });
     };  
 
