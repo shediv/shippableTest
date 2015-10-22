@@ -231,11 +231,7 @@ var Common = function()
     },
     function(err, results)
     {
-    
-      return res.status(200).json(results);
-      //..res.status(200).json({radioStation:results.radioStation, radioStationCount:results.radioStation.length, radioCity:results.radioCity, magazinurl:results.magazine, magazinecount:results.magazine.length, cinemacinemaChainurl:results.cinemaChain, cinemacinemaChaincount:results.cinemaChain.length, cinemacinemaCityurl:results.cinemaCity, cinemacinemaCitycount:results.cinemaCity.length, newspaper:results.newspaper, newspaperCount:results.newspaper.length});
-      //res.status(200).json({radioStation:results.radioStation, radioStationCount:results.radioStation.length, radioCity:results.radioCity, magazinurl:results.magazine, magazinecount:results.magazine.length, newspaper:results.newspaper, newspaperCount:results.newspaper.length});
-      res.status(200).json({url : results.cinemaChain.length});
+      return res.status(200).json({url:[].concat(results.magazine, results.newspaper, results.radio, results.cinema)});
     });
   };
 
@@ -310,9 +306,7 @@ var Common = function()
           });
         }
       },function(err, results){
-        console.log(results.cityPlusCinemaChain);
         callbackInner(err, [].concat(results.cinemaChain, results.city, results.cityPlusCinemaChain));
-        //callbackInner(err, [].concat(results.cityPlusCinemaChain));
       });
     };  
 
