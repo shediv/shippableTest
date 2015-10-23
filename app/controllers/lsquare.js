@@ -24,7 +24,7 @@ var Lsquare = function()
   var self = this;
 
   this.getLsquare = function(req, res){
-    //self.params = JSON.parse(req.query.params);    
+    self.params = JSON.parse(req.query.params);    
     async.waterfall([
       function(callback)
       {
@@ -59,7 +59,8 @@ var Lsquare = function()
         'createdAt' : 1,
         'active' : 1,
         'createdBy' : 1,
-        'answers' : 1
+        'answers' : 1,
+        'oldId' : 1
       };
 
       query.match.active = 1;
@@ -98,12 +99,28 @@ var Lsquare = function()
             {$project: query.projection}, 
             function(err, results) 
             {
-              var questionUserIds = [];
-              for(i in results) { questionUserIds.push(results[i].createdBy); }
-              CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
-                for(i in results) results[i].createdBy = userInfo[results[i].createdBy];
-                callbackInner(err, results);                  
-              });                  
+              
+            self.getQuestionAnswers(results, callbackInner);
+            //   var questionUserIds = [];
+            //   var questionIds = [];
+            //   // var questionIds = [];
+            //   for(i in results) { questionUserIds.push(results[i].createdBy);}              
+            //   CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
+            //   for(i in results) {
+            //     results[i].createdBy = userInfo[results[i].createdBy];
+            //     CommonLib.getAnswers(results[i].oldId, function(err, answers){
+            //       console.log(answers);
+            //       results[i].answers = answers;
+
+            //     })
+
+
+            //   }  
+            //   callbackInner(err,results);  
+            // })
+
+              
+
             }
           );
         }
@@ -113,6 +130,48 @@ var Lsquare = function()
         callback(err, results);
       });
     };
+
+
+    self.getQuestionAnswers = function(results, callbackInner){
+      async.parallel({
+        answers : function(callback)
+        {
+          var data = [];          
+          async.each(results, function(result, callbackEach){            
+            LsquareAnswer.find({oldQuestionID:result.oldId }, function(err, qAnswers){                              
+                result['answers'] = qAnswers;
+                callbackEach(null);
+              });
+            
+          }, function(err){
+            callback(err, results);
+          });          
+        }
+      },function(err, results){        
+         var questionUserIds = [];
+         for(i in results.answers) { questionUserIds.push(results.answers[i].createdBy);}
+          console.log(questionUserIds);
+        CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
+        for(i in results.answers) { 
+          results.answers[i].createdBy = userInfo[results.answers[i].createdBy];
+        }
+        callbackInner(results.answers);                  
+        });  
+        //callbackInner(results);
+        
+      });
+    };
+
+
+  // self.getQuestionAnswers = function(result, callbackInner){
+  //   for(i in )
+  //   LsquareAnswer.find({oldQuestionID : result.oldId}).lean().exec(function(err, answers){
+  //     result.answers = answers;
+  //     callbackInner(err, result);
+  //   });
+
+  // }  
+
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -277,19 +336,19 @@ var Lsquare = function()
     for(i in obj){
       var ID = obj[i].oldQuestionID
       var data = obj[i];      
-      Lsquare.findOne({oldId : ID}).lean().exec(function(err, question){        
-        if(question){
-        iD = question._id;}
+      // Lsquare.findOne({oldId : ID}).lean().exec(function(err, question){        
+      //   if(question){
+      //   iD = question._id;}
 
-        var newLsquare = LsquareAnswer(data);
-        return res.status(200).json({data : data, obj: obj[i], ID:question});
+        var newLsquare = LsquareAnswer(obj[i]);
+        //return res.status(200).json({data : data, obj: obj[i], ID:question});
         // save the Media
           newLsquare.save(function(err) {
             if(err) return res.status(500).json(err);  
             return res.status(200).json(newLsquare._id);
           });
         //return res.status(200).json(data);        
-      });
+      //});
 
           
       // var newLsquare = Lsquare(obj[i]);
