@@ -270,14 +270,14 @@ var Common = function()
 
     self.siteMapCinemaCategory = function(tool, callbackInner){
       async.parallel({
-        /*cinemaChain : function(callback)
+        cinemaChain : function(callback)
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
               results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i];
             callback(err, results);
           });
-        },*/
+        },
         city : function(callback)
         {
           Media.distinct('geography', { toolId:tool._id, isActive:1 }, function(err, results){
@@ -288,7 +288,7 @@ var Common = function()
             });
           });
         }
-        /*cityPlusCinemaChain : function(callback)
+        cityPlusCinemaChain : function(callback)
         {
           var cinemaLinks = [];
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1, cinemaChain:{ $ne:'Single Screen' } }, function(err, chains){
@@ -304,10 +304,10 @@ var Common = function()
               callback(err, cinemaLinks);
             });
           });
-        }*/
+        }
       },function(err, results){
-        //callbackInner(err, [].concat(results.cinemaChain, results.city, results.cityPlusCinemaChain));
-        callbackInner(err, [].concat(results.city));
+        callbackInner(err, [].concat(results.cinemaChain, results.city, results.cityPlusCinemaChain));
+        //callbackInner(err, [].concat(results.city));
       });
     };  
 
