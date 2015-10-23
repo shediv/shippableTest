@@ -287,7 +287,7 @@ var Common = function()
               callback(err, cities);
             });
           });
-        }
+        },
         cityPlusCinemaChain : function(callback)
         {
           var cinemaLinks = [];
