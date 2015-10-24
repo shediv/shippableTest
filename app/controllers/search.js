@@ -110,7 +110,7 @@ var Search = function()
         tools.sort(function(a,b){ return a.medias.length < b.medias.length });
         var finalResults = [];
         for(i in tools) finalResults = finalResults.concat(tools[i].medias);
-        callback(err, finalResults);
+        callback(err, self.sortClosestMatch(finalResults));
       });
     };
 
