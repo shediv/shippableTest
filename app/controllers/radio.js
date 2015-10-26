@@ -221,7 +221,7 @@ var Radio = function()
           description = results.station+ " in "+results.city+" plays music in "+results.language.join()+" language(s). "+results.station+" advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+results.station+ " Advertising Rates & "+results.station+" Advertising Costs here";        
         }
         var metaTags = {
-          title : results.name,
+          title : results.station + ', ' + results.city,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
