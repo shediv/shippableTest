@@ -9,7 +9,9 @@ var Lsquare = function()
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
+  var User = require('../models/user').User;
   var jwt = require('jsonwebtoken');
+  var underscore = require('underscore');
 
 
   var imagick = require('imagemagick');
@@ -37,7 +39,7 @@ var Lsquare = function()
     ],
     function (err, result)
     {
-      if(err) return res.status(500).json(err);
+      if(err) return res.status(500).json(err);      
       res.status(200).json(result);
     });
   };
@@ -98,80 +100,37 @@ var Lsquare = function()
             {$skip : query.offset}, {$limit: query.limit},
             {$project: query.projection}, 
             function(err, results) 
-            {
-              
-            self.getQuestionAnswers(results, callbackInner);
-            //   var questionUserIds = [];
-            //   var questionIds = [];
-            //   // var questionIds = [];
-            //   for(i in results) { questionUserIds.push(results[i].createdBy);}              
-            //   CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
-            //   for(i in results) {
-            //     results[i].createdBy = userInfo[results[i].createdBy];
-            //     CommonLib.getAnswers(results[i].oldId, function(err, answers){
-            //       console.log(answers);
-            //       results[i].answers = answers;
-
-            //     })
-
-
-            //   }  
-            //   callbackInner(err,results);  
-            // })
-
-              
-
+            {              
+              self.getQuestionAnswers(results, callbackInner);                            
             }
           );
         }
       },
       function(err, results) 
-      {                
+      {                                   
         callback(err, results);
       });
     };
 
-
-    self.getQuestionAnswers = function(results, callbackInner){
-      async.parallel({
-        answers : function(callback)
-        {
-          var data = [];          
-          async.each(results, function(result, callbackEach){            
-            LsquareAnswer.find({oldQuestionID:result.oldId }, function(err, qAnswers){                              
-                result['answers'] = qAnswers;
-                callbackEach(null);
-              });
-            
-          }, function(err){
-            callback(err, results);
-          });          
-        }
-      },function(err, results){        
-         var questionUserIds = [];
-         for(i in results.answers) { questionUserIds.push(results.answers[i].createdBy);}
-          console.log(questionUserIds);
-        CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
-        for(i in results.answers) { 
-          results.answers[i].createdBy = userInfo[results.answers[i].createdBy];
-        }
-        callbackInner(results.answers);                  
-        });  
-        //callbackInner(results);
-        
-      });
+    self.getQuestionAnswers = function(results, callbackInner){     
+      var answerUsersIDs = [];        
+      async.each(results, function(result, callbackEach){            
+        User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
+          result.createdBy = userInfo;
+          LsquareAnswer.find({questionID : result._id}).lean().exec(function(err, answers){
+           for(i in answers) answerUsersIDs.push(answers[i].answered_by)
+           CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
+            for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
+            result.answers = answers;
+            callbackEach(null); 
+           });         
+          })        
+        });            
+      }, 
+      function(err){
+        callbackInner(err, results);
+      });                  
     };
-
-
-  // self.getQuestionAnswers = function(result, callbackInner){
-  //   for(i in )
-  //   LsquareAnswer.find({oldQuestionID : result.oldId}).lean().exec(function(err, answers){
-  //     result.answers = answers;
-  //     callbackInner(err, result);
-  //   });
-
-  // }  
-
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -186,34 +145,31 @@ var Lsquare = function()
   };
 
     self.getTrendingQuestions = function(callback){
-      Media.aggregate(
-        {$match: {isActive : 1}},
-        {$sort: {"score": -1, "views": -1}},
+      Lsquare.aggregate(
+        {$match: {active : 1}},
+        {$sort: {"views": -1}},
+        {$limit : 8 },
         function(error, results) 
         {
-          for(i in results) {
-            results['noOfAnswers'] = results[i].answer.length; 
-          }
-
-          var userIds = [];
-          results.map(function(o){ userIds.push(o.userId); });
-
           callback(error, results);
         }
       );
     };
 
     self.getTopTags = function(callback){
-        Media.aggregate(
-          {$match: {isActive : 1}},
-          {$sort: {"score": -1, "views": -1} },        
+        Lsquare.aggregate(
+          {$match: {active : 1}},
+          {$sort: {"views": -1} },
+          {$limit : 8 },        
           function(error, results) 
           {
-            var questionIds = [];
-            results.map(function(o){ questionIds.push(o._id); });
-            Category.find({_id : {$in: questionIds}},'name').lean().exec(function(err, tags){
-              callback(error, tags);
-            });
+            var Tags = [];
+            for(i in results)
+              for(j in results[i].tags){
+                Tags.push(results[i].tags[j]);
+              }
+            var Tags = underscore.uniq(Tags);                  
+            callback(error, Tags);
           }
         );
     };
@@ -292,10 +248,22 @@ var Lsquare = function()
   };
 
   this.show = function(req, res){
-    Lsquare.findOne({url_slug: req.params.urlSlug}).lean().exec(function(err, results){
+    var answerUsersIDs = [];
+    Lsquare.findOne({url_slug: req.params.urlSlug}).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
-      if(!results) return res.status(404).json({error : 'No Such Media Found'});
-      res.status(200).json({lsquare : results});
+      if(!result) return res.status(404).json({error : 'No Such Media Found'});
+      
+      User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
+        result.createdBy = userInfo;
+        LsquareAnswer.find({questionID : result._id}).lean().exec(function(err, answers){
+         for(i in answers) answerUsersIDs.push(answers[i].answered_by)
+         CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
+          for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
+          result.answers = answers;
+          res.status(200).json({lsquare : result}); 
+         });         
+        })        
+      });
     });
 
     var visitor = {
@@ -310,53 +278,53 @@ var Lsquare = function()
 
   this.dataImport = function(req, res){ 
   
-    // //........Insert Questions  
-    // var path = 'public/bestRate/lsqaure_Question.json';
-    // var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
-
-    // for(i in obj){
-    //   var data = obj[i];
-    //   data['oldId'] = parseInt(data['oldId']);     
-    //   var newLsquare = Lsquare(obj[i]);
-    //   //return res.status(200).json(newLsquare);           
-    //       // save the Media
-    //       newLsquare.save(function(err) {
-    //         if(err) return res.status(500).json(err);  
-    //         return res.status(200).json(newLsquare._id);
-    //       });
-    // }
-
-    //........Insert answers  
-    var path = 'public/bestRate/answers_list.json';
+    //........Insert Questions  
+    var path = 'public/bestRate/lsquareQwithTags.json';
     var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
-    //return res.status(200).json(obj.length);
-    obj = obj.reverse();
-    var iD;
 
     for(i in obj){
-      var ID = obj[i].oldQuestionID
-      var data = obj[i];      
-      // Lsquare.findOne({oldId : ID}).lean().exec(function(err, question){        
-      //   if(question){
-      //   iD = question._id;}
-
-        var newLsquare = LsquareAnswer(obj[i]);
-        //return res.status(200).json({data : data, obj: obj[i], ID:question});
-        // save the Media
+      var data = obj[i];
+      data['oldId'] = parseInt(obj[i].id);     
+      var newLsquare = Lsquare(data);
+      //return res.status(200).json(newLsquare);           
+          // save the Media
           newLsquare.save(function(err) {
             if(err) return res.status(500).json(err);  
             return res.status(200).json(newLsquare._id);
           });
-        //return res.status(200).json(data);        
-      //});
-
-          
-      // var newLsquare = Lsquare(obj[i]);
-      // //return res.status(200).json(newLsquare);           
-          
     }
 
-    // console.log(obj.length);
+    // //........Insert answers  
+    // var path = 'public/bestRate/answers_list.json';
+    // var obj = JSON.parse(fs.readFileSync(path, 'utf8'));
+    // //return res.status(200).json(obj.length);
+    // obj = obj.reverse();
+    // var iD;
+
+    // for(i in obj){
+    //   var ID = obj[i].oldQuestionID
+    //   var data = obj[i];      
+    //   // Lsquare.findOne({oldId : ID}).lean().exec(function(err, question){        
+    //   //   if(question){
+    //   //   iD = question._id;}
+
+    //     var newLsquare = LsquareAnswer(obj[i]);
+    //     //return res.status(200).json({data : data, obj: obj[i], ID:question});
+    //     // save the Media
+    //       newLsquare.save(function(err) {
+    //         if(err) return res.status(500).json(err);  
+    //         return res.status(200).json(newLsquare._id);
+    //       });
+    //     //return res.status(200).json(data);        
+    //   //});
+
+          
+    //   // var newLsquare = Lsquare(obj[i]);
+    //   // //return res.status(200).json(newLsquare);           
+          
+    // }
+
+    // // console.log(obj.length);
 
   };  
 };
