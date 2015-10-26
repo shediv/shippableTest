@@ -192,7 +192,7 @@ var Common = function()
       for(i in results.media)
       {
         for(j in results.media[i].medias)
-          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
+          data.push(encodeURI('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]));
       }
       //toolUrl = ['http://www.themediaant.com/magazine', 'http://www.themediaant.com/cinema', 'http://www.themediaant.com/newspaper', 'http://www.themediaant.com/radio', 'http://www.themediaant.com/television', 'http://www.themediaant.com/outdoor', 'http://www.themediaant.com/airport', 'http://www.themediaant.com/digital', 'http://www.themediaant.com/nontraditional'];
       data = data.concat(results.twelthCross);
@@ -239,7 +239,7 @@ var Common = function()
       Media.distinct('categoryId', { toolId:tool._id, isActive:1 }, function(err, results){
         Category.distinct('name', { _id:{ $in:results } }, function(err, cats){
           for(i in cats) 
-            cats[i] = 'http://'+self.config.appHost+'/'+tool.name+'?category='+cats[i];
+            cats[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?category='+cats[i]);
           callbackInner(err, cats);
         });
       });
@@ -251,7 +251,7 @@ var Common = function()
         {
           Media.distinct('station', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?station='+results[i];
+              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?station='+results[i]);
             callback(err, results);
           });
         },
@@ -259,7 +259,7 @@ var Common = function()
         {
           Media.distinct('city', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?city='+results[i];
+              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?city='+results[i]);
             callback(err, results);
           });
         }
@@ -274,7 +274,7 @@ var Common = function()
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i];
+              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i]);
             callback(err, results);
           });
         },
@@ -283,7 +283,7 @@ var Common = function()
           Media.distinct('geography', { toolId:tool._id, isActive:1 }, function(err, results){
             Geography.distinct('city', { _id:{ $in:results } }, function(err, cities){
               for(i in cities)
-                cities[i] = 'http://'+self.config.appHost+'/'+tool.name+'?city='+cities[i];
+                cities[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?city='+cities[i]);
               callback(err, cities);
             });
           });
@@ -296,7 +296,7 @@ var Common = function()
               var base = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+chain;
               Media.distinct('geography', { toolId:tool._id, isActive:1, cinemaChain:chain }, function(err, geos){
                 Geography.distinct('city', { _id:{ $in:geos } },function(err, cities){
-                  for(i in cities) cinemaLinks.push(base + '&city=' + cities[i]);
+                  for(i in cities) cinemaLinks.push(encodeURI(base + '&city=' + cities[i]));
                   callbackEach(null);
                 });
               });

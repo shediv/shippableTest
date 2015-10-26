@@ -129,7 +129,7 @@ var Lsquare = function()
       async.each(results, function(result, callbackEach){            
         User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
           result.createdBy = userInfo;
-          LsquareAnswer.find({questionID : result._id}).lean().exec(function(err, answers){
+          LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err, answers){
            for(i in answers) answerUsersIDs.push(answers[i].answered_by)
            CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
             for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
@@ -307,7 +307,7 @@ var Lsquare = function()
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
         result.createdBy = userInfo;
-        LsquareAnswer.find({questionID : result._id}).lean().exec(function(err, answers){          
+        LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err, answers){          
          for(i in answers) answerUsersIDs.push(answers[i].answered_by)
          CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}

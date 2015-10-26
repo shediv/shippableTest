@@ -224,7 +224,7 @@ var Digital = function()
 
   this.show = function(req, res){
     //return res.status(200).json(self.config.twitter);
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, results){
+    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
