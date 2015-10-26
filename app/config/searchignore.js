@@ -77,6 +77,7 @@ var searchIgnore = [
   "brief",
   "but",
   "by",
+  "cable",
   "call",
   "came",
   "can",
