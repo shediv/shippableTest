@@ -5,7 +5,6 @@ var Lsquare = function()
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
-  var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
@@ -42,77 +41,77 @@ var Lsquare = function()
     });
   };
 
-    self.applyFilters = function(){
-      var query = {};
-      query.sortBy = self.params.sortBy || 'views';
-      query.offset = self.params.offset || 0;
-      query.limit = self.params.limit || 9;
-      query.match = {};
+  self.applyFilters = function(){
+    var query = {};
+    query.sortBy = self.params.sortBy || 'views';
+    query.offset = self.params.offset || 0;
+    query.limit = self.params.limit || 9;
+    query.match = {};
 
-      query.projection = {
-        '_id' : 1,
-        'question' : 1,
-        'description' : 1,
-        'url_slug' : 1,                
-        'tags' : 1,
-        'views' : 1,
-        'createdAt' : 1,
-        'active' : 1,
-        'createdBy' : 1,
-        'answers' : 1
-      };
-
-      query.match.active = 1;
-      //query.match.toolId = self.toolId;
-      return query;
+    query.projection = {
+      '_id' : 1,
+      'question' : 1,
+      'description' : 1,
+      'url_slug' : 1,                
+      'tags' : 1,
+      'views' : 1,
+      'createdAt' : 1,
+      'active' : 1,
+      'createdBy' : 1,
+      'answers' : 1
     };
 
-    self.sortFilteredMedia = function(query, callback){      
-      var data = [];
-      var user = []; 
-      async.parallel({
-        count : function(callbackInner)
-        {          
-          Lsquare.aggregate(
-            {$match : query.match},
-            {$group: { _id : "url_slug", count: {$sum: 1} }},
-            function(err, result)
-            {
-              if(result[0] === undefined) count = 0;
-              else count = result[0].count;
-              callbackInner(err, count);
-            }
-          );
-        },
-        questions : function(callbackInner)
-        { 
-          switch(query.sortBy)
+    query.match.active = 1;
+    //query.match.toolId = self.toolId;
+    return query;
+  };
+
+  self.sortFilteredMedia = function(query, callback){      
+    var data = [];
+    var user = []; 
+    async.parallel({
+      count : function(callbackInner)
+      {          
+        Lsquare.aggregate(
+          {$match : query.match},
+          {$group: { _id : "url_slug", count: {$sum: 1} }},
+          function(err, result)
           {
-            case 'views': query.sortBy = { 'views' : -1 }; break;
-            //case 'score': query.sortBy = { 'score' : -1}; break;
+            if(result[0] === undefined) count = 0;
+            else count = result[0].count;
+            callbackInner(err, count);
           }
-          query.sortBy._id = 1;
-          Lsquare.aggregate(
-            {$match: query.match}, {$sort: query.sortBy},
-            {$skip : query.offset}, {$limit: query.limit},
-            {$project: query.projection}, 
-            function(err, results) 
-            {
-              var questionUserIds = [];
-              for(i in results) { questionUserIds.push(results[i].createdBy); }
-              CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
-                for(i in results) results[i].createdBy = userInfo[results[i].createdBy];
-                callbackInner(err, results);                  
-              });                  
-            }
-          );
-        }
+        );
       },
-      function(err, results) 
-      {                
-        callback(err, results);
-      });
-    };
+      questions : function(callbackInner)
+      { 
+        switch(query.sortBy)
+        {
+          case 'views': query.sortBy = { 'views' : -1 }; break;
+          //case 'score': query.sortBy = { 'score' : -1}; break;
+        }
+        query.sortBy._id = 1;
+        Lsquare.aggregate(
+          {$match: query.match}, {$sort: query.sortBy},
+          {$skip : query.offset}, {$limit: query.limit},
+          {$project: query.projection}, 
+          function(err, results) 
+          {
+            var questionUserIds = [];
+            for(i in results) { questionUserIds.push(results[i].createdBy); }
+            CommonLib.getUserInfo(questionUserIds, function(err, userInfo){
+              for(i in results) results[i].createdBy = userInfo[results[i].createdBy];
+              callbackInner(err, results);                  
+            });                  
+          }
+        );
+      }
+    },
+    function(err, results) 
+    {                
+      callback(err, results);
+    });
+  };
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -126,38 +125,38 @@ var Lsquare = function()
     });
   };
 
-    self.getTrendingQuestions = function(callback){
+  self.getTrendingQuestions = function(callback){
+    Media.aggregate(
+      {$match: {isActive : 1}},
+      {$sort: {"score": -1, "views": -1}},
+      function(error, results) 
+      {
+        for(i in results) {
+          results['noOfAnswers'] = results[i].answer.length; 
+        }
+
+        var userIds = [];
+        results.map(function(o){ userIds.push(o.userId); });
+
+        callback(error, results);
+      }
+    );
+  };
+
+  self.getTopTags = function(callback){
       Media.aggregate(
         {$match: {isActive : 1}},
-        {$sort: {"score": -1, "views": -1}},
+        {$sort: {"score": -1, "views": -1} },        
         function(error, results) 
         {
-          for(i in results) {
-            results['noOfAnswers'] = results[i].answer.length; 
-          }
-
-          var userIds = [];
-          results.map(function(o){ userIds.push(o.userId); });
-
-          callback(error, results);
+          var questionIds = [];
+          results.map(function(o){ questionIds.push(o._id); });
+          Category.find({_id : {$in: questionIds}},'name').lean().exec(function(err, tags){
+            callback(error, tags);
+          });
         }
       );
-    };
-
-    self.getTopTags = function(callback){
-        Media.aggregate(
-          {$match: {isActive : 1}},
-          {$sort: {"score": -1, "views": -1} },        
-          function(error, results) 
-          {
-            var questionIds = [];
-            results.map(function(o){ questionIds.push(o._id); });
-            Category.find({_id : {$in: questionIds}},'name').lean().exec(function(err, tags){
-              callback(error, tags);
-            });
-          }
-        );
-    };
+  };
 
   this.addQuestion = function(req, res){
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -294,12 +293,10 @@ var Lsquare = function()
           
       // var newLsquare = Lsquare(obj[i]);
       // //return res.status(200).json(newLsquare);           
-          
     }
 
     // console.log(obj.length);
-
-  };  
+  }; 
 };
 
 module.exports.Lsquare = Lsquare;

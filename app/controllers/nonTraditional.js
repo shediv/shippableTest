@@ -266,7 +266,7 @@ var NonTraditional = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
+    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId}).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       Geography.findOne({ _id:result.geography}).lean().exec(function(err, geo){
