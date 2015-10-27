@@ -54,7 +54,7 @@ var Search = function()
         'areaCovered' : 1,
         'editionName' : 1
       };
-      var match = { searchKeyWords:{ $all:query } };
+      var match = { searchKeyWords:{ $all:query }, isActive:1 };
       Media.aggregate( 
         { $match:match },
         { $project:project },
