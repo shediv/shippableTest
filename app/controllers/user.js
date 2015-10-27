@@ -10,6 +10,7 @@ var User = function()
 	var mkdirp = require('mkdirp');
 	var nodeMailer = require('nodemailer');
 	var crypto =require('crypto');
+	var Contact = require('../models/contact').Contact;
 
 	var path = require('path');
 	var EmailTemplate = require('email-templates').EmailTemplate;
@@ -43,34 +44,37 @@ var User = function()
 			newUser.save(function(err){
 				if(err) return res.status(500).json(err);
 				res.status(200).json({userId:newUser._id});
-
 				var mailOptions = {
-		      email: user.email,
-		      name: {
-		        first: CommonLib.capitalizeFirstLetter(user.firstName),
-		        last: CommonLib.capitalizeFirstLetter(user.lastName)
-		      },
-		      userId:newUser._id,
-		      emailHash:md5(user.email),
-		      appHost:self.config.appHost
-		    };
+			      email: user.email,
+			      name: {
+			        first: CommonLib.capitalizeFirstLetter(user.firstName),
+			        last: CommonLib.capitalizeFirstLetter(user.lastName)
+			      },
+			      userId:newUser._id,
+			      emailHash:md5(user.email),
+			      appHost:self.config.appHost
+			    };
 
-		    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
+			    var newContact = Contact(mailOptions);
 
-				emailTemplate.render(mailOptions, function(err, results){
-					if(err) return console.error(err)
-					self.transporter.sendMail({
-		        from: self.config.noreply, // sender address
-		        to: mailOptions.email, // list of receivers
-		        subject: 'One Last Step To Create Your Account!',
-		        html: results.html
-					}, function(err, responseStatus){
-						if(err) return console.log(err);
-					   console.log("responseStatus.message");
-					})
+			    newContact.save(function(err){
+			    	if(err) return res.status(500).json(err);
+				    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
+					emailTemplate.render(mailOptions, function(err, results){
+						if(err) return console.error(err)
+						self.transporter.sendMail({
+			        from: self.config.noreply, // sender address
+			        to: mailOptions.email, // list of receivers
+			        subject: 'One Last Step To Create Your Account!',
+			        html: results.html
+						}, function(err, responseStatus){
+							if(err) return console.log(err);
+						   console.log("responseStatus.message");
+						})
+					});
+					mkdirp('../public/images/users/'+newUser._id);
 				});
-				mkdirp('../public/images/users/'+newUser._id);
-			});
+			});	
 
 		});
 	};
@@ -78,7 +82,7 @@ var User = function()
 	this.reVerificationMail = function(req, res){
 		//return res.status(200).json(req.body.email);
 		User.findOne({email: req.body.email, isActive:0}).lean().exec(function(err, result){
-			if(err) throw err;
+			if(err) throw err; 
 			if(result) {
 				var mailOptions = {
 			      email: result.email,

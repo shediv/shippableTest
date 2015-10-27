@@ -77,6 +77,7 @@ var Lsquare = function()
         'oldId' : 1
       };
 
+      if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
       query.match.active = 1;
       //query.match.toolId = self.toolId;
       return query;
@@ -315,7 +316,10 @@ var Lsquare = function()
          CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           result.answers = answers;
-          res.status(200).json({lsquare : result}); 
+          //to get related question...
+          Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().exec(function(err, Rquestions){
+            res.status(200).json({lsquare : result, relatedQuestion : Rquestions});
+          })           
          });         
         })        
       });

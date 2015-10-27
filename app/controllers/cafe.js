@@ -100,7 +100,7 @@ var Cafe = function()
       if(self.params.filters.topics.length) query.match['topics'] = { $all:self.params.filters.topics };
       //query.match.isActive = 1;
 
-      console.log(query.length);
+      //console.log(query.length);
       
       return query;
     };
