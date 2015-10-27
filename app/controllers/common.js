@@ -280,7 +280,7 @@ var Common = function()
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i]);
+              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemachain='+results[i]);
             callback(err, results);
           });
         },
@@ -299,7 +299,7 @@ var Common = function()
           var cinemaLinks = [];
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1, cinemaChain:{ $ne:'Single Screen' } }, function(err, chains){
             async.each(chains, function(chain, callbackEach){
-              var base = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+chain;
+              var base = 'http://'+self.config.appHost+'/'+tool.name+'?cinemachain='+chain;
               Media.distinct('geography', { toolId:tool._id, isActive:1, cinemaChain:chain }, function(err, geos){
                 Geography.distinct('city', { _id:{ $in:geos } },function(err, cities){
                   for(i in cities) cinemaLinks.push(encodeURI(base + '&city=' + cities[i]));
