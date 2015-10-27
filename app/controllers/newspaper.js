@@ -276,7 +276,7 @@ var Newspaper = function()
     };
 
   this.show = function(req, res){
-    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId}).lean().exec(function(err, results){
+    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId, isActive:1}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){

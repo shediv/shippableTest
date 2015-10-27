@@ -911,7 +911,7 @@ var Magazine = function()
 
   this.show = function(req, res){
     var description = '';
-    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId}).lean().exec(function(err, results){
+    Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId, isActive:1}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       results.attributes = CommonLib.removeHiddenAttributes(results.attributes);
