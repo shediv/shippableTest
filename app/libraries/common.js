@@ -2,7 +2,8 @@ var Common = function()
 {
 	var Media = require('../models/media').Media;
 	var TwelthCross = require('../models/12thCross').TwelthCross;
-  var Cafe = require('../models/cafe').Cafe;
+	var Lsquare = require('../models/lsquare').Lsquare;
+  	var Cafe = require('../models/cafe').Cafe;
 	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
 	var Tools = require('../models/tool').Tools;
 	var Products = require('../models/product').Products;
@@ -41,6 +42,7 @@ var Common = function()
     var model = undefined;
 		if(visitor.type == 'media') model = Media;
 		if(visitor.type == '12thcross') model =  TwelthCross;
+		if(visitor.type == 'lsquare') model =  Lsquare;
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
