@@ -35,6 +35,7 @@ var Cinema = function()
   };
 
   this.showCinemas = function(req, res){
+    req.params.urlSlug = decodeURI(req.params.urlSlug);
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
       if(err) return res.status(500).json(err);

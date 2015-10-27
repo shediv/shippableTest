@@ -183,6 +183,7 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
+    req.params.urlSlug = decodeURI(req.params.urlSlug);
     Cafe.findOne({urlSlug: req.params.urlSlug}).lean().exec(
       function(err, result)
       {

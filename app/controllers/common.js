@@ -35,7 +35,7 @@ var Common = function()
       if(err) return res.status(500).json(err);
       if(!result) 
       {
-        Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
+        Media.findOne( {urlSlug:decodeURI(toolName)} ).lean().exec(function(err, media){
           if(!media)
           {
             var find = '-';
