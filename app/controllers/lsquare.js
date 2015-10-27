@@ -13,6 +13,7 @@ var Lsquare = function()
   var jwt = require('jsonwebtoken');
   var underscore = require('underscore');
   var Contact = require('../models/contact').Contact;
+  var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
   var nodeMailer = require('nodemailer');
 
 
@@ -67,7 +68,7 @@ var Lsquare = function()
         '_id' : 1,
         'question' : 1,
         'description' : 1,
-        'url_slug' : 1,                
+        'urlSlug' : 1,                
         'tags' : 1,
         'views' : 1,
         'createdAt' : 1,
@@ -91,7 +92,7 @@ var Lsquare = function()
         {          
           Lsquare.aggregate(
             {$match : query.match},
-            {$group: { _id : "url_slug", count: {$sum: 1} }},
+            {$group: { _id : "urlSlug", count: {$sum: 1} }},
             function(err, result)
             {
               if(result[0] === undefined) count = 0;
@@ -208,7 +209,7 @@ var Lsquare = function()
             url = url.replace(/[-]+/g, "-");
 
             question.createdBy = decoded._id;
-            question.url_slug = url;
+            question.urlSlug = url;
             question.question = req.body.question;
             question.description = req.body.description;          
             question.tags = req.body.tags;
@@ -237,31 +238,31 @@ var Lsquare = function()
           answer.createdAt = Date();
           answer.answered_by = decoded._id;
           answer.questionID = req.body.answer.questionID;
+          answer.score = 0;
           answer.active = 1;
           //return res.status(200).json(answer);
           var newAnswer = LsquareAnswer(answer);
           newAnswer.save(function(err){
             if (err) return res.send(500, { error: err });            
-            //res.status(200).json(newAnswer._id);
+            res.status(200).json(newAnswer._id);
             Lsquare.findOne({_id: req.body.answer.questionID}).lean().exec(function(err, question){               
               User.findOne({_id : question.createdBy}).lean().exec(function(err,userInfo){
                 //send mail to creator of question...                
                 var mailOptions = {};
                 mailOptions.to = userInfo.email;
-                mailOptions.message = "new answer for a question "+req.body.answer.questionID;
-                mailOptions.toolName =  'Lsquare';
+                mailOptions.questionID = req.body.answer.questionID;
+                mailOptions.activity =  'New Question';
                 mailOptions.answerID =  newAnswer._id;
                 mailOptions.appHost = self.config.appHost;
                 mailOptions.date = Date();
                 var firstName = userInfo.firstName;
                 firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
                 mailOptions.name = firstName;
-                mailOptions.answer = req.body.answer;
-                mailOptions.question = question.question;
-                mailOptions.url_slug = question.url_slug;
-                var newContact = Contact(mailOptions);                
+                mailOptions.answerBy = decoded;                
+                mailOptions.urlSlug = question.urlSlug;
+                var newActivity = LsquareActivities(mailOptions);                
 
-                newContact.save(function(err){
+                newActivity.save(function(err){
                   if(err) return res.status(500).json(err);
                   var emailTemplate = new EmailTemplate(path.join(templatesDir, 'newAnswer'));
                   emailTemplate.render(mailOptions, function(err, results){            
@@ -269,11 +270,11 @@ var Lsquare = function()
                     self.transporter.sendMail({
                       from: "help@themediaant.com", // sender address
                       to: mailOptions.to, // list of receivers
-                      subject: 'New answer for your question.',
+                      subject: 'LSquare - New Answer for your Question.',
                       html: results.html
                     }, function(err, responseStatus){
                       if(err) return console.error(err);
-                       return res.status(200).json("sucess");
+                       console.log("sucess");
                     })
                   });
                 });                
@@ -290,15 +291,42 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          var newAnswer = {};
-          newAnswer.answeredBy = req.body.userId;
-          newAnswer.answer = req.body.answer;
-          newAnswer.description = req.body.description;
-          newAnswer.id = questionID;        
-
-          Lsquare.findOneAndUpdate({_id: answer.id}, answer, {upsert:true}, function(err, doc){
-            if (err) return res.send(500, { error: err });
-            return res.status(200).json("succesfully updated");
+          LsquareAnswer.update({ _id:req.body.answerID }, { $inc:{ score:1 } }, { upsert:true }).exec();        
+          res.status(200).json("sucess");
+          Lsquare.findOne({_id: req.body.questionID}).lean().exec(function(err, question){
+            LsquareAnswer.findOne({_id: req.body.answerID}).lean().exec(function(err, answer){
+              User.findOne({_id: answer.answered_by}).lean().exec(function(err, user){
+                var mailOptions = {};
+                mailOptions.to = user.email;
+                mailOptions.answerID = req.body.answerID;
+                mailOptions.questionID = req.body.questionID;
+                mailOptions.appHost = self.config.appHost;
+                mailOptions.date = Date();
+                var firstName = user.firstName;
+                firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
+                mailOptions.name = firstName;
+                mailOptions.voter = decoded;
+                mailOptions.activity = "Upvote";              
+                mailOptions.urlSlug = question.urlSlug;
+                var newActivity = LsquareActivities(mailOptions);
+                newActivity.save(function(err){
+                    if(err) return res.status(500).json(err);
+                    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'upvote'));
+                    emailTemplate.render(mailOptions, function(err, results){            
+                      if(err) return console.error(err)
+                      self.transporter.sendMail({
+                        from: "help@themediaant.com", // sender address
+                        to: mailOptions.to, // list of receivers
+                        subject: 'LSquare – Upvote for your Answer.',
+                        html: results.html
+                      }, function(err, responseStatus){
+                        if(err) return console.error(err);
+                         console.log("mail sent");
+                      })
+                    });
+                  });
+              })
+            });
           });
         }
     });
@@ -306,7 +334,7 @@ var Lsquare = function()
 
   this.show = function(req, res){
     var answerUsersIDs = [];
-    Lsquare.findOne({url_slug: req.params.urlSlug}).lean().exec(function(err, result){
+    Lsquare.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){

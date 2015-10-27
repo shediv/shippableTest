@@ -39,25 +39,18 @@ var Common = function()
 	};
 
 	this.uniqueVisits = function(visitor){
-	    var model = undefined;
+    var model = undefined;
 		if(visitor.type == 'media') model = Media;
 		if(visitor.type == '12thcross') model =  TwelthCross;
-		if(visitor.type == 'lsquare') model =  Lsquare;			
+		if(visitor.type == 'lsquare') model =  Lsquare;
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
-			{				
-				if(model != undefined) {
-					if(visitor.type == 'lsquare'){
-						model.update({ url_slug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
-					}
-					else{
-						model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
-					}
-				}
+			{
+				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
 				UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true }).exec();
 			}
 			else
-			{								
+			{
 				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
 				visitor.views = 1;
 				var newVisitor = UniqueVisitor(visitor);
