@@ -335,6 +335,20 @@ var Lsquare = function()
     CommonLib.uniqueVisits(visitor);
   };
 
+  this.search = function(req, res){    
+    var qString = req.query.q;
+    var qRegExp = new RegExp('\\b'+qString, "i");    
+    Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].tags);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
+    });
+  };
+
   this.dataImport = function(req, res){ 
   
     //........Insert Questions  
