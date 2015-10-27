@@ -35,7 +35,6 @@ var Cinema = function()
   };
 
   this.showCinemas = function(req, res){
-    req.params.urlSlug = decodeURI(req.params.urlSlug);
     self.params = JSON.parse(req.query.params);                
     async.series([self.buildGeographyQuery], function(err, results){
       if(err) return res.status(500).json(err);
@@ -348,6 +347,7 @@ var Cinema = function()
   };
 
   this.show = function(req, res){
+    //req.query.urlSlug = decodeURI(req.query.urlSlug);
     Media.findOne({urlSlug: req.params.urlSlug , toolId : self.toolId, isActive:1 }).lean().exec(
       function(err, results)
       {

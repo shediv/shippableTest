@@ -35,7 +35,7 @@ var Common = function()
       if(err) return res.status(500).json(err);
       if(!result) 
       {
-        Media.findOne( {urlSlug:decodeURI(toolName)} ).lean().exec(function(err, media){
+        Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
           if(!media)
           {
             var find = '-';
@@ -196,7 +196,7 @@ var Common = function()
       for(i in results.media)
       {
         for(j in results.media[i].medias)
-          data.push(encodeURI('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]));
+          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
       }
       //toolUrl = ['http://www.themediaant.com/magazine', 'http://www.themediaant.com/cinema', 'http://www.themediaant.com/newspaper', 'http://www.themediaant.com/radio', 'http://www.themediaant.com/television', 'http://www.themediaant.com/outdoor', 'http://www.themediaant.com/airport', 'http://www.themediaant.com/digital', 'http://www.themediaant.com/nontraditional'];
       data = data.concat(results.twelthCross);
