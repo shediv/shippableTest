@@ -280,7 +280,7 @@ var Common = function()
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemachain='+results[i]);
+              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i]);
             callback(err, results);
           });
         },
