@@ -102,8 +102,8 @@ var Lsquare = function()
         { 
           switch(query.sortBy)
           {
-            case 'views': query.sortBy = { 'views' : -1 }; break;
-            //case 'score': query.sortBy = { 'score' : -1}; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;            
+            case 'noOfAnswers': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
           Lsquare.aggregate(
@@ -118,7 +118,7 @@ var Lsquare = function()
         }
       },
       function(err, results) 
-      {                                   
+      {                                           
         callback(err, results);
       });
     };
@@ -133,12 +133,15 @@ var Lsquare = function()
            CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
             for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
             result.answers = answers;
+            result.answersCount = answers.length;
             callbackEach(null); 
            });         
           })        
         });            
       }, 
       function(err){
+        if(self.params.sortBy == 'noOfAnswers') {
+          results.sort(function(a,b){ return a.answersCount < b.answersCount }); }
         callbackInner(err, results);
       });                  
     };
