@@ -328,7 +328,7 @@ var Common = function()
     Tools.distinct('name', {}, function(err, tools){
       return res.status(200).json({
         title : 'The Media Ant',
-        description : 'The Media Ant is a platform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
+        description : 'TheMediaAnt.com is a market place for media. The Media Ant has information for more than 2,00,000 advertising touch points across various offline and online media verticals. Media owners list the details of their media on the site for advertisers to discover and execute. This is a free service both to the media owners and the advertisers. ',
         image : 'image',
         twitter : self.config.twitter,
         facebook : self.config.facebook,
@@ -376,8 +376,8 @@ var Common = function()
       TwelthCross.distinct('urlSlug',{},function(err, medias){
         if(err) return res.status(500).json(err);
         return res.status(200).json({
-          title : '12th Cross || The Media Ant',
-          description : 'List of agencies servicingon various medias',
+          title : '12th Cross » Services Marketplace',
+          description : '12th cross is a marketplace where service providers can list their areas of expertise to be discovered by advertisers who can avail these services to assist in creating and placing an ad.',
           image : 'image',
           twitter : self.config.twitter,
           facebook : self.config.facebook,
@@ -391,8 +391,8 @@ var Common = function()
       if(!req.query.url)
       {
         return res.status(200).json({
-          title : 'Cafe || The Media Ant',
-          description : 'Cafe, browse popular URLs and articles',
+          title : 'Cafe » Read | Share',
+          description : 'Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
           image : 'image',
           twitter : self.config.twitter,
           facebook : self.config.facebook,
@@ -406,8 +406,8 @@ var Common = function()
           if(!cafe)
           {
             return res.status(200).json({
-              title : 'Cafe || The Media Ant',
-              description : 'Cafe, browse popular URLs and articles',
+              title : 'Cafe » Read | Share',
+              description : 'Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
               image : 'image',
               twitter : self.config.twitter,
               facebook : self.config.facebook,
@@ -418,8 +418,8 @@ var Common = function()
           else
           {
             return res.status(200).json({
-              title : cafe.title + 'Cafe || The Media Ant',
-              description : cafe.title + ' Cafe, browse popular URLs and articles',
+              title : cafe.title + ' Cafe » Read | Share',
+              description : cafe.title + ' Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
               image : 'image',
               twitter : self.config.twitter,
               facebook : self.config.facebook,
