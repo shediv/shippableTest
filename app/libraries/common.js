@@ -46,12 +46,12 @@ var Common = function()
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
-				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }, { upsert:true }).exec();
+				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1 } }).exec();
 				UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true }).exec();
 			}
 			else
 			{
-				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }, { upsert:true }).exec();
+				if(model != undefined) model.update({ urlSlug:visitor.urlSlug }, { $inc:{ views:1, uniqueViews:1 } }).exec();
 				visitor.views = 1;
 				var newVisitor = UniqueVisitor(visitor);
 				newVisitor.save();
