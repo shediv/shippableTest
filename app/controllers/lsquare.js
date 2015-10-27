@@ -374,7 +374,8 @@ var Lsquare = function()
     //   // //return res.status(200).json(newLsquare);           
           
     // }
-    // console.log(obj.length);
+    
+    // // console.log(obj.length);
   };
 };
 
