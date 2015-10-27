@@ -1,6 +1,6 @@
 <html>
   <head>
-    <title>LSquare - New Answer for your Question | The Media Ant</title>
+    <title>LSquare – Upvote for your Answer | The Media Ant</title>
   </head>
   <body>
     <header>
@@ -13,12 +13,12 @@
 
     <div style="margin:30px 0;">
       <h3>Hi <strong><%= name %>!</strong></h3>
-      <h3>You have a new answer for your question from</h3>
+      <h3>You have a new Upvote vote for your answer from</h3>
       <table style="border: 1px solid #E8D9D9;width: 50%;">
         <tbody>
           <tr>
-              <td><img src="http://<%= appHost %><%= answerBy.ppic %>" alt="User Picture" style="width: 50px;"></td>
-              <td style=""><h5><%= answerBy.firstName %></h5><h5><%= answerBy.lastName %></h5></td>
+              <td><img src="http://<%= appHost %><%= voter.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <td style=""><h5><%= voter.firstName %></h5><h5><%= voter.lastName %></h5></td>
           </tr>
         </tbody>
       </table>
