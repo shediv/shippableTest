@@ -77,6 +77,7 @@ var Lsquare = function()
         'oldId' : 1
       };
 
+      if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
       query.match.active = 1;
       //query.match.toolId = self.toolId;
       return query;
@@ -103,8 +104,8 @@ var Lsquare = function()
         { 
           switch(query.sortBy)
           {
-            case 'views': query.sortBy = { 'views' : -1 }; break;
-            //case 'score': query.sortBy = { 'score' : -1}; break;
+            case 'views': query.sortBy = { 'views' : -1 }; break;            
+            case 'noOfAnswers': query.sortBy = {}; break;
           }
           query.sortBy._id = 1;
           Lsquare.aggregate(
@@ -119,7 +120,7 @@ var Lsquare = function()
         }
       },
       function(err, results) 
-      {                                   
+      {                                           
         callback(err, results);
       });
     };
@@ -134,12 +135,15 @@ var Lsquare = function()
            CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
             for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
             result.answers = answers;
+            result.answersCount = answers.length;
             callbackEach(null); 
            });         
           })        
         });            
       }, 
       function(err){
+        if(self.params.sortBy == 'noOfAnswers') {
+          results.sort(function(a,b){ return a.answersCount < b.answersCount }); }
         callbackInner(err, results);
       });                  
     };
@@ -312,7 +316,10 @@ var Lsquare = function()
          CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           result.answers = answers;
-          res.status(200).json({lsquare : result}); 
+          //to get related question...
+          Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().exec(function(err, Rquestions){
+            res.status(200).json({lsquare : result, relatedQuestion : Rquestions});
+          })           
          });         
         })        
       });
@@ -326,6 +333,20 @@ var Lsquare = function()
       tool: self.toolName
     };
     CommonLib.uniqueVisits(visitor);
+  };
+
+  this.search = function(req, res){    
+    var qString = req.query.q;
+    var qRegExp = new RegExp('\\b'+qString, "i");    
+    Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].tags);
+      }
+      var topics = underscore.uniq(topics);
+      return res.send({topics:topics, count:topics.length});
+    });
   };
 
   this.dataImport = function(req, res){ 
@@ -375,10 +396,9 @@ var Lsquare = function()
     //   // //return res.status(200).json(newLsquare);           
           
     // }
-
+    
     // // console.log(obj.length);
-
-  };  
+  };
 };
 
 module.exports.Lsquare = Lsquare;
