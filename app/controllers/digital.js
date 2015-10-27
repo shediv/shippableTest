@@ -103,24 +103,27 @@ var Digital = function()
                 if(result['reach2'] !== undefined && result['unit2'])
                   result['reach2'] = result['reach2'] + ' ' + result['unit2'];
                 
-                firstmediaOptionsKey = Object.keys(result['mediaOptions'])[0];
-                if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
-                if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
-                if(result.mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = result.mediaOptions[firstmediaOptionsKey].pricingUnit1; }
-                if(result.mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = result.mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
-                
-                if(minimumQtyUnit2)
+                if(result['mediaOptions'])
                 {
-                  minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
-                  minimumBilling = (result.mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+                  firstmediaOptionsKey = Object.keys(result['mediaOptions'])[0];
+                  if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1 === undefined){ minimumQtyUnit1 = false;} else { minimumQtyUnit1 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit1; }
+                  if(result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2 === undefined){ minimumQtyUnit2 = false;} else { minimumQtyUnit2 = result.mediaOptions[firstmediaOptionsKey].minimumQtyUnit2; }
+                  if(result.mediaOptions[firstmediaOptionsKey].pricingUnit1 === undefined){ pricingUnit1 = false;} else { pricingUnit1 = result.mediaOptions[firstmediaOptionsKey].pricingUnit1; }
+                  if(result.mediaOptions[firstmediaOptionsKey].pricingUnit2 === undefined){ pricingUnit2 = false;} else { pricingUnit2 = result.mediaOptions[firstmediaOptionsKey].pricingUnit2; }                                      
+                  
+                  if(minimumQtyUnit2)
+                  {
+                    minimumUnit = minimumQtyUnit1 + ' ' + pricingUnit1 + ' / ' + minimumQtyUnit2 + ' ' + pricingUnit2;
+                    minimumBilling = (result.mediaOptions[firstmediaOptionsKey].cardRate * minimumQtyUnit1 * minimumQtyUnit2);
+                  }
+                  else
+                  {
+                    minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
+                    minimumBilling =  result.mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
+                  }
+                  result['minimumBilling'] = minimumBilling;
+                  result['firstMediaOption'] = firstmediaOptionsKey;
                 }
-                else
-                {
-                  minimumUnit =  minimumQtyUnit1 + ' ' +  pricingUnit1;
-                  minimumBilling =  result.mediaOptions[firstmediaOptionsKey].cardRate *  minimumQtyUnit1;
-                }
-                result['minimumBilling'] = minimumBilling;
-                result['firstMediaOption'] = firstmediaOptionsKey;
                 Category.findOne({ _id:result.categoryId },'name').lean().exec(function(err, cat){
                   if(cat) result.categoryName = cat.name;
                   callback(err);
