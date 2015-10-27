@@ -5,6 +5,7 @@ var Lsquare = function()
   var Media = require('../models/media').Media;
   var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
+  var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
   var Products = require('../models/product').Products;
   var Geography = require('../models/geography').Geography;
   var Category = require('../models/category').Category;
