@@ -278,7 +278,7 @@ var Common = function()
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?cinemachain='+encodeURIComponent(results[i]));
+              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?cinemachain='+encodeURIComponent(results[i]);
             callback(err, results);
           });
         },
