@@ -52,7 +52,9 @@ var Search = function()
         'type' : 1,
         //For Newspaper
         'areaCovered' : 1,
-        'editionName' : 1
+        'editionName' : 1,
+        //For Digital
+        'medium' : 1
       };
       var match = { searchKeyWords:{ $all:query }, isActive:1 };
       Media.aggregate( 
@@ -99,6 +101,10 @@ var Search = function()
                 result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].areaCovered;
                 delete result['medias'][i].areaCovered;
                 delete result['medias'][i].editionName;
+                break;
+              case 'digital':
+                result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].medium;
+                delete result['medias'][i].medium;
                 break;
             }
           }
