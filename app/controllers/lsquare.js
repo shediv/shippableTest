@@ -151,8 +151,8 @@ var Lsquare = function()
 
   this.getFilters = function(req, res){
     async.parallel({
-      trendingQuestions : self.getTrendingQuestions,
-      topTags : self.getTopTags
+      //trendingQuestions : self.getTrendingQuestions,
+      topics : self.getTopTags
     },
     function(err, results) 
     {
@@ -222,6 +222,35 @@ var Lsquare = function()
             newQuestion.save(function(err){
               if(err) return res.status(500).json(err);
               res.status(200).json({newQuestion:newQuestion._id});
+
+              var mailOptions = {};
+              mailOptions.to = "videsh@themediaant.com";
+              mailOptions.question = req.body.question;
+              mailOptions.urlSlug = url;
+              mailOptions.activity =  'New Question';
+              mailOptions.appHost = self.config.appHost;
+              mailOptions.date = Date();
+              mailOptions.askedBy = decoded;                
+              var newActivity = LsquareActivities(mailOptions);
+
+              newActivity.save(function(err){
+                if(err) return res.status(500).json(err);
+                if(req.body.assistance){
+                  var emailTemplate = new EmailTemplate(path.join(templatesDir, 'newQuestion'));
+                  emailTemplate.render(mailOptions, function(err, results){            
+                    if(err) return console.error(err)
+                    self.transporter.sendMail({
+                    from: "help@themediaant.com", // sender address
+                    to: mailOptions.to, // list of receivers
+                    subject: 'LSquare - New Question.',
+                    html: results.html
+                    }, function(err, responseStatus){
+                    if(err) return console.error(err);
+                     console.log("sucess");
+                    })
+                  });
+                }
+              });              
             });          
           }          
         });            
@@ -251,7 +280,7 @@ var Lsquare = function()
                 var mailOptions = {};
                 mailOptions.to = userInfo.email;
                 mailOptions.questionID = req.body.answer.questionID;
-                mailOptions.activity =  'New Question';
+                mailOptions.activity =  'New Answer for a Question';
                 mailOptions.answerID =  newAnswer._id;
                 mailOptions.appHost = self.config.appHost;
                 mailOptions.date = Date();
