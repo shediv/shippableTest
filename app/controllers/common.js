@@ -38,18 +38,11 @@ var Common = function()
         Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
           if(!media)
           {
-            var find = '-';
-            var regExp = new RegExp(find, 'g');
-            toolName = toolName.replace(regExp, ' ');
-            var find = '(';
-            var regExp = new RegExp(find, 'g');
-            toolName = toolName.replace(regExp, ' ');
-            var find = ')';
-            var regExp = new RegExp(find, 'g');
-            toolName = toolName.replace(regExp, ' ');
-            var find = '_';
-            var regExp = new RegExp(find, 'g');
-            toolName = toolName.replace(regExp, ' ').split(' ');
+            toolName = toolName.replace(/-/g, ' ');
+            toolName = toolName.replace(/_/g, ' ');
+            toolName = toolName.replace(/\(/g, ' ');
+            toolName = toolName.replace(/\)/g, ' ');
+            toolName = toolName.split(' ');
             var queries = [];
             for(i in toolName)
             {
