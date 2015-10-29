@@ -46,7 +46,20 @@ var Cafe = function()
   };
 
   this.trending = function(req, res){    
-    Cafe.find({}).lean().limit(15).exec(function(err, doc){
+    Cafe.find({}).lean().exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      topics = topics.slice(0,15);
+      return res.send({topics:topics, count:topics.length});
+    });
+  };
+
+  this.allTopics = function(req, res){    
+    Cafe.find({}).lean().exec(function(err, doc){
       if(err) return res.status(500).json(err);
       var topics = [];      
       for(i in doc) {
