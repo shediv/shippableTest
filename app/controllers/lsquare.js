@@ -242,7 +242,7 @@ var Lsquare = function()
                     self.transporter.sendMail({
                     from: "help@themediaant.com", // sender address
                     to: mailOptions.to, // list of receivers
-                    subject: 'LSquare - New Question.',
+                    subject: 'LSquare - New Question',
                     html: results.html
                     }, function(err, responseStatus){
                     if(err) return console.error(err);
@@ -299,7 +299,7 @@ var Lsquare = function()
                     self.transporter.sendMail({
                       from: "help@themediaant.com", // sender address
                       to: mailOptions.to, // list of receivers
-                      subject: 'LSquare - New Answer for your Question.',
+                      subject: 'LSquare - New Answer for your Question',
                       html: results.html
                     }, function(err, responseStatus){
                       if(err) return console.error(err);
@@ -346,7 +346,7 @@ var Lsquare = function()
                       self.transporter.sendMail({
                         from: "help@themediaant.com", // sender address
                         to: mailOptions.to, // list of receivers
-                        subject: 'LSquare – Upvote for your Answer.',
+                        subject: 'LSquare – Upvote for your Answer',
                         html: results.html
                       }, function(err, responseStatus){
                         if(err) return console.error(err);
@@ -374,8 +374,8 @@ var Lsquare = function()
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           result.answers = answers;
           //to get related question...
-          Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().exec(function(err, Rquestions){
-            res.status(200).json({lsquare : result, relatedQuestion : Rquestions});
+          Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().limit(5).exec(function(err, Rquestions){
+            res.status(200).json({lsquare : result, answersCount : result.answers.length, relatedQuestion : Rquestions});
           })           
          });         
         })        
