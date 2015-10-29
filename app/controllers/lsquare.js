@@ -224,13 +224,15 @@ var Lsquare = function()
               res.status(200).json({newQuestion:newQuestion._id});
 
               var mailOptions = {};
+              mailOptions.social = false;
               mailOptions.to = "videsh@themediaant.com";
               mailOptions.question = req.body.question;
               mailOptions.urlSlug = url;
               mailOptions.activity =  'New Question';
               mailOptions.appHost = self.config.appHost;
               mailOptions.date = Date();
-              mailOptions.askedBy = decoded;                
+              mailOptions.askedBy = decoded;
+              if(decoded.googleId || decoded.facebookId) mailOptions.social = true;                
               var newActivity = LsquareActivities(mailOptions);
 
               newActivity.save(function(err){
@@ -278,6 +280,7 @@ var Lsquare = function()
               User.findOne({_id : question.createdBy}).lean().exec(function(err,userInfo){
                 //send mail to creator of question...                
                 var mailOptions = {};
+                mailOptions.social = false;
                 mailOptions.to = userInfo.email;
                 mailOptions.questionID = req.body.answer.questionID;
                 mailOptions.activity =  'New Answer for a Question';
@@ -287,7 +290,8 @@ var Lsquare = function()
                 var firstName = userInfo.firstName;
                 firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
                 mailOptions.name = firstName;
-                mailOptions.answerBy = decoded;                
+                mailOptions.answerBy = decoded;
+                if(decoded.googleId || decoded.facebookId) mailOptions.social = true;               
                 mailOptions.urlSlug = question.urlSlug;
                 var newActivity = LsquareActivities(mailOptions);                
 
@@ -326,6 +330,7 @@ var Lsquare = function()
             LsquareAnswer.findOne({_id: req.body.answerID}).lean().exec(function(err, answer){
               User.findOne({_id: answer.answered_by}).lean().exec(function(err, user){
                 var mailOptions = {};
+                mailOptions.social = false;
                 mailOptions.to = user.email;
                 mailOptions.answerID = req.body.answerID;
                 mailOptions.questionID = req.body.questionID;
@@ -335,6 +340,7 @@ var Lsquare = function()
                 firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
                 mailOptions.name = firstName;
                 mailOptions.voter = decoded;
+                if(decoded.googleId || decoded.facebookId) mailOptions.social = true;
                 mailOptions.activity = "Upvote";              
                 mailOptions.urlSlug = question.urlSlug;
                 var newActivity = LsquareActivities(mailOptions);
