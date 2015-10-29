@@ -1,6 +1,6 @@
 var express = require('express');
 var path = require('path');
-var logger = require('morgan');
+//var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var mongoose = require('mongoose');
@@ -78,7 +78,13 @@ function mongooseLog(data) {
   return console.log(data);
 }
 
-app.use(logger('dev'));
+app.use(function(req, res, next){
+  console.log(  "\033[34m \033[1m" + req.method + 
+                "\033[36m \033[1m REQUEST URL: " + "\033[32m "+req.url + 
+                "\033[36m \033[1m REQUEST TIME: " + "\033[32m "+ new Date() + "\033[0m ");
+  next();
+})
+
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
