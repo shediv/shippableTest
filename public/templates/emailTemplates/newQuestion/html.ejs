@@ -15,9 +15,13 @@
       <h3>Hi
       <h3>A new question has been added by</h3>
       <table style="border: 1px solid #E8D9D9;width: 50%; margin-left: 4cm;">
-        <tbody>
+        <tbody>          
           <tr>
+              <% if(social){ %>
+              <td><img src="<%= askedBy.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <% } else {%>
               <td><img src="http://<%= appHost %><%= askedBy.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <% } %>
               <td style=""><h5><%= askedBy.firstName %></h5><h5><%= askedBy.lastName %></h5></td>
           </tr>
         </tbody>
