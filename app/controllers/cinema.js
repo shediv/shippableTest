@@ -347,6 +347,7 @@ var Cinema = function()
   };
 
   this.show = function(req, res){
+    //req.query.urlSlug = decodeURI(req.query.urlSlug);
     Media.findOne({urlSlug: req.params.urlSlug , toolId : self.toolId, isActive:1 }).lean().exec(
       function(err, results)
       {

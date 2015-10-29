@@ -237,6 +237,7 @@ var _12thCross = function()
     };
 
   this.show = function(req, res){
+    //req.params.urlSlug = decodeURI(req.params.urlSlug);
     TwelthCross.findOne({urlSlug: req.params.urlSlug, isActive:1}).lean().exec(
       function(err, result)
       {

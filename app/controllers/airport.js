@@ -227,6 +227,7 @@ var Airport = function()
   };
 
   this.show = function(req, res){
+    //req.params.urlSlug = decodeURI(req.params.urlSlug);
     Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId, isActive:1 }).lean().exec(function(err, result){
       if(err) return res.status(500).json(err);
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
