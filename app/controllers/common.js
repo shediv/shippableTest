@@ -38,7 +38,6 @@ var Common = function()
         Media.findOne( {urlSlug:toolName} ).lean().exec(function(err, media){
           if(!media)
           {
-            var x = new RegExp("\(");
             toolName = toolName.replace(/-/g, ' ');
             toolName = toolName.replace(/_/g, ' ');
             toolName = toolName.replace(/\(/g, ' ');
