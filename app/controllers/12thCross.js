@@ -237,7 +237,8 @@ var _12thCross = function()
     };
 
   this.show = function(req, res){
-    TwelthCross.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+    //req.params.urlSlug = decodeURI(req.params.urlSlug);
+    TwelthCross.findOne({urlSlug: req.params.urlSlug, isActive:1}).lean().exec(
       function(err, result)
       {
         if(!result) res.status(404).json({error : 'No Such Media Found'});

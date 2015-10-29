@@ -1,0 +1,32 @@
+<html>
+  <head>
+    <title>LSquare - New Question | The Media Ant</title>
+  </head>
+  <body>
+    <header>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0;">
+      <a href="http://<%= appHost %>">
+        <img src="http://<%= appHost %>/images/themediant-logo.jpg" style="width:10%;margin:0 20px;">
+      </a>
+      <hr style="border:none;border-top:1px solid #ccc;margin:10px 0;">
+    </header>
+
+    <div style="margin:30px 0;">
+      <h3>Hi
+      <h3>A new question has been added by</h3>
+      <table style="border: 1px solid #E8D9D9;width: 50%; margin-left: 4cm;">
+        <tbody>
+          <tr>
+              <td><img src="http://<%= appHost %><%= askedBy.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <td style=""><h5><%= askedBy.firstName %></h5><h5><%= askedBy.lastName %></h5></td>
+          </tr>
+        </tbody>
+      </table>
+      <h3>Please click on the <a href="http://<%= appHost %>/lsquare/<%= urlSlug %>"> link </a> to check the question.</h3>
+    </div>
+    
+    <div class="footer">
+      <h4 style="color:#666">Stay in touch with us - help@themediaant.com</h4>
+    </div>
+  </body>
+</html>

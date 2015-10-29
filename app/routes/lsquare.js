@@ -11,6 +11,8 @@ router.get("/filters", LsquareCtrl.getFilters);
 router.get("/dataImport", LsquareCtrl.dataImport);
 router.post("/addQuestion", LsquareCtrl.addQuestion);
 router.post("/addAnswer", LsquareCtrl.addAnswer);
+router.get("/search", LsquareCtrl.search);
+router.post("/upvote", LsquareCtrl.upvoteAnswer);
 //router.get("/addQuestion", LsquareCtrl.addQuestion);
 router.get("/:urlSlug", LsquareCtrl.show);
 

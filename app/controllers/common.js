@@ -40,14 +40,24 @@ var Common = function()
           {
             var find = '-';
             var regExp = new RegExp(find, 'g');
+            toolName = toolName.replace(regExp, ' ');
+            var find = '(';
+            var regExp = new RegExp(find, 'g');
+            toolName = toolName.replace(regExp, ' ');
+            var find = ')';
+            var regExp = new RegExp(find, 'g');
+            toolName = toolName.replace(regExp, ' ');
+            var find = '_';
+            var regExp = new RegExp(find, 'g');
             toolName = toolName.replace(regExp, ' ').split(' ');
+            var queries = [];
             for(i in toolName)
             {
               if( SearchIgnore.indexOf(toolName[i]) > -1 ) continue;
               var qRegExp = new RegExp('\\b'+toolName[i], "i");
-              toolName[i] = qRegExp;
+              queries.push(qRegExp);
             }
-            Media.find({ searchKeyWords:{ $all:toolName } }).lean().exec(function(err, media){
+            Media.find({ searchKeyWords:{ $all:queries }, isActive:1 }).lean().exec(function(err, media){
               if(!media.length) return res.status(404).json({status:"NO MEDIAS FOUND"});
               if(media.length == 1)
               {
@@ -192,7 +202,7 @@ var Common = function()
       for(i in results.media)
       {
         for(j in results.media[i].medias)
-          data.push(encodeURI('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]));
+          data.push('http://'+self.config.appHost+'/'+results.media[i]._id+'/'+results.media[i].medias[j]);
       }
       //toolUrl = ['http://www.themediaant.com/magazine', 'http://www.themediaant.com/cinema', 'http://www.themediaant.com/newspaper', 'http://www.themediaant.com/radio', 'http://www.themediaant.com/television', 'http://www.themediaant.com/outdoor', 'http://www.themediaant.com/airport', 'http://www.themediaant.com/digital', 'http://www.themediaant.com/nontraditional'];
       data = data.concat(results.twelthCross);
@@ -239,7 +249,7 @@ var Common = function()
       Media.distinct('categoryId', { toolId:tool._id, isActive:1 }, function(err, results){
         Category.distinct('name', { _id:{ $in:results } }, function(err, cats){
           for(i in cats) 
-            cats[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?category='+cats[i]);
+            cats[i] = 'http://'+self.config.appHost+'/'+tool.name+'?category='+encodeURIComponent(cats[i]);
           callbackInner(err, cats);
         });
       });
@@ -251,7 +261,7 @@ var Common = function()
         {
           Media.distinct('station', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?station='+results[i]);
+              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?station='+encodeURIComponent(results[i]);
             callback(err, results);
           });
         },
@@ -259,7 +269,7 @@ var Common = function()
         {
           Media.distinct('city', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?city='+results[i]);
+              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?city='+encodeURIComponent(results[i]);
             callback(err, results);
           });
         }
@@ -274,7 +284,7 @@ var Common = function()
         {
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
             for(i in results)
-              results[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+results[i]);
+              results[i] = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+encodeURIComponent(results[i]);
             callback(err, results);
           });
         },
@@ -283,7 +293,7 @@ var Common = function()
           Media.distinct('geography', { toolId:tool._id, isActive:1 }, function(err, results){
             Geography.distinct('city', { _id:{ $in:results } }, function(err, cities){
               for(i in cities)
-                cities[i] = encodeURI('http://'+self.config.appHost+'/'+tool.name+'?city='+cities[i]);
+                cities[i] = 'http://'+self.config.appHost+'/'+tool.name+'?city='+encodeURIComponent(cities[i]);
               callback(err, cities);
             });
           });
@@ -293,10 +303,10 @@ var Common = function()
           var cinemaLinks = [];
           Media.distinct('cinemaChain', { toolId:tool._id, isActive:1, cinemaChain:{ $ne:'Single Screen' } }, function(err, chains){
             async.each(chains, function(chain, callbackEach){
-              var base = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+chain;
+              var base = 'http://'+self.config.appHost+'/'+tool.name+'?cinemaChain='+encodeURIComponent(chain);
               Media.distinct('geography', { toolId:tool._id, isActive:1, cinemaChain:chain }, function(err, geos){
                 Geography.distinct('city', { _id:{ $in:geos } },function(err, cities){
-                  for(i in cities) cinemaLinks.push(encodeURI(base + '&city=' + cities[i]));
+                  for(i in cities) cinemaLinks.push(base + '&city=' + encodeURIComponent(cities[i]));
                   callbackEach(null);
                 });
               });
@@ -322,7 +332,7 @@ var Common = function()
     Tools.distinct('name', {}, function(err, tools){
       return res.status(200).json({
         title : 'The Media Ant',
-        description : 'The Media Ant is a platform where you can advertise on various media verticals like magazine, newspaper, cinema, radio, etc.',
+        description : 'TheMediaAnt.com is a market place for media. The Media Ant has information for more than 2,00,000 advertising touch points across various offline and online media verticals. Media owners list the details of their media on the site for advertisers to discover and execute. This is a free service both to the media owners and the advertisers. ',
         image : 'image',
         twitter : self.config.twitter,
         facebook : self.config.facebook,
@@ -370,8 +380,8 @@ var Common = function()
       TwelthCross.distinct('urlSlug',{},function(err, medias){
         if(err) return res.status(500).json(err);
         return res.status(200).json({
-          title : '12th Cross || The Media Ant',
-          description : 'List of agencies servicingon various medias',
+          title : '12th Cross » Services Marketplace',
+          description : '12th cross is a marketplace where service providers can list their areas of expertise to be discovered by advertisers who can avail these services to assist in creating and placing an ad.',
           image : 'image',
           twitter : self.config.twitter,
           facebook : self.config.facebook,
@@ -385,8 +395,8 @@ var Common = function()
       if(!req.query.url)
       {
         return res.status(200).json({
-          title : 'Cafe || The Media Ant',
-          description : 'Cafe, browse popular URLs and articles',
+          title : 'Cafe » Read | Share',
+          description : 'Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
           image : 'image',
           twitter : self.config.twitter,
           facebook : self.config.facebook,
@@ -400,8 +410,8 @@ var Common = function()
           if(!cafe)
           {
             return res.status(200).json({
-              title : 'Cafe || The Media Ant',
-              description : 'Cafe, browse popular URLs and articles',
+              title : 'Cafe » Read | Share',
+              description : 'Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
               image : 'image',
               twitter : self.config.twitter,
               facebook : self.config.facebook,
@@ -412,8 +422,8 @@ var Common = function()
           else
           {
             return res.status(200).json({
-              title : cafe.title + 'Cafe || The Media Ant',
-              description : cafe.title + ' Cafe, browse popular URLs and articles',
+              title : cafe.title + ' Cafe » Read | Share',
+              description : cafe.title + ' Read and Share Marketing Articles with India\'s largest content sharing platform for Marketing.',
               image : 'image',
               twitter : self.config.twitter,
               facebook : self.config.facebook,
