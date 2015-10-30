@@ -83,7 +83,7 @@ app.use(function(req, res, next){
                 "\033[36m \033[1m REQUEST URL: " + "\033[32m "+req.url , 
                 "\033[36m \033[1m REQUEST TIME: " + "\033[32m "+ new Date() + "\033[31m ");
   next();
-})
+});
 
 app.use(bodyParser.json({limit: '50mb'}));
 app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
