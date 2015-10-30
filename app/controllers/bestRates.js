@@ -366,7 +366,7 @@ var BestRates = function()
     };
 
     self.airport = function(data, tool, callback){
-      tool = 'Airort/Inflight';
+      tool = 'Airport/Inflight';
 
       for(id in data)
       {
