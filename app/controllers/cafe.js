@@ -17,8 +17,16 @@ var Cafe = function()
   this.store = function(req, res){
     Cafe.findOne({ url:req.body.cafe.url }).lean().exec(function(err, cafe){
       if(cafe) return res.status(500).json("Cafe already exists");
+
+      var newUrl = req.body.cafe.url;
       // create a new Media
-      req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
+      if(newUrl.search('https://') > -1){
+        req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
+      }else{
+        req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
+      }
+      
+      req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
       req.body.cafe.createdAt = new Date();
       if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
 
