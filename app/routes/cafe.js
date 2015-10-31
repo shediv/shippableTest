@@ -11,6 +11,7 @@ router.post("/", Cafe.store);
 router.get("/filters", Cafe.getFilters);
 router.post("/update", Cafe.update);
 router.get("/search", Cafe.search);
+router.get("/allTopics", Cafe.allTopics);
 router.get("/trending", Cafe.trending);
 router.get("/:urlSlug", Cafe.show);
 

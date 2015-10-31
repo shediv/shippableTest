@@ -17,8 +17,16 @@ var Cafe = function()
   this.store = function(req, res){
     Cafe.findOne({ url:req.body.cafe.url }).lean().exec(function(err, cafe){
       if(cafe) return res.status(500).json("Cafe already exists");
+
+      var newUrl = req.body.cafe.url;
       // create a new Media
-      req.body.cafe.baseUrl = (req.body.cafe.url).replace('http://','').split('/')[0];
+      if(newUrl.search('https://') > -1){
+        req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
+      }else{
+        req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
+      }
+      
+      req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
       req.body.cafe.createdAt = new Date();
       if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
 
@@ -46,7 +54,20 @@ var Cafe = function()
   };
 
   this.trending = function(req, res){    
-    Cafe.find({}).lean().limit(15).exec(function(err, doc){
+    Cafe.find({}).lean().exec(function(err, doc){
+      if(err) return res.status(500).json(err);
+      var topics = [];      
+      for(i in doc) {
+        topics = topics.concat(doc[i].topics);
+      }
+      var topics = underscore.uniq(topics);
+      topics = topics.slice(0,15);
+      return res.send({topics:topics, count:topics.length});
+    });
+  };
+
+  this.allTopics = function(req, res){    
+    Cafe.find({}).lean().exec(function(err, doc){
       if(err) return res.status(500).json(err);
       var topics = [];      
       for(i in doc) {

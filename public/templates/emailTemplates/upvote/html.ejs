@@ -15,9 +15,13 @@
       <h3>Hi <strong><%= name %>!</strong></h3>
       <h3>You have a new Upvote for your answer from</h3>
       <table style="border: 1px solid #E8D9D9;width: 50%; margin-left: 5cm;">
-        <tbody>
+        <tbody>      
           <tr>
+              <% if(social){ %>
+              <td><img src="<%= voter.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <% } else {%>
               <td><img src="http://<%= appHost %><%= voter.ppic %>" alt="User Picture" style="width: 50px;"></td>
+              <% } %>
               <td style=""><h5><%= voter.firstName %></h5><h5><%= voter.lastName %></h5></td>
           </tr>
         </tbody>
