@@ -8,3 +8,4 @@ npm-debug.log
 log/
 bin/www
 logs/
+bin/www
