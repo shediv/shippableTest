@@ -18,7 +18,7 @@ app.set('port', port1);
 var port2 = normalizePort(process.env.PORT || '3335');
 app.set('port', port2);
 
-var port3 = normalizePort(process.env.PORT || '3336');
+var port3 = normalizePort(process.env.PORT || '9000');
 app.set('port', port3);
 
 /**
