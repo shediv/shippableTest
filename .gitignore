@@ -9,3 +9,4 @@ log/
 bin/www
 logs/
 bin/www
+app/config/config.js
