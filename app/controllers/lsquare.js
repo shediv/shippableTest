@@ -402,16 +402,26 @@ var Lsquare = function()
 
   this.search = function(req, res){    
     var qString = req.query.q;
-    var qRegExp = new RegExp('\\b'+qString, "i");    
-    Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
-      if(err) return res.status(500).json(err);
-      var topics = [];      
-      for(i in doc) {
-        topics = topics.concat(doc[i].tags);
-      }
-      var topics = underscore.uniq(topics);
-      return res.send({topics:topics, count:topics.length});
-    });
+    console.log(req.query.filter);
+    //return res.status(200).json(req.query.filter);
+    var qRegExp = new RegExp('\\b'+qString, "i");
+    if(req.query.filter == 'tags') {   
+      Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+        if(err) return res.status(500).json(err);
+        var topics = [];      
+        for(i in doc) {
+          topics = topics.concat(doc[i].tags);
+        }
+        var topics = underscore.uniq(topics);
+        return res.send({topics:topics, count:topics.length});
+      });
+    }
+    else if(req.query.filter == 'user'){
+      User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+        if(err) return res.status(500).json(err);
+        return res.send({users:usersList, count:usersList.length});
+      });
+    }
   };
 
 
