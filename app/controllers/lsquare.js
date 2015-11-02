@@ -39,7 +39,8 @@ var Lsquare = function()
   });
 
   this.getLsquare = function(req, res){
-    self.params = JSON.parse(req.query.params);    
+    self.params = JSON.parse(req.query.params);
+    //return res.status(200).json(self.params);  
     async.waterfall([
       function(callback)
       {
@@ -79,6 +80,7 @@ var Lsquare = function()
       };
 
       if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
+      if(self.params.filters.askedBy.length) query.match['createdBy'] = { $in:self.params.filters.askedBy };
       query.match.active = 1;
       //query.match.toolId = self.toolId;
       return query;
@@ -409,6 +411,16 @@ var Lsquare = function()
       }
       var topics = underscore.uniq(topics);
       return res.send({topics:topics, count:topics.length});
+    });
+  };
+
+
+  this.getUser = function(req, res){    
+    var qString = req.query.q;
+    var qRegExp = new RegExp('\\b'+qString, "i");    
+    User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+      if(err) return res.status(500).json(err);
+      return res.send({users:usersList, count:usersList.length});
     });
   };
 
