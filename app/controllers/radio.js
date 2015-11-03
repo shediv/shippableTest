@@ -216,6 +216,7 @@ var Radio = function()
     Media.findOne({urlSlug: req.params.urlSlug, toolId : self.toolId, isActive:1}).lean().exec(function(err, results){
       if(err) return res.status(500).json(err);
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
+      results.name = results.station + ', ' + results.city;
       if(results.about) {
           description = results.about;
         }else {

@@ -356,6 +356,7 @@ var Cinema = function()
         if(!results) return res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
+          results.name = results.cinemaChain+ ", "+ results.mallName;
           if(results.type == 'onScreen')
           {
             dateObj = new Date();
