@@ -39,7 +39,8 @@ var Lsquare = function()
   });
 
   this.getLsquare = function(req, res){
-    self.params = JSON.parse(req.query.params);    
+    self.params = JSON.parse(req.query.params);
+    //return res.status(200).json(self.params);  
     async.waterfall([
       function(callback)
       {
@@ -59,7 +60,7 @@ var Lsquare = function()
 
     self.applyFilters = function(){
       var query = {};
-      query.sortBy = self.params.sortBy || 'views';
+      query.sortBy = self.params.sortBy || 'createdAt';
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
@@ -79,6 +80,7 @@ var Lsquare = function()
       };
 
       if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
+      if(self.params.filters.askedBy.length) query.match['createdBy'] = { $in:self.params.filters.askedBy };
       query.match.active = 1;
       //query.match.toolId = self.toolId;
       return query;
@@ -106,7 +108,7 @@ var Lsquare = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;            
-            case 'noOfAnswers': query.sortBy = {}; break;
+            case 'createdAt': query.sortBy = { 'createdAt' : -1 }; break;
           }
           query.sortBy._id = 1;
           Lsquare.aggregate(
@@ -400,15 +402,35 @@ var Lsquare = function()
 
   this.search = function(req, res){    
     var qString = req.query.q;
+    console.log(req.query.filter);
+    //return res.status(200).json(req.query.filter);
+    var qRegExp = new RegExp('\\b'+qString, "i");
+    if(req.query.filter == 'tags') {   
+      Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+        if(err) return res.status(500).json(err);
+        var topics = [];      
+        for(i in doc) {
+          topics = topics.concat(doc[i].tags);
+        }
+        var topics = underscore.uniq(topics);
+        return res.send({topics:topics, count:topics.length});
+      });
+    }
+    else if(req.query.filter == 'user'){
+      User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+        if(err) return res.status(500).json(err);
+        return res.send({users:usersList, count:usersList.length});
+      });
+    }
+  };
+
+
+  this.getUser = function(req, res){    
+    var qString = req.query.q;
     var qRegExp = new RegExp('\\b'+qString, "i");    
-    Lsquare.find({tags : { $elemMatch: { $regex: qRegExp } }}, { tags : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+    User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
       if(err) return res.status(500).json(err);
-      var topics = [];      
-      for(i in doc) {
-        topics = topics.concat(doc[i].tags);
-      }
-      var topics = underscore.uniq(topics);
-      return res.send({topics:topics, count:topics.length});
+      return res.send({users:usersList, count:usersList.length});
     });
   };
 

@@ -165,15 +165,16 @@ var Cinema = function()
       }
       else
       {
-        var finalMedias = [];
+        var finalMedias = [];  
         Media.aggregate(match, {$project:project}, group, function(err, medias){
           if(err) console.log(err);
           for(key in medias)
           {
+            medias[key].geoBasedMedias.sort(function(a,b){ return b.seats - a.seats});
             medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
             finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
           }
-          medias = finalMedias;
+          medias = finalMedias;          
           if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
           else
           {
