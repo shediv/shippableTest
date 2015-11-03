@@ -60,7 +60,7 @@ var Lsquare = function()
 
     self.applyFilters = function(){
       var query = {};
-      query.sortBy = self.params.sortBy || 'views';
+      query.sortBy = self.params.sortBy || 'createdAt';
       query.offset = self.params.offset || 0;
       query.limit = self.params.limit || 9;
       query.match = {};
@@ -108,7 +108,7 @@ var Lsquare = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;            
-            case 'noOfAnswers': query.sortBy = {}; break;
+            case 'createdAt': query.sortBy = { 'createdAt' : -1 }; break;
           }
           query.sortBy._id = 1;
           Lsquare.aggregate(
