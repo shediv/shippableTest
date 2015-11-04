@@ -358,12 +358,74 @@ var Common = function()
     else
     {
       Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+        var tool = result;
         if(!result) {console.log('Meta error: ',toolName); return res.status(404).json({status:"NOT OK"});}
-        result = self.populateCategoryMetatags(result, toolName, req);
-        Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
-          if(err) return res.status(500).json(err);
-          result.metaTags.medias = medias;
-          return res.status(200).json(result.metaTags);  
+        async.series([
+          function(callback)
+          {
+            switch(toolName)
+            {
+              case 'magazine':
+              case 'newspaper':
+                Media.distinct('categoryId', { toolId:tool._id, isActive:1 }, function(err, results){
+                  Category.distinct('name', { _id:{ $in:results } }, function(err, cats){
+                    var params = {};
+                    params['category'] = cats;
+                    callback(err, params);
+                  });
+                });
+                break;
+              case 'radio':
+                async.parallel({
+                  station : function(callbackInner)
+                  {
+                    Media.distinct('station', { toolId:tool._id, isActive:1 }, function(err, results){
+                      callbackInner(err, results);
+                    });
+                  },
+                  city : function(callbackInner)
+                  {
+                    Media.distinct('city', { toolId:tool._id, isActive:1 }, function(err, results){
+                      callbackInner(err, results);
+                    });
+                  }
+                },function(err, results){
+                  callback(err, results);
+                });
+                break;
+              case 'cinema':
+                async.parallel({
+                  cinemaChain : function(callbackInner)
+                  {
+                    Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
+                      callbackInner(err, results);
+                    });
+                  },
+                  city : function(callbackInner)
+                  {
+                    Media.distinct('geography', { toolId:tool._id, isActive:1 }, function(err, results){
+                      Geography.distinct('city', { _id:{ $in:results } }, function(err, cities){
+                        callbackInner(err, cities);
+                      });
+                    });
+                  }
+                },function(err, results){
+                  callback(err, results);
+                });
+                break;
+              default:
+                callback(null, {});
+            }
+          }
+        ], function(err, params){
+          params = params[0];
+          result = self.populateCategoryMetatags(result, toolName, req, params);
+          if(!result) return res.status(404).json("NOT FOUND");
+          Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+            if(err) return res.status(500).json(err);
+            result.metaTags.medias = medias;
+            return res.status(200).json(result.metaTags);  
+          });
         });
       });
     }
@@ -428,7 +490,7 @@ var Common = function()
       }
     };
 
-    self.populateCategoryMetatags = function(result, toolName, req){
+    self.populateCategoryMetatags = function(result, toolName, req, params){
       switch(toolName)
       {
         case 'magazine':
@@ -436,6 +498,7 @@ var Common = function()
           if(req.query.category) 
           {
             var category = req.query.category;
+            if(params.category.indexOf(category) == -1) return false;
             result.metaTags.title = category + " Magazine Advertising in India";
             result.metaTags.description = "Advertise in "+category+" Magazines via TheMediaAnt. "+category+" Magazines in India are utilized to advertise a great variety of products. Find the best "+category+" Magazines advertising rates in India through The Media Ant.";
           }
@@ -447,6 +510,8 @@ var Common = function()
           {
             var cinemaChain = req.query.cinemaChain;
             var city = req.query.city;
+            if(params['cinemaChain'].indexOf(cinemaChain) == -1) return false;
+            if(params.city.indexOf(city) == -1) return false;
             result.metaTags.title = cinemaChain + " Cinema Advertising in " + city;
             result.metaTags.description = "Advertise in "+cinemaChain+" in "+city+" via TheMediaAnt. "+cinemaChain+" is one of the leading multiplex chains in India. "+cinemaChain+" Theatres in "+city+" have emerged as a promising advertising plaform for multiple brands. Get access to the list of "+cinemaChain+" Advertising Screens in "+city+" at The Media Ant. Find the best "+city+" "+cinemaChain+" advertising rates here.";
           }
@@ -454,6 +519,7 @@ var Common = function()
           if(req.query.cinemaChain) 
           {
             var cinemaChain = req.query.cinemaChain;
+            if(params['cinemaChain'].indexOf(cinemaChain) == -1) return false;
             result.metaTags.title = cinemaChain + " Cinema Advertising in India";
             result.metaTags.description = "Advertise in "+cinemaChain+" in India via TheMediaAnt. "+cinemaChain+" in India is one of the premier multiplex chains. "+cinemaChain+" Advertising is enabled in many cities. Get access to the list of "+cinemaChain+" Advertising Screens at The Media Ant. Find the best Inox cinema advertising rates here.";
           }
@@ -461,6 +527,7 @@ var Common = function()
           if(req.query.city) 
           {
             var city = req.query.city;
+            if(params.city.indexOf(city) == -1) return false;
             result.metaTags.title = city + " Cinema Advertising";
             result.metaTags.description = "Advertise in "+city+" cinemas via TheMediaAnt. "+city+" is one of India's premier cities with a youth & family strong demographic. For this demography theatre is a primary medium of entertainment. You can explore "+city+" Cinema Advertising Rates & "+city+" Cinema Advertising Costs here.";
           }
@@ -471,6 +538,7 @@ var Common = function()
           if(req.query.station) 
           {
             var station = req.query.station;
+            if(params.station.indexOf(station) == -1) return false;
             result.metaTags.title = station + " Radio Advertising in India";
             result.metaTags.description = "Advertise in "+station+" in India via TheMediaAnt. "+station+" is a renowned radio channel with a strong foot-hold in India. We have absolute access to the advertising inventory of "+station+". Get access to the list of "+station+" Advertising Stations at The Media Ant. Find the best "+station+" advertising rates here.";
           }
@@ -478,6 +546,7 @@ var Common = function()
           if(req.query.city) 
           {
             var city = req.query.city;
+            if(params.city.indexOf(city) == -1) return false;
             result.metaTags.title = city + " Radio Advertising";
             result.metaTags.description = "Advertise in "+city+" Radio Station via TheMediaAnt. Radio Advertising in "+city+" has emerged as a promising advertising platform. "+city+" Radio Advertising is utilized by a variety of brand categories. Get access to the list of "+city+" Radio Advertising Stations at The Media Ant. Find the best "+city+" radio station advertising rates here.";
           }
@@ -488,6 +557,7 @@ var Common = function()
           if(req.query.category) 
           {
             var category = req.query.category;
+            if(params.category.indexOf(category) == -1) return false;
             result.metaTags.title = category + " Newspaper Advertising in India";
             result.metaTags.description = "Advertise in "+category+" Newspapers in India via TheMediaAnt. "+category+" Newspapers advertisement appears alongside regular editorial content.The list of "+category+" Newspapers in India display ads contain text, photographs,logos, maps, and other informational items. Find the best "+category+" Newspaper Advertising rates through The Media Ant.";
           }
