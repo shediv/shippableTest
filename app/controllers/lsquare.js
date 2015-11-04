@@ -151,14 +151,14 @@ var Lsquare = function()
     };
 
     self.imageUpload = function(req, res){
-      //console.log(req.file.path);
-      //return res.status(200).json("req");
 
       var tmp_path = req.file.path;
 
       /** The original name of the uploaded file
           stored in the variable "originalname". **/
-      var target_path = './public/lsquare/' + req.file.originalname;
+      var date = new Date();
+      var returnPath = date + req.file.originalname;    
+      var target_path = './public/lsquare/' + returnPath;
 
       /** A better way to copy the uploaded file. **/
       var src = fs.createReadStream(tmp_path);
@@ -168,11 +168,13 @@ var Lsquare = function()
       html = "";
       html += "<script type='text/javascript'>";
       //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      html += "    var url     = \"/lsquare/" + req.file.originalname + "\";";
+      html += "    var url     = \"/lsquare/" + returnPath + "\";";
       html += "    var message = \"Uploaded file successfully\";";
       html += "";
       html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
       html += "</script>";
+
+      fs.unlinkSync(tmp_path);
 
       res.send(html);      
 
