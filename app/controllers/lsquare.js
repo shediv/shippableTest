@@ -2,17 +2,11 @@ var Lsquare = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
-  var Media = require('../models/media').Media;
-  var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
   var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
-  var Products = require('../models/product').Products;
-  var Geography = require('../models/geography').Geography;
-  var Category = require('../models/category').Category;
   var User = require('../models/user').User;
   var jwt = require('jsonwebtoken');
   var underscore = require('underscore');
-  var Contact = require('../models/contact').Contact;
   var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
   var nodeMailer = require('nodemailer');
   var multer = require('multer');
@@ -20,6 +14,8 @@ var Lsquare = function()
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
   var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
+  var ToolsProject = require('../config/toolsProject.js');
+  var SearchIgnore = require('../config/searchignore.js');
   
   this.params = {};
   var self = this;
@@ -28,13 +24,12 @@ var Lsquare = function()
 
   this.params = {};
   this.config = require('../config/config.js');
-  var self = this;
 
   this.transporter = nodeMailer.createTransport({
-  service: self.config.smtpService,
-  host: self.config.smtpHost,
-  port: self.config.smtpPort,
-  auth: self.config.smtpAuth
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
   });
 
   this.getLsquare = function(req, res){
@@ -64,19 +59,7 @@ var Lsquare = function()
       query.limit = self.params.limit || 9;
       query.match = {};
 
-      query.projection = {
-        '_id' : 1,
-        'question' : 1,
-        'description' : 1,
-        'urlSlug' : 1,                
-        'tags' : 1,
-        'views' : 1,
-        'createdAt' : 1,
-        'active' : 1,
-        'createdBy' : 1,
-        'answers' : 1,
-        'oldId' : 1
-      };
+      query.projection = ToolsProject.lsquare;
 
       if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
       if(self.params.filters.askedBy.length) query.match['createdBy'] = { $in:self.params.filters.askedBy };
@@ -463,7 +446,7 @@ var Lsquare = function()
     CommonLib.uniqueVisits(visitor);
   };
 
-  this.search = function(req, res){    
+  this.filterSearch = function(req, res){
     var qString = req.query.q;
     console.log(req.query.filter);
     //return res.status(200).json(req.query.filter);
@@ -487,6 +470,28 @@ var Lsquare = function()
     }
   };
 
+  this.search = function(req, res){
+    var queryTerms = req.query.q;
+    queryTerms = queryTerms.split(' ');
+    var query = new RegExp('\\b'+queryTerms.join('|'), 'i');
+    for(i in queryTerms) 
+    {
+      queryTerms[i] = '/' + queryTerms[i] + '/';
+    }
+    queryTerms = queryTerms.join(' ')
+    console.log(query);
+    console.log(queryTerms);
+    Lsquare.aggregate(
+      //{ $match : { question : query } },
+      { $match : { $text : { $search : queryTerms } } },
+      { $sort: { score :  { $meta: "textScore" } } }, 
+      { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
+      function(err, questions){
+        if(err) console.log(err);
+        res.status(200).json({questions:questions});
+      }
+    );
+  };
 
   this.getUser = function(req, res){    
     var qString = req.query.q;

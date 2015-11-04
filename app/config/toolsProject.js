@@ -133,7 +133,21 @@ var toolsProject= {
     'urlSlug'      : 1,
     'logo'         : 1,
     'contact.primary.areasServiced' : 1
-	}
+	},
+
+  "lsquare": {
+    '_id' : 1,
+    'question' : 1,
+    'description' : 1,
+    'urlSlug' : 1,                
+    'tags' : 1,
+    'views' : 1,
+    'createdAt' : 1,
+    'active' : 1,
+    'createdBy' : 1,
+    'answers' : 1,
+    'oldId' : 1
+  }
 }
 
 module.exports = toolsProject;
