@@ -12,23 +12,23 @@ var http = require('http');
  * Get port from environment and store in Express.
  */
 
-var port1 = normalizePort(process.env.PORT || '3334');
-app.set('port', port1);
+//var port1 = normalizePort(process.env.PORT || '3334');
+//app.set('port', port1);
 
-var port2 = normalizePort(process.env.PORT || '3335');
-app.set('port', port2);
+//var port2 = normalizePort(process.env.PORT || '3335');
+//app.set('port', port2);
 
-var port3 = normalizePort(process.env.PORT || '3336');
+var port3 = normalizePort(process.env.PORT || '9000');
 app.set('port', port3);
 
 /**
  * Create HTTP server.
  */
 
-var server1 = http.createServer(app).listen(port1).on('error', onError);
+//var server1 = http.createServer(app).listen(port1).on('error', onError);
 //server1.on('listening', onListening(server1));
 
-var server2 = http.createServer(app).listen(port2).on('error', onError);
+//var server2 = http.createServer(app).listen(port2).on('error', onError);
 //server1.on('listening', onListening(server2));
 
 var server3 = http.createServer(app).listen(port3).on('error', onError);
