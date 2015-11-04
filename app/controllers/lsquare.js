@@ -15,8 +15,7 @@ var Lsquare = function()
   var Contact = require('../models/contact').Contact;
   var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
   var nodeMailer = require('nodemailer');
-
-
+  var multer = require('multer');
   var imagick = require('imagemagick');
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
@@ -150,6 +149,68 @@ var Lsquare = function()
         callbackInner(err, results);
       });                  
     };
+
+    self.imageUpload = function(req, res){
+      //console.log(req.file.path);
+      //return res.status(200).json("req");
+
+      var tmp_path = req.file.path;
+
+      /** The original name of the uploaded file
+          stored in the variable "originalname". **/
+      var target_path = './public/lsquare/' + req.file.originalname;
+
+      /** A better way to copy the uploaded file. **/
+      var src = fs.createReadStream(tmp_path);
+      var dest = fs.createWriteStream(target_path);
+      src.pipe(dest);
+
+      html = "";
+      html += "<script type='text/javascript'>";
+      //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
+      html += "    var url     = \"/lsquare/" + req.file.originalname + "\";";
+      html += "    var message = \"Uploaded file successfully\";";
+      html += "";
+      html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
+      html += "</script>";
+
+      res.send(html);      
+
+      // var dest, fileName, fs, l, tmpPath;
+    
+      // fs = require('fs');
+      
+      // tmpPath = req.files.upload.path;
+      // l = tmpPath.split('/').length;
+      // fileName = tmpPath.split('/')[l - 1] + "_" + req.files.upload.name;
+      
+      // dest = __dirname + "/public/uploads/" + fileName;
+      // fs.readFile(req.files.upload.path, function(err, data) {
+      //   if (err) {
+      //     console.log(err);
+      //     return;
+      //   }
+        
+      //   fs.writeFile(dest, data, function(err) {
+      //     var html;
+      //     if (err) {
+      //       console.log(err);
+      //       return;
+      //     }
+          
+      //     html = "";
+      //     html += "<script type='text/javascript'>";
+      //     html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
+      //     html += "    var url     = \"/uploads/" + fileName + "\";";
+      //     html += "    var message = \"Uploaded file successfully\";";
+      //     html += "";
+      //     html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
+      //     html += "</script>";
+          
+      //     res.send(html);
+      //   });
+      // });
+    }
 
   this.getFilters = function(req, res){
     async.parallel({
