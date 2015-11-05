@@ -135,67 +135,66 @@ var Lsquare = function()
 
     self.imageUpload = function(req, res){
 
-      var tmp_path = req.file.path;
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) res.status(401).json("Invalid Token");
+        else
+        { 
+          var tmp_path = req.file.path;        
+          var date = new Date();
+          var returnPath = date + req.file.originalname;
+          var path = './public/lsquare/'+ decoded._id;
 
-      /** The original name of the uploaded file
-          stored in the variable "originalname". **/
-      var date = new Date();
-      var returnPath = date + req.file.originalname;    
-      var target_path = './public/lsquare/' + returnPath;
+          if (!fs.existsSync(path)){
+              fs.mkdirSync(path);
+          }
 
-      /** A better way to copy the uploaded file. **/
-      var src = fs.createReadStream(tmp_path);
-      var dest = fs.createWriteStream(target_path);
-      src.pipe(dest);
+          var target_path = path + '/' + returnPath;
 
-      html = "";
-      html += "<script type='text/javascript'>";
-      //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      html += "    var url     = \"/lsquare/" + returnPath + "\";";
-      html += "    var message = \"Uploaded file successfully\";";
-      html += "";
-      html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      html += "</script>";
+          /** A better way to copy the uploaded file. **/
+          var src = fs.createReadStream(tmp_path);
+          var dest = fs.createWriteStream(target_path);
+          src.pipe(dest);
 
-      fs.unlinkSync(tmp_path);
+          html = "";
+          html += "<script type='text/javascript'>";
+          //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
+          html += "    var url     = \"/lsquare/"+ decoded._id + '/' +returnPath + "\";";
+          html += "    var message = \"Uploaded file successfully\";";
+          html += "";
+          html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
+          html += "</script>";
 
-      res.send(html);      
+          fs.unlinkSync(tmp_path);
 
-      // var dest, fileName, fs, l, tmpPath;
-    
-      // fs = require('fs');
-      
-      // tmpPath = req.files.upload.path;
-      // l = tmpPath.split('/').length;
-      // fileName = tmpPath.split('/')[l - 1] + "_" + req.files.upload.name;
-      
-      // dest = __dirname + "/public/uploads/" + fileName;
-      // fs.readFile(req.files.upload.path, function(err, data) {
-      //   if (err) {
-      //     console.log(err);
-      //     return;
-      //   }
-        
-      //   fs.writeFile(dest, data, function(err) {
-      //     var html;
-      //     if (err) {
-      //       console.log(err);
-      //       return;
-      //     }
-          
-      //     html = "";
-      //     html += "<script type='text/javascript'>";
-      //     html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      //     html += "    var url     = \"/uploads/" + fileName + "\";";
-      //     html += "    var message = \"Uploaded file successfully\";";
-      //     html += "";
-      //     html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      //     html += "</script>";
-          
-      //     res.send(html);
-      //   });
-      // });
+          res.send(html);
+        }  
+      });      
     }
+
+    this.getImages = function(req, res){
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+        if(!token) return res.status(401).json("Token not found");
+        jwt.verify(token, self.config.secret, function(err, decoded){
+          if(err) res.status(401).json("Invalid Token");
+          else
+          {           
+            var path = './public/lsquare/'+ decoded._id;
+            var files = [];
+            var i;
+
+            fs.readdir(path, function (err, list) {
+              for(i=0; i<list.length; i++) {
+                  //if(path.extname(list[i]) === fileType) {
+                      files.push('/lsquare/'+ decoded._id+'/'+list[i]); //store the file name into the array files
+                  //}
+              }
+              res.status(200).json({images:files});
+            });
+          }            
+        });
+    };
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -364,7 +363,60 @@ var Lsquare = function()
           });          
           }          
       });
-  };  
+  };
+
+  this.userActivities = function(req, res){
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    if(!token) return res.status(401).json("Token not found");
+    jwt.verify(token, self.config.secret, function(err, decoded){
+      if(err) res.status(401).json("Invalid Token");
+      else
+      {  
+        async.parallel({
+          questions : function(callbackInner)
+          {          
+            Lsquare.find({createdBy : decoded._id}).lean().exec(function(err, questions){
+                callbackInner(err, questions);
+              })
+          },
+          answers : function(callbackInner)
+          { 
+            LsquareAnswer.find({answered_by : decoded._id}).lean().exec(function(err, results){
+                self.getAnswersQuestion(results, callbackInner);
+              })
+          }
+        },
+        function(err, results) 
+        {                                           
+          var activities = [];
+          for(i in results.questions){
+            results.questions[i].type = 'question';
+            activities.push(results.questions[i]);            
+          }
+
+          for(i in results.answers){            
+            results.answers[i].type = 'answer';
+            activities.push(results.answers[i]);
+          }   
+          res.status(200).json(activities);
+        });
+      }  
+    })
+  }
+
+  self.getAnswersQuestion = function(results, callbackInner){     
+      var answerUsersIDs = [];        
+      async.each(results, function(result, callbackEach){            
+        Lsquare.findOne({_id : result.questionID}).lean().exec(function(err,questions){
+          result.question = questions;         
+          callbackEach(null);                
+        });            
+      }, 
+      function(err){
+        //console.log(results);
+        callbackInner(err, results);
+      });                  
+  };
 
   this.upvoteAnswer = function(req, res){
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
