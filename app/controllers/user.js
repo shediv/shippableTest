@@ -282,7 +282,7 @@ var User = function()
 
 	this.getSession = function(req, res){
 		var token = req.body.token || req.query.Tokenn || req.headers['x-access-token'];
-		if(!token) return res.status(401).json("Token not found");
+		if(!token) return res.status(403).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, decoded){
 			if(err) res.status(401).json("Invalid Token");
 			else res.status(200).json({user:decoded});

@@ -13,6 +13,8 @@ router.get("/dataImport", LsquareCtrl.dataImport);
 router.post("/addQuestion", LsquareCtrl.addQuestion);
 router.post("/addAnswer", LsquareCtrl.addAnswer);
 router.get("/getUser", LsquareCtrl.getUser);
+router.get("/user/activities", LsquareCtrl.userActivities);
+router.get("/getImages", LsquareCtrl.getImages);
 router.post("/imageUpload", LsquareCtrl.imageUpload);
 router.get("/filters/search", LsquareCtrl.filterSearch);
 router.post("/upvote", LsquareCtrl.upvoteAnswer);
