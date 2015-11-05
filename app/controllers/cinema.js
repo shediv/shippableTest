@@ -201,20 +201,23 @@ var Cinema = function()
       var cinemas = [];
       var reach = 0;
       var totalSeats = 0;
-      for(i in medias)
+      if(medias.length > 0)
       {
-        totalPrice10SecMuteSlide += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
-        totalPrice10SecAudioSlide += medias[i].mediaOptions['10SecAudioSlide'][self.params.nextFriday].showRate;
-        totalPrice30SecVideo += medias[i].mediaOptions['30SecVideo'][self.params.nextFriday].showRate;
-        totalPrice60SecVideo += medias[i].mediaOptions['60SecVideo'][self.params.nextFriday].showRate;
+        for(i in medias)
+        {
+          totalPrice10SecMuteSlide += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+          totalPrice10SecAudioSlide += medias[i].mediaOptions['10SecAudioSlide'][self.params.nextFriday].showRate;
+          totalPrice30SecVideo += medias[i].mediaOptions['30SecVideo'][self.params.nextFriday].showRate;
+          totalPrice60SecVideo += medias[i].mediaOptions['60SecVideo'][self.params.nextFriday].showRate;
 
-        totalSeats += medias[i].seats;
-        medias[i]['city'] = geographies[medias[i].geography[0]].city;
-        medias[i]['state'] = geographies[medias[i].geography[0]].state;
-        if(cities.indexOf(medias[i].city) <= -1) 
-          cities.push(medias[i].city);
-        if(cinemas.indexOf(medias[i].theatreName) <= -1) 
-          cinemas.push(medias[i].theatreName);
+          totalSeats += medias[i].seats;
+          medias[i]['city'] = geographies[medias[i].geography[0]].city;
+          medias[i]['state'] = geographies[medias[i].geography[0]].state;
+          if(cities.indexOf(medias[i].city) <= -1) 
+            cities.push(medias[i].city);
+          if(cinemas.indexOf(medias[i].theatreName) <= -1) 
+            cinemas.push(medias[i].theatreName);
+        }
       }
       var data = {
         count:medias.length, 
@@ -256,14 +259,17 @@ var Cinema = function()
       var cities = [];
       var reach = 0;
       var totalSeats = 0;
-      for(i in medias)
+      if(medias.length > 0)
       {
-        totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
-        totalSeats += medias[i].seats;
-        medias[i]['city'] = geographies[medias[i].geography[0]].city;
-        medias[i]['state'] = geographies[medias[i].geography[0]].state;
-        if(cities.indexOf(medias[i].city) <= -1) 
-          cities.push(medias[i].city);
+        for(i in medias)
+        {
+          totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
+          totalSeats += medias[i].seats;
+          medias[i]['city'] = geographies[medias[i].geography[0]].city;
+          medias[i]['state'] = geographies[medias[i].geography[0]].state;
+          if(cities.indexOf(medias[i].city) <= -1) 
+            cities.push(medias[i].city);
+        }
       }
       var data = {
         count:medias.length, 
