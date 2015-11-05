@@ -420,7 +420,7 @@ var Common = function()
         ], function(err, params){
           params = params[0];
           result = self.populateCategoryMetatags(result, toolName, req, params);
-          if(!result) return res.status(404).json("NOT FOUND");
+          if(!result) return res.status(410).json("NOT FOUND");
           Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
             if(err) return res.status(500).json(err);
             result.metaTags.medias = medias;
