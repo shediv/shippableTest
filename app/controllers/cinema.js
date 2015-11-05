@@ -356,9 +356,10 @@ var Cinema = function()
         if(!results) return res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
-          results.name = results.cinemaChain+ ", "+ results.mallName;
           if(results.type == 'onScreen')
           {
+            results.name = results.cinemaChain+ ", "+ results.resultMallName;
+            mallName = results.resultMallName;
             dateObj = new Date();
             dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
             var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
@@ -370,14 +371,21 @@ var Cinema = function()
             results.mediaOptions['30SecVideo'] = results.mediaOptions['30SecVideo'][nextFriday];
             results.mediaOptions['60SecVideo'] = results.mediaOptions['60SecVideo'][nextFriday];
           }
-
-          if(results.about) {
+          else 
+          {
+            results.name = results.cinemaChain+ ", "+ results.mallName;
+            mallName = results.mallName;
+          }
+          if(results.about) 
+          {
             description = results.about;
-          }else {
-          description = results.cinemaChain+" at "+results.mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
+          }
+          else 
+          {
+            description = results.cinemaChain+" at "+mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
           }
           var metaTags = {
-            title : results.cinemaChain+ ", "+ results.mallName,
+            title : results.cinemaChain+ ", "+ mallName,
             image  : results.imageUrl,
             description  : description,
             facebook : self.config.facebook,
