@@ -375,14 +375,24 @@ var Lsquare = function()
         async.parallel({
           questions : function(callbackInner)
           {          
-            Lsquare.find({createdBy : decoded._id}).lean().exec(function(err, questions){
-                callbackInner(err, questions);
+            var createdByIDs = [];
+            Lsquare.find({createdBy : req.query.userID}).lean().exec(function(err, questions){
+                for(i in questions) createdByIDs.push(questions[i].createdBy);                  
+                  CommonLib.getUserInfo(createdByIDs, function(err, userInfo){
+                    for(i in questions) questions[i].createdBy = userInfo[0];
+                    callbackInner(err, questions);
+                  })                
               })
           },
           answers : function(callbackInner)
           { 
-            LsquareAnswer.find({answered_by : decoded._id}).lean().exec(function(err, results){
-                self.getAnswersQuestion(results, callbackInner);
+            var answered_byIDs = [];
+            LsquareAnswer.find({answered_by : req.query.userID}).lean().exec(function(err, results){
+                for(i in results) answered_byIDs.push(results[i].answered_by);
+                  CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
+                    for(i in results) results[i].answered_by = userInfo[0];
+                      self.getAnswersQuestion(results, callbackInner);
+                  });  
               })
           }
         },
@@ -414,7 +424,14 @@ var Lsquare = function()
       }, 
       function(err){
         //console.log(results);
-        callbackInner(err, results);
+        var questionCreatedByIDs = [];
+        for(i in results) questionCreatedByIDs.push(results[i].question.createdBy);
+          CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
+            for(i in results) { results[i].question.createdBy = QuserInfo[results[i].question.createdBy];}
+            callbackInner(err, results);
+          })
+        //console.log(questionCreatedByIDs);
+        //callbackInner(err, results);
       });                  
   };
 
