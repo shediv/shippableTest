@@ -374,6 +374,12 @@ var User = function()
 	  	else return "user logged";
 	  });
 	};
+
+	this.userCount = function(req, res){
+		User.find({dateOfJoin: {"$gte": new Date(req.query.startDate), "$lt": new Date(req.query.endDate)}}).lean().exec(function(err, users){
+			return res.status(200).json(users.length);
+		})		
+	}
 }
 
 module.exports.User = User;
