@@ -165,15 +165,16 @@ var Cinema = function()
       }
       else
       {
-        var finalMedias = [];
+        var finalMedias = [];  
         Media.aggregate(match, {$project:project}, group, function(err, medias){
           if(err) console.log(err);
           for(key in medias)
           {
+            medias[key].geoBasedMedias.sort(function(a,b){ return b.seats - a.seats});
             medias[key].geoBasedMedias = medias[key].geoBasedMedias.slice(0,2);                  
             finalMedias = finalMedias.concat(medias[key].geoBasedMedias);
           }
-          medias = finalMedias;
+          medias = finalMedias;          
           if(geographies.length) callback(err, self.populateOnScreenData(medias, geographies));
           else
           {
@@ -355,6 +356,7 @@ var Cinema = function()
         if(!results) return res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
+          results.name = results.cinemaChain+ ", "+ results.mallName;
           if(results.type == 'onScreen')
           {
             dateObj = new Date();
