@@ -74,39 +74,7 @@ var Search = function()
           for(i in result['medias'])
           {
             result['medias'][i].toolName = tool.name;
-            switch(tool.name)
-            {
-              case 'cinema':
-                if(result['medias'][i].type == 'onScreen')
-                {
-                  result['medias'][i].name = result['medias'][i].theatreName + ', ' + result['medias'][i].resultMallName;
-                  delete result['medias'][i].theatreName;
-                  delete result['medias'][i].resultMallName;
-                }
-                else
-                {
-                  result['medias'][i].name = result['medias'][i].cinemaChain + ', ' + result['medias'][i].mallName;
-                  delete result['medias'][i].mallName;
-                }
-                delete result['medias'][i].cinemaChain;
-                delete result['medias'][i].type;
-                break;
-              case 'radio':
-                result['medias'][i].name = result['medias'][i].station + ', ' + result['medias'][i].city;
-                delete result['medias'][i].station;
-                delete result['medias'][i].city;
-                break;
-              case 'newspaper':
-                result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].editionName;
-                result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].areaCovered;
-                delete result['medias'][i].areaCovered;
-                delete result['medias'][i].editionName;
-                break;
-              case 'digital':
-                result['medias'][i].name = result['medias'][i].name + ', ' + result['medias'][i].medium;
-                delete result['medias'][i].medium;
-                break;
-            }
+            result['medias'][i] = CommonLib.formMediaName(result['medias'][i], tool.name);
           }
           result['medias'] = self.sortClosestMatch(result['medias']);
           result['medias'] = result['medias'].slice(0, 10);
