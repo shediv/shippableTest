@@ -375,13 +375,13 @@ var Lsquare = function()
         async.parallel({
           questions : function(callbackInner)
           {          
-            Lsquare.find({createdBy : decoded._id}).lean().exec(function(err, questions){
+            Lsquare.find({createdBy : req.query.userID}).lean().exec(function(err, questions){
                 callbackInner(err, questions);
               })
           },
           answers : function(callbackInner)
           { 
-            LsquareAnswer.find({answered_by : decoded._id}).lean().exec(function(err, results){
+            LsquareAnswer.find({answered_by : req.query.userID}).lean().exec(function(err, results){
                 self.getAnswersQuestion(results, callbackInner);
               })
           }
