@@ -538,6 +538,7 @@ var Lsquare = function()
       { $match : { $text : { $search : queryTerms } } },
       { $sort: { score :  { $meta: "textScore" } } }, 
       { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
+      { $limit : 5 }, { $skip : 0 },
       function(err, questions){
         if(err) console.log(err);
         res.status(200).json({questions:questions});
