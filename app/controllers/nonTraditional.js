@@ -298,8 +298,11 @@ var NonTraditional = function()
           result.mediaOptions[i]['minimumUnit'] = minimumUnit;              
         }
 
+        var mainTitle = result.name.replace("-", "Advertising in")
+        var subTitle = result.name.replace("-", "Advertisement in")
+
         var metaTags = {
-          title : result.name,
+          title : mainTitle+' >> Rates for '+subTitle,
           image  : result.imageUrl,
           description  : result.about,
           facebook : self.config.facebook,

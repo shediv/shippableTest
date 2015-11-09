@@ -443,14 +443,15 @@ var Lsquare = function()
         else {
           LsquareAnswer.update({ _id:req.body.answerID }, { $inc:{ score:1 } }, { upsert:true }).exec();        
           res.status(200).json("sucess");
-          Lsquare.findOne({_id: req.body.questionID}).lean().exec(function(err, question){
+          //Lsquare.findOne({_id: req.body.questionID}).lean().exec(function(err, question){
             LsquareAnswer.findOne({_id: req.body.answerID}).lean().exec(function(err, answer){
               User.findOne({_id: answer.answered_by}).lean().exec(function(err, user){
+              Lsquare.findOne({_id: answer.questionID}).lean().exec(function(err, question){  
                 var mailOptions = {};
                 mailOptions.social = false;
                 mailOptions.to = user.email;
                 mailOptions.answerID = req.body.answerID;
-                mailOptions.questionID = req.body.questionID;
+                mailOptions.questionID = answer.questionID;
                 mailOptions.appHost = self.config.appHost;
                 mailOptions.date = Date();
                 var firstName = user.firstName;

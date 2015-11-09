@@ -922,10 +922,10 @@ var Magazine = function()
         if(results.about) {
           description = results.about;
         }else {
-          description = results.name+" is a "+results.attributes.frequency.value+"Magazine in the "+results.categoryName+" Segment. "+results.name+" is utilized by a variety of brands to reach out to their target audience. You can explore "+ results.name +" Rates & " + results.name +" Costs here";
+          description = results.name+" is a "+results.attributes.frequency.value+" Magazine in the "+results.categoryName+" Segment. "+results.name+" Magazine Advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+ results.name +" Magazine Advertising Rates & " + results.name +" Magazine Advertising Costs here";
         }
         var metaTags = {
-          title : results.name,
+          title : results.name+' Magazine Advertising >> Rates for ' + results.name+' Magazine Advertisement',
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
