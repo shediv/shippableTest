@@ -201,20 +201,23 @@ var Cinema = function()
       var cinemas = [];
       var reach = 0;
       var totalSeats = 0;
-      for(i in medias)
+      if(medias.length > 0)
       {
-        totalPrice10SecMuteSlide += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
-        totalPrice10SecAudioSlide += medias[i].mediaOptions['10SecAudioSlide'][self.params.nextFriday].showRate;
-        totalPrice30SecVideo += medias[i].mediaOptions['30SecVideo'][self.params.nextFriday].showRate;
-        totalPrice60SecVideo += medias[i].mediaOptions['60SecVideo'][self.params.nextFriday].showRate;
+        for(i in medias)
+        {
+          totalPrice10SecMuteSlide += medias[i].mediaOptions['10SecMuteSlide'][self.params.nextFriday].showRate;
+          totalPrice10SecAudioSlide += medias[i].mediaOptions['10SecAudioSlide'][self.params.nextFriday].showRate;
+          totalPrice30SecVideo += medias[i].mediaOptions['30SecVideo'][self.params.nextFriday].showRate;
+          totalPrice60SecVideo += medias[i].mediaOptions['60SecVideo'][self.params.nextFriday].showRate;
 
-        totalSeats += medias[i].seats;
-        medias[i]['city'] = geographies[medias[i].geography[0]].city;
-        medias[i]['state'] = geographies[medias[i].geography[0]].state;
-        if(cities.indexOf(medias[i].city) <= -1) 
-          cities.push(medias[i].city);
-        if(cinemas.indexOf(medias[i].theatreName) <= -1) 
-          cinemas.push(medias[i].theatreName);
+          totalSeats += medias[i].seats;
+          medias[i]['city'] = geographies[medias[i].geography[0]].city;
+          medias[i]['state'] = geographies[medias[i].geography[0]].state;
+          if(cities.indexOf(medias[i].city) <= -1) 
+            cities.push(medias[i].city);
+          if(cinemas.indexOf(medias[i].theatreName) <= -1) 
+            cinemas.push(medias[i].theatreName);
+        }
       }
       var data = {
         count:medias.length, 
@@ -256,14 +259,17 @@ var Cinema = function()
       var cities = [];
       var reach = 0;
       var totalSeats = 0;
-      for(i in medias)
+      if(medias.length > 0)
       {
-        totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
-        totalSeats += medias[i].seats;
-        medias[i]['city'] = geographies[medias[i].geography[0]].city;
-        medias[i]['state'] = geographies[medias[i].geography[0]].state;
-        if(cities.indexOf(medias[i].city) <= -1) 
-          cities.push(medias[i].city);
+        for(i in medias)
+        {
+          totalPrice += medias[i].mediaOptions['voucherDistribution'].discountedRate;
+          totalSeats += medias[i].seats;
+          medias[i]['city'] = geographies[medias[i].geography[0]].city;
+          medias[i]['state'] = geographies[medias[i].geography[0]].state;
+          if(cities.indexOf(medias[i].city) <= -1) 
+            cities.push(medias[i].city);
+        }
       }
       var data = {
         count:medias.length, 
@@ -356,9 +362,10 @@ var Cinema = function()
         if(!results) return res.status(404).json({error : 'No Such Media Found'});
         Geography.find({ _id:{ $in:results.geography } }).lean().exec(function(err, geos){
           if(geos) results.geography = geos;
-          results.name = results.cinemaChain+ ", "+ results.mallName;
           if(results.type == 'onScreen')
           {
+            results.name = results.cinemaChain+ ", "+ results.resultMallName;
+            mallName = results.resultMallName;
             dateObj = new Date();
             dateObj.setDate(dateObj.getDate() + (12 - dateObj.getDay()) % 7);
             var nextFriday = ('0' + dateObj.getDate()).slice(-2) + '/'
@@ -370,14 +377,21 @@ var Cinema = function()
             results.mediaOptions['30SecVideo'] = results.mediaOptions['30SecVideo'][nextFriday];
             results.mediaOptions['60SecVideo'] = results.mediaOptions['60SecVideo'][nextFriday];
           }
-
-          if(results.about) {
+          else 
+          {
+            results.name = results.cinemaChain+ ", "+ results.mallName;
+            mallName = results.mallName;
+          }
+          if(results.about) 
+          {
             description = results.about;
-          }else {
-          description = results.cinemaChain+" at "+results.mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
+          }
+          else 
+          {
+            description = results.cinemaChain+" at "+mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
           }
           var metaTags = {
-            title : results.cinemaChain+ ", "+ results.mallName,
+            title : results.cinemaChain+ ", "+ mallName,
             image  : results.imageUrl,
             description  : description,
             facebook : self.config.facebook,

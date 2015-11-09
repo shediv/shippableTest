@@ -2,17 +2,11 @@ var Lsquare = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
-  var Media = require('../models/media').Media;
-  var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
   var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
-  var Products = require('../models/product').Products;
-  var Geography = require('../models/geography').Geography;
-  var Category = require('../models/category').Category;
   var User = require('../models/user').User;
   var jwt = require('jsonwebtoken');
   var underscore = require('underscore');
-  var Contact = require('../models/contact').Contact;
   var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
   var nodeMailer = require('nodemailer');
   var multer = require('multer');
@@ -20,6 +14,8 @@ var Lsquare = function()
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
   var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
+  var ToolsProject = require('../config/toolsProject.js');
+  var SearchIgnore = require('../config/searchignore.js');
   
   this.params = {};
   var self = this;
@@ -28,13 +24,12 @@ var Lsquare = function()
 
   this.params = {};
   this.config = require('../config/config.js');
-  var self = this;
 
   this.transporter = nodeMailer.createTransport({
-  service: self.config.smtpService,
-  host: self.config.smtpHost,
-  port: self.config.smtpPort,
-  auth: self.config.smtpAuth
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
   });
 
   this.getLsquare = function(req, res){
@@ -64,19 +59,7 @@ var Lsquare = function()
       query.limit = self.params.limit || 9;
       query.match = {};
 
-      query.projection = {
-        '_id' : 1,
-        'question' : 1,
-        'description' : 1,
-        'urlSlug' : 1,                
-        'tags' : 1,
-        'views' : 1,
-        'createdAt' : 1,
-        'active' : 1,
-        'createdBy' : 1,
-        'answers' : 1,
-        'oldId' : 1
-      };
+      query.projection = ToolsProject.lsquare;
 
       if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
       if(self.params.filters.askedBy.length) query.match['createdBy'] = { $in:self.params.filters.askedBy };
@@ -152,67 +135,66 @@ var Lsquare = function()
 
     self.imageUpload = function(req, res){
 
-      var tmp_path = req.file.path;
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) res.status(401).json("Invalid Token");
+        else
+        { 
+          var tmp_path = req.file.path;        
+          var date = new Date();
+          var returnPath = date + req.file.originalname;
+          var path = './public/lsquare/'+ decoded._id;
 
-      /** The original name of the uploaded file
-          stored in the variable "originalname". **/
-      var date = new Date();
-      var returnPath = date + req.file.originalname;    
-      var target_path = './public/lsquare/' + returnPath;
+          if (!fs.existsSync(path)){
+              fs.mkdirSync(path);
+          }
 
-      /** A better way to copy the uploaded file. **/
-      var src = fs.createReadStream(tmp_path);
-      var dest = fs.createWriteStream(target_path);
-      src.pipe(dest);
+          var target_path = path + '/' + returnPath;
 
-      html = "";
-      html += "<script type='text/javascript'>";
-      //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      html += "    var url     = \"/lsquare/" + returnPath + "\";";
-      html += "    var message = \"Uploaded file successfully\";";
-      html += "";
-      html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      html += "</script>";
+          /** A better way to copy the uploaded file. **/
+          var src = fs.createReadStream(tmp_path);
+          var dest = fs.createWriteStream(target_path);
+          src.pipe(dest);
 
-      fs.unlinkSync(tmp_path);
+          html = "";
+          html += "<script type='text/javascript'>";
+          //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
+          html += "    var url     = \"/lsquare/"+ decoded._id + '/' +returnPath + "\";";
+          html += "    var message = \"Uploaded file successfully\";";
+          html += "";
+          html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
+          html += "</script>";
 
-      res.send(html);      
+          fs.unlinkSync(tmp_path);
 
-      // var dest, fileName, fs, l, tmpPath;
-    
-      // fs = require('fs');
-      
-      // tmpPath = req.files.upload.path;
-      // l = tmpPath.split('/').length;
-      // fileName = tmpPath.split('/')[l - 1] + "_" + req.files.upload.name;
-      
-      // dest = __dirname + "/public/uploads/" + fileName;
-      // fs.readFile(req.files.upload.path, function(err, data) {
-      //   if (err) {
-      //     console.log(err);
-      //     return;
-      //   }
-        
-      //   fs.writeFile(dest, data, function(err) {
-      //     var html;
-      //     if (err) {
-      //       console.log(err);
-      //       return;
-      //     }
-          
-      //     html = "";
-      //     html += "<script type='text/javascript'>";
-      //     html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      //     html += "    var url     = \"/uploads/" + fileName + "\";";
-      //     html += "    var message = \"Uploaded file successfully\";";
-      //     html += "";
-      //     html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      //     html += "</script>";
-          
-      //     res.send(html);
-      //   });
-      // });
+          res.send(html);
+        }  
+      });      
     }
+
+    this.getImages = function(req, res){
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+        if(!token) return res.status(401).json("Token not found");
+        jwt.verify(token, self.config.secret, function(err, decoded){
+          if(err) res.status(401).json("Invalid Token");
+          else
+          {           
+            var path = './public/lsquare/'+ decoded._id;
+            var files = [];
+            var i;
+
+            fs.readdir(path, function (err, list) {
+              for(i=0; i<list.length; i++) {
+                  //if(path.extname(list[i]) === fileType) {
+                      files.push('/lsquare/'+ decoded._id+'/'+list[i]); //store the file name into the array files
+                  //}
+              }
+              res.status(200).json({images:files});
+            });
+          }            
+        });
+    };
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -381,7 +363,77 @@ var Lsquare = function()
           });          
           }          
       });
-  };  
+  };
+
+  this.userActivities = function(req, res){
+    // var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    // if(!token) return res.status(401).json("Token not found");
+    // jwt.verify(token, self.config.secret, function(err, decoded){
+    //   if(err) res.status(401).json("Invalid Token");
+    //   else
+    //   {  
+        async.parallel({
+          questions : function(callbackInner)
+          {          
+            var createdByIDs = [];
+            Lsquare.find({createdBy : req.query.userID}).lean().exec(function(err, questions){
+                for(i in questions) createdByIDs.push(questions[i].createdBy);                  
+                  CommonLib.getUserInfo(createdByIDs, function(err, userInfo){
+                    for(i in questions) questions[i].createdBy = userInfo[0];
+                    callbackInner(err, questions);
+                  })                
+              })
+          },
+          answers : function(callbackInner)
+          { 
+            var answered_byIDs = [];
+            LsquareAnswer.find({answered_by : req.query.userID}).lean().exec(function(err, results){
+                for(i in results) answered_byIDs.push(results[i].answered_by);
+                  CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
+                    for(i in results) results[i].answered_by = userInfo[0];
+                      self.getAnswersQuestion(results, callbackInner);
+                  });  
+              })
+          }
+        },
+        function(err, results) 
+        {                                           
+          var activities = [];
+          for(i in results.questions){
+            results.questions[i].type = 'question';
+            activities.push(results.questions[i]);            
+          }
+
+          for(i in results.answers){            
+            results.answers[i].type = 'answer';
+            activities.push(results.answers[i]);
+          }   
+          res.status(200).json(activities);
+        });
+      //}  
+    //})
+  }
+
+  self.getAnswersQuestion = function(results, callbackInner){     
+      var answerUsersIDs = [];        
+      async.each(results, function(result, callbackEach){            
+        Lsquare.findOne({_id : result.questionID}).lean().exec(function(err,questions){
+          result.question = questions;         
+          callbackEach(null);                
+        });            
+      }, 
+      function(err){
+        //console.log(results);
+        var questionCreatedByIDs = [];
+        for(i in results) questionCreatedByIDs.push(results[i].question.createdBy);
+          CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
+            for(i in results) { results[i].question.createdBy = QuserInfo[results[i].question.createdBy];}
+            callbackInner(err, results);
+          })
+        //console.log(questionCreatedByIDs);
+        //callbackInner(err, results);
+      });                  
+  };
 
   this.upvoteAnswer = function(req, res){
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -463,7 +515,7 @@ var Lsquare = function()
     CommonLib.uniqueVisits(visitor);
   };
 
-  this.search = function(req, res){    
+  this.filterSearch = function(req, res){
     var qString = req.query.q;
     console.log(req.query.filter);
     //return res.status(200).json(req.query.filter);
@@ -487,6 +539,29 @@ var Lsquare = function()
     }
   };
 
+  this.search = function(req, res){
+    var queryTerms = req.query.q;
+    queryTerms = queryTerms.split(' ');
+    var query = new RegExp('\\b'+queryTerms.join('|'), 'i');
+    for(i in queryTerms) 
+    {
+      queryTerms[i] = '/' + queryTerms[i] + '/';
+    }
+    queryTerms = queryTerms.join(' ')
+    console.log(query);
+    console.log(queryTerms);
+    Lsquare.aggregate(
+      //{ $match : { question : query } },
+      { $match : { $text : { $search : queryTerms } } },
+      { $sort: { score :  { $meta: "textScore" } } }, 
+      { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
+      { $limit : 5 }, { $skip : 0 },
+      function(err, questions){
+        if(err) console.log(err);
+        res.status(200).json({questions:questions});
+      }
+    );
+  };
 
   this.getUser = function(req, res){    
     var qString = req.query.q;

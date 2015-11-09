@@ -89,6 +89,43 @@ var Common = function()
     return returnString;
 	};
 
+	this.formMediaName = function(media, toolName){
+		switch(toolName)
+		{
+			case 'cinema':
+        if(media.type == 'onScreen')
+        {
+          media.name = media.theatreName + ', ' + media.resultMallName;
+          delete media.theatreName;
+          delete media.resultMallName;
+        }
+        else
+        {
+          media.name = media.cinemaChain + ', ' + media.mallName;
+        }
+        delete media.mallName;
+        delete media.cinemaChain;
+        delete media.type;
+        break;
+      case 'radio':
+        media.name = media.station + ', ' + media.city;
+        delete media.station;
+        delete media.city;
+        break;
+      case 'newspaper':
+        media.name = media.name + ', ' + media.editionName;
+        media.name = media.name + ', ' + media.areaCovered;
+        delete media.areaCovered;
+        delete media.editionName;
+        break;
+      case 'digital':
+        media.name = media.name + ', ' + media.medium;
+        delete media.medium;
+        break;
+		}
+		return media;
+	};
+
   this.addCommas = function(x){
     return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
   };
