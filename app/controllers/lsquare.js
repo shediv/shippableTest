@@ -366,12 +366,12 @@ var Lsquare = function()
   };
 
   this.userActivities = function(req, res){
-    var token = req.body.token || req.query.token || req.headers['x-access-token'];
-    if(!token) return res.status(401).json("Token not found");
-    jwt.verify(token, self.config.secret, function(err, decoded){
-      if(err) res.status(401).json("Invalid Token");
-      else
-      {  
+    // var token = req.body.token || req.query.token || req.headers['x-access-token'];
+    // if(!token) return res.status(401).json("Token not found");
+    // jwt.verify(token, self.config.secret, function(err, decoded){
+    //   if(err) res.status(401).json("Invalid Token");
+    //   else
+    //   {  
         async.parallel({
           questions : function(callbackInner)
           {          
@@ -410,8 +410,8 @@ var Lsquare = function()
           }   
           res.status(200).json(activities);
         });
-      }  
-    })
+      //}  
+    //})
   }
 
   self.getAnswersQuestion = function(results, callbackInner){     
