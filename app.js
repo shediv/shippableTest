@@ -47,7 +47,14 @@ app.use(cors({
         'http://www.m20.in',
         'http://m20.in',
 		    'http://tma.dev:3000',
-		    'http://www.tma.dev:3000'
+		    'http://www.tma.dev:3000',
+'http://127.0.0.1:3000',
+'http://127.0.0.1:3333',
+'http://127.0.0.1:12301',
+'http://127.0.0.1:12302',
+'http://127.0.0.1:12303',
+'http://127.0.0.1:12304',
+'http://127.0.0.1:12305'
     ],
 	headers: [
 		'x-access-token', 'Content-Type'
