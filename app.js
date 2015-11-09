@@ -97,7 +97,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(multer({dest: './public/temp/'}).single('file'));
+app.use(multer({dest: './public/temp/'}).single('upload'));
 
 // check if login required
 app.use(function(req, res, next) {
