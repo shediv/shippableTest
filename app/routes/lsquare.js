@@ -18,7 +18,6 @@ router.get("/getImages", LsquareCtrl.getImages);
 router.post("/imageUpload", LsquareCtrl.imageUpload);
 router.get("/filters/search", LsquareCtrl.filterSearch);
 router.post("/upvote", LsquareCtrl.upvoteAnswer);
-//router.get("/addQuestion", LsquareCtrl.addQuestion);
 router.get("/:urlSlug", LsquareCtrl.show);
 
 module.exports = router;
