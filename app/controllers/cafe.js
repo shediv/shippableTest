@@ -49,7 +49,7 @@ var Cafe = function()
     var cafeData = req.body.vendor;
     Cafe.findOneAndUpdate({_id : cafeID}, cafeData, {upsert:true}, function(err, doc){
       if(err) return res.status(500).json(err);
-      return res.send("Cafe info succesfully updated");
+      return res.status(200).json("Cafe info succesfully updated");
     });
   };
 
@@ -62,7 +62,7 @@ var Cafe = function()
       }
       var topics = underscore.uniq(topics);
       topics = topics.slice(0,15);
-      return res.send({topics:topics, count:topics.length});
+      return res.status(200).json({topics:topics, count:topics.length});
     });
   };
 
@@ -74,7 +74,7 @@ var Cafe = function()
         topics = topics.concat(doc[i].topics);
       }
       var topics = underscore.uniq(topics);
-      return res.send({topics:topics, count:topics.length});
+      return res.status(200).json({topics:topics, count:topics.length});
     });
   };
 
@@ -88,7 +88,7 @@ var Cafe = function()
         topics = topics.concat(doc[i].topics);
       }
       var topics = underscore.uniq(topics);
-      return res.send({topics:topics, count:topics.length});
+      return res.status(200).json({topics:topics, count:topics.length});
     });
   };
   
