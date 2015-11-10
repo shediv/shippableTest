@@ -58,7 +58,7 @@ var _12thCross = function()
     var vendorData = req.body.vendor;
     TwelthCross.findOneAndUpdate({_id : vendorID}, vendorData, {upsert:true}, function(err, doc){
       if(err) return res.status(500).json(err);
-      return res.send("Vendor info succesfully updated");
+      return res.status(200).json("Vendor info succesfully updated");
     });
   };
   

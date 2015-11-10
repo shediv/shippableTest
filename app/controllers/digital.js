@@ -232,10 +232,14 @@ var Digital = function()
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
         if(cat) results.categoryName = cat.name;
+        var newTitle = results.name.replace("App", '');
+        newTitle = newTitle.replace("  ", " ");
+        newTitle = newTitle + ' ' +results.medium;
         var metaTags = {
-          title : results.name,
+          title : newTitle,
           image  : results.imageUrl,
-          description  : results.about,
+          //description  : results.about,
+          description  : newTitle + ' is utilized by variety of brands to  reach out to their target audience. You can explore '+newTitle+' Advertising rates and '+newTitle+' Advertising cost here.',
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }

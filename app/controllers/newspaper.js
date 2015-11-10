@@ -285,10 +285,10 @@ var Newspaper = function()
         if(results.about) {
           description = results.about;
         }else {
-          description = results.name+" that covers "+results.areaCovered+" is a popular newspaper in the "+results.categoryName+" Segment. "+results.name+" Advertising is utilized by a variety of brands to reach our target audience. You can explore "+results.name+ " Advertising Rates & "+results.name+" Advertising Costs here";          
+          description = results.name+" that covers "+results.areaCovered+" is a popular newspaper in the "+results.categoryName+" Segment. "+results.name+" Newspaper Advertising is utilized by a variety of brands to reach the target audience. You can explore "+results.name+ " Newspaper Advertising Rates & "+results.name+" Newspaper Advertising Costs here";
         }
         var metaTags = {
-          title : results.name,
+          title : results.name+ ' Newspaper Advertising in '+results.areaCovered+' >> Rates for '+results.name+' Newspaper Advertisement in '+results.areaCovered,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,

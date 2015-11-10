@@ -255,10 +255,14 @@ var Airport = function()
         result.mediaOptions[i]['minimumUnit'] = minimumUnit;              
       }
 
+      var newStr = result.name.split("-");
+      console.log(newStr[0]);
+
       var metaTags = {
-          title : result.name,
+          //title : result.name,          
+          title : result.name.replace("-", "Advertising in")+ ' >> Rates for '+result.name.replace("-", "Advertisement in"),
           image  : result.imageUrl,
-          description  : result.about,
+          description  : newStr[1]+ ' '+newStr[0]+'Advertising  has emerged as a promising Advertising platform. We have access to all media properties for'+newStr[1]+' '+ newStr[0]+'Advertising. Explore '+newStr[1]+' '+ newStr[0]+ 'Advertising rates and '+newStr[1]+ ' '+newStr[0]+'Advertising options here.',
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }
