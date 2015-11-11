@@ -1,10 +1,9 @@
 .idea/
+app/config/config.env.js
 node_modules/
-config.js
 public/images/
 public/temp/
 npm-debug.log
 .idea/
 log/
-bin/www
 logs/

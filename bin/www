@@ -7,40 +7,20 @@
 var app = require('../app');
 var debug = require('debug')('tma-api:server');
 var http = require('http');
+var envConfig = require('../app/config/config.env.js');
 
 /**
  * Get port from environment and store in Express.
  */
 
-var port1 = normalizePort(process.env.PORT || '3000');
-app.set('port', port1);
+var port = [], server = [];
 
-var port2 = normalizePort(process.env.PORT || '3001');
-app.set('port', port2);
-
-var port3 = normalizePort(process.env.PORT || '3002');
-app.set('port', port3);
-
-/**
- * Create HTTP server.
- */
-
-var server1 = http.createServer(app).listen(port1).on('error', onError);
-//server1.on('listening', onListening(server1));
-
-var server2 = http.createServer(app).listen(port2).on('error', onError);
-//server1.on('listening', onListening(server2));
-
-var server3 = http.createServer(app).listen(port3).on('error', onError);
-//server1.on('listening', onListening(server3));
-
-/**
- * Listen on provided port, on all network interfaces.
- */
-
-//server.listen(port);
-//server.on('error', onError);
-//server.on('listening', onListening);
+envConfig.ports.forEach(function(element, index, array){
+  port[index] = normalizePort(process.env.PORT || element);
+  app.set('port', port[index]);
+  server[index] = http.createServer(app).listen(port[index]).on('error', onError);
+  //server[index].on('listening', onListening(server[index]));
+});
 
 /**
  * Normalize a port into a number, string, or false.
