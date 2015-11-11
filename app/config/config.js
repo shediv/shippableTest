@@ -9,9 +9,6 @@ var config = {
   },
   smtpPort:587,
 
-  //Database Configs
-  mongoUrl : "mongodb://root:goosebumps@139.162.29.37/media_ant?authSource=admin",
-
   //Domain Name Configs
   appHost : 'www.themediaant.com',
 
