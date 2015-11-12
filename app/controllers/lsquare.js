@@ -146,22 +146,20 @@ var Lsquare = function()
     };
 
     self.imageUpload = function(req, res){
-
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, decoded){
-        if(err) res.status(401).json("Invalid Token");
+        if(err) return res.status(401).json("Invalid Token");
         else
-        { 
+        {
           var tmp_path = req.file.path;        
           var date = new Date();
           var returnPath = date + req.file.originalname;
-          var path = './public/lsquare/'+ decoded._id;
+          var path = './public/images/users/'+ decoded._id;
 
           if (!fs.existsSync(path)){
               fs.mkdirSync(path);
           }
-
           var target_path = path + '/' + returnPath;
 
           /** A better way to copy the uploaded file. **/
@@ -169,21 +167,12 @@ var Lsquare = function()
           var dest = fs.createWriteStream(target_path);
           src.pipe(dest);
 
-          html = "";
-          html += "<script type='text/javascript'>";
-          //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-          html += "    var url     = \"/lsquare/"+ decoded._id + '/' +returnPath + "\";";
-          html += "    var message = \"Uploaded file successfully\";";
-          html += "";
-          html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-          html += "</script>";
-
           fs.unlinkSync(tmp_path);
 
-          res.send(html);
+          res.status(200).json('/images/users/'+decoded._id+'/'+returnPath);
         }  
       });      
-    }
+    };
 
     this.getImages = function(req, res){
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -192,14 +181,14 @@ var Lsquare = function()
           if(err) res.status(401).json("Invalid Token");
           else
           {           
-            var path = './public/lsquare/'+ decoded._id;
+            var path = './public/images/users/'+ decoded._id;
             var files = [];
             var i;
 
             fs.readdir(path, function (err, list) {
               for(i=0; i<list.length; i++) {
                   //if(path.extname(list[i]) === fileType) {
-                      files.push('/lsquare/'+ decoded._id+'/'+list[i]); //store the file name into the array files
+                      files.push('/images/users/'+ decoded._id+'/'+list[i]); //store the file name into the array files
                   //}
               }
               res.status(200).json({images:files});

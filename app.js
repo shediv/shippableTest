@@ -88,18 +88,19 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(multer({dest: './public/temp/'}).single('upload'));
+app.use(multer({dest: './public/temp/'}).single('file'));
 
 // check if login required
 app.use(function(req, res, next) {
   RoutesCollection.findOne({url:req.url, isAuthReq:true}).lean().exec(
     function(err, result)
     {
+      if(err) return res.status(500).json(err);
       if(result){
         var token = req.body.token || req.query.token || req.headers['x-access-token'];
         if(!token) return res.status(401).json("Token not found");
-        jwt.verify(token, config.secret, function(err, decoded){
-          if(err) res.status(401).json("Invalid Token");
+        jwt.verify(token, config.secret, function(tokenErr, decoded){
+          if(tokenErr) return res.status(401).json("Invalid Token");
           else next();
         });
       }
