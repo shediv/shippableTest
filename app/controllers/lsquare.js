@@ -155,7 +155,7 @@ var Lsquare = function()
           var tmp_path = req.file.path;        
           var date = new Date();
           var returnPath = date + req.file.originalname;
-          var path = './public/images/'+ decoded._id;
+          var path = './public/images/users/'+ decoded._id;
 
           if (!fs.existsSync(path)){
               fs.mkdirSync(path);
@@ -169,7 +169,7 @@ var Lsquare = function()
 
           fs.unlinkSync(tmp_path);
 
-          res.status(200).json("success");
+          res.status(200).json('/images/users/'+decoded._id+'/'+returnPath);
         }  
       });      
     };
@@ -181,14 +181,14 @@ var Lsquare = function()
           if(err) res.status(401).json("Invalid Token");
           else
           {           
-            var path = './public/images/'+ decoded._id;
+            var path = './public/images/users/'+ decoded._id;
             var files = [];
             var i;
 
             fs.readdir(path, function (err, list) {
               for(i=0; i<list.length; i++) {
                   //if(path.extname(list[i]) === fileType) {
-                      files.push('/images/'+ decoded._id+'/'+list[i]); //store the file name into the array files
+                      files.push('/images/users/'+ decoded._id+'/'+list[i]); //store the file name into the array files
                   //}
               }
               res.status(200).json({images:files});
