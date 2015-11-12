@@ -337,6 +337,10 @@ var Common = function()
 
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
+    if(req.query.category) req.query.category = decodeURIComponent(req.query.category);
+    if(req.query.city) req.query.city = decodeURIComponent(req.query.city);
+    if(req.query.station) req.query.station = decodeURIComponent(req.query.station);
+    if(req.query.cinemaChain) req.query.cinemaChain = decodeURIComponent(req.query.cinemaChain);
 
     var visitor = {
       userAgent: req.headers['user-agent'],
