@@ -11,6 +11,7 @@ var Common = function()
 	var Category = require('../models/category').Category;
 	var UniqueVisitor = require('../models/uniqueVisitors').UniqueVisitor;
 	var User = require('../models/user').User;
+	var LsquareAnswerScore = require('../models/lsquareAnswerScore').LsquareAnswerScore;
 	var nodemailer = require('nodemailer');
 
 	var scope = this;
@@ -28,6 +29,13 @@ var Common = function()
 		User.find({_id : {$in: questionUserIds}}).lean().exec(function(err, userInfo){
 			for(i in userInfo) userInfo[userInfo[i]._id] = userInfo[i];							
 			callback(err, userInfo);
+		});
+	};
+
+	this.checkLoginUserVote = function(answerIDs, userID, callback) {
+		LsquareAnswerScore.find({userID:userID, answerID: {$in: answerIDs} }).lean().exec(function(err, loginUserVoteInfo){																
+			for(i in loginUserVoteInfo) loginUserVoteInfo[loginUserVoteInfo[i].answerID] = true;			
+			callback(err, loginUserVoteInfo);
 		});
 	};
 
