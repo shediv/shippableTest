@@ -377,7 +377,11 @@ var Lsquare = function()
       });
   };
 
-  this.userActivities = function(req, res){ 
+  this.userActivities = function(req, res){
+    self.token = req.body.token || req.query.token || req.headers['x-access-token'];
+    jwt.verify(self.token, self.config.secret, function(err, decoded){
+      if(decoded) self.UserID = decoded._id;        
+    }) 
     async.parallel({
       questions : function(callbackInner)
       {          
@@ -393,12 +397,19 @@ var Lsquare = function()
       answers : function(callbackInner)
       { 
         var answered_byIDs = [];
+        var answerIDs = [];
         LsquareAnswer.find({answered_by : req.query.userID, active: 1}).lean().exec(function(err, results){
-            for(i in results) answered_byIDs.push(results[i].answered_by);
-              CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
-                for(i in results) results[i].answered_by = userInfo[0];
-                  self.getAnswersQuestion(results, callbackInner);
+            for(i in results){
+             answered_byIDs.push(results[i].answered_by);
+             answerIDs.push(results[i]._id.toString());
+            }
+            CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
+              for(i in results) results[i].answered_by = userInfo[0];
+              CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
+                for(i in results) { results[i].loggedinUserScore = loginUserVoteInfo[results[i]._id];}
+                self.getAnswersQuestion(results, callbackInner);
               });  
+            });  
           })
       }
     },
@@ -485,7 +496,7 @@ var Lsquare = function()
                           if(err8) return console.error(err8)
                           self.transporter.sendMail({
                             from: "help@themediaant.com", // sender address
-                            to: "videsh@themediaant.com", // list of receivers
+                            to: mailOptions.to, // list of receivers
                             subject: 'LSquare – Upvote for your Answer',
                             html: results.html
                           }, function(err, responseStatus){
