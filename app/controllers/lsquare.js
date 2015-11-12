@@ -2,24 +2,21 @@ var Lsquare = function()
 {
   var async = require('async');
   var CommonLib = require('../libraries/common').Common;
-  var Media = require('../models/media').Media;
-  var Tools = require('../models/tool').Tools;
   var Lsquare = require('../models/lsquare').Lsquare;
   var LsquareAnswer = require('../models/lsquareAnswers').LsquareAnswers;
-  var Products = require('../models/product').Products;
-  var Geography = require('../models/geography').Geography;
-  var Category = require('../models/category').Category;
   var User = require('../models/user').User;
   var jwt = require('jsonwebtoken');
   var underscore = require('underscore');
-  var Contact = require('../models/contact').Contact;
   var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
+  var LsquareAnswerScore = require('../models/lsquareAnswerScore').LsquareAnswerScore;
   var nodeMailer = require('nodemailer');
   var multer = require('multer');
   var imagick = require('imagemagick');
   var path = require('path');
   var EmailTemplate = require('email-templates').EmailTemplate;
   var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
+  var ToolsProject = require('../config/toolsProject.js');
+  var SearchIgnore = require('../config/searchignore.js');
   
   this.params = {};
   var self = this;
@@ -28,13 +25,12 @@ var Lsquare = function()
 
   this.params = {};
   this.config = require('../config/config.js');
-  var self = this;
 
   this.transporter = nodeMailer.createTransport({
-  service: self.config.smtpService,
-  host: self.config.smtpHost,
-  port: self.config.smtpPort,
-  auth: self.config.smtpAuth
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
   });
 
   this.getLsquare = function(req, res){
@@ -64,19 +60,7 @@ var Lsquare = function()
       query.limit = self.params.limit || 9;
       query.match = {};
 
-      query.projection = {
-        '_id' : 1,
-        'question' : 1,
-        'description' : 1,
-        'urlSlug' : 1,                
-        'tags' : 1,
-        'views' : 1,
-        'createdAt' : 1,
-        'active' : 1,
-        'createdBy' : 1,
-        'answers' : 1,
-        'oldId' : 1
-      };
+      query.projection = ToolsProject.lsquare;
 
       if(self.params.filters.topics.length) query.match['tags'] = { $all:self.params.filters.topics };
       if(self.params.filters.askedBy.length) query.match['createdBy'] = { $in:self.params.filters.askedBy };
@@ -152,67 +136,66 @@ var Lsquare = function()
 
     self.imageUpload = function(req, res){
 
-      var tmp_path = req.file.path;
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) res.status(401).json("Invalid Token");
+        else
+        { 
+          var tmp_path = req.file.path;        
+          var date = new Date();
+          var returnPath = date + req.file.originalname;
+          var path = './public/lsquare/'+ decoded._id;
 
-      /** The original name of the uploaded file
-          stored in the variable "originalname". **/
-      var date = new Date();
-      var returnPath = date + req.file.originalname;    
-      var target_path = './public/lsquare/' + returnPath;
+          if (!fs.existsSync(path)){
+              fs.mkdirSync(path);
+          }
 
-      /** A better way to copy the uploaded file. **/
-      var src = fs.createReadStream(tmp_path);
-      var dest = fs.createWriteStream(target_path);
-      src.pipe(dest);
+          var target_path = path + '/' + returnPath;
 
-      html = "";
-      html += "<script type='text/javascript'>";
-      //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      html += "    var url     = \"/lsquare/" + returnPath + "\";";
-      html += "    var message = \"Uploaded file successfully\";";
-      html += "";
-      html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      html += "</script>";
+          /** A better way to copy the uploaded file. **/
+          var src = fs.createReadStream(tmp_path);
+          var dest = fs.createWriteStream(target_path);
+          src.pipe(dest);
 
-      fs.unlinkSync(tmp_path);
+          html = "";
+          html += "<script type='text/javascript'>";
+          //html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
+          html += "    var url     = \"/lsquare/"+ decoded._id + '/' +returnPath + "\";";
+          html += "    var message = \"Uploaded file successfully\";";
+          html += "";
+          html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
+          html += "</script>";
 
-      res.send(html);      
+          fs.unlinkSync(tmp_path);
 
-      // var dest, fileName, fs, l, tmpPath;
-    
-      // fs = require('fs');
-      
-      // tmpPath = req.files.upload.path;
-      // l = tmpPath.split('/').length;
-      // fileName = tmpPath.split('/')[l - 1] + "_" + req.files.upload.name;
-      
-      // dest = __dirname + "/public/uploads/" + fileName;
-      // fs.readFile(req.files.upload.path, function(err, data) {
-      //   if (err) {
-      //     console.log(err);
-      //     return;
-      //   }
-        
-      //   fs.writeFile(dest, data, function(err) {
-      //     var html;
-      //     if (err) {
-      //       console.log(err);
-      //       return;
-      //     }
-          
-      //     html = "";
-      //     html += "<script type='text/javascript'>";
-      //     html += "    var funcNum = " + req.query.CKEditorFuncNum + ";";
-      //     html += "    var url     = \"/uploads/" + fileName + "\";";
-      //     html += "    var message = \"Uploaded file successfully\";";
-      //     html += "";
-      //     html += "    window.parent.CKEDITOR.tools.callFunction(funcNum, url, message);";
-      //     html += "</script>";
-          
-      //     res.send(html);
-      //   });
-      // });
+          res.send(html);
+        }  
+      });      
     }
+
+    this.getImages = function(req, res){
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+        if(!token) return res.status(401).json("Token not found");
+        jwt.verify(token, self.config.secret, function(err, decoded){
+          if(err) res.status(401).json("Invalid Token");
+          else
+          {           
+            var path = './public/lsquare/'+ decoded._id;
+            var files = [];
+            var i;
+
+            fs.readdir(path, function (err, list) {
+              for(i=0; i<list.length; i++) {
+                  //if(path.extname(list[i]) === fileType) {
+                      files.push('/lsquare/'+ decoded._id+'/'+list[i]); //store the file name into the array files
+                  //}
+              }
+              res.status(200).json({images:files});
+            });
+          }            
+        });
+    };
 
   this.getFilters = function(req, res){
     async.parallel({
@@ -381,7 +364,67 @@ var Lsquare = function()
           });          
           }          
       });
-  };  
+  };
+
+  this.userActivities = function(req, res){ 
+    async.parallel({
+      questions : function(callbackInner)
+      {          
+        var createdByIDs = [];
+        Lsquare.find({createdBy : req.query.userID, active: 1}).lean().exec(function(err, questions){
+            for(i in questions) createdByIDs.push(questions[i].createdBy);                  
+              CommonLib.getUserInfo(createdByIDs, function(err, userInfo){
+                for(i in questions) questions[i].createdBy = userInfo[0];
+                callbackInner(err, questions);
+              })                
+          })
+      },
+      answers : function(callbackInner)
+      { 
+        var answered_byIDs = [];
+        LsquareAnswer.find({answered_by : req.query.userID, active: 1}).lean().exec(function(err, results){
+            for(i in results) answered_byIDs.push(results[i].answered_by);
+              CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
+                for(i in results) results[i].answered_by = userInfo[0];
+                  self.getAnswersQuestion(results, callbackInner);
+              });  
+          })
+      }
+    },
+    function(err, results) 
+    {                                           
+      var activities = [];
+      for(i in results.questions){
+        results.questions[i].type = 'question';
+        activities.push(results.questions[i]);            
+      }
+
+      for(i in results.answers){            
+        results.answers[i].type = 'answer';
+        activities.push(results.answers[i]);
+      }   
+      res.status(200).json(activities);
+    });
+  }
+
+  self.getAnswersQuestion = function(results, callbackInner){     
+      var answerUsersIDs = [];        
+      async.each(results, function(result, callbackEach){            
+        Lsquare.findOne({_id : result.questionID, active: 1}).lean().exec(function(err,questions){
+          result.question = questions;         
+          callbackEach(null);                
+        });            
+      }, 
+      function(err){
+        //console.log(results);
+        var questionCreatedByIDs = [];
+        for(i in results) questionCreatedByIDs.push(results[i].question.createdBy);
+          CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
+            for(i in results) { results[i].question.createdBy = QuserInfo[results[i].question.createdBy];}
+            callbackInner(err, results);
+          })
+      });                  
+  };
 
   this.upvoteAnswer = function(req, res){
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
@@ -389,45 +432,59 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          LsquareAnswer.update({ _id:req.body.answerID }, { $inc:{ score:1 } }, { upsert:true }).exec();        
-          res.status(200).json("sucess");
-          Lsquare.findOne({_id: req.body.questionID}).lean().exec(function(err, question){
-            LsquareAnswer.findOne({_id: req.body.answerID}).lean().exec(function(err, answer){
-              User.findOne({_id: answer.answered_by}).lean().exec(function(err, user){
-                var mailOptions = {};
-                mailOptions.social = false;
-                mailOptions.to = user.email;
-                mailOptions.answerID = req.body.answerID;
-                mailOptions.questionID = req.body.questionID;
-                mailOptions.appHost = self.config.appHost;
-                mailOptions.date = Date();
-                var firstName = user.firstName;
-                firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
-                mailOptions.name = firstName;
-                mailOptions.voter = decoded;
-                if(decoded.googleId || decoded.facebookId) mailOptions.social = true;
-                mailOptions.activity = "Upvote";              
-                mailOptions.urlSlug = question.urlSlug;
-                var newActivity = LsquareActivities(mailOptions);
-                newActivity.save(function(err){
-                    if(err) return res.status(500).json(err);
-                    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'upvote'));
-                    emailTemplate.render(mailOptions, function(err, results){            
-                      if(err) return console.error(err)
-                      self.transporter.sendMail({
-                        from: "help@themediaant.com", // sender address
-                        to: mailOptions.to, // list of receivers
-                        subject: 'LSquare – Upvote for your Answer',
-                        html: results.html
-                      }, function(err, responseStatus){
-                        if(err) return console.error(err);
-                         console.log("mail sent");
-                      })
+          LsquareAnswerScore.findOne({userID : decoded._id, answerID : req.body.answerID}).lean().exec(function(err2, scoreUser){
+            if(scoreUser) res.status(500).json("User has already Upvoted this answer");
+            else 
+            {      
+              var answerScore = {};
+              LsquareAnswer.update({ _id:req.body.answerID }, { $inc:{ score:1 } }, { upsert:true }).exec();                      
+              res.status(200).json("sucess");
+              //Add answer score details in LsquareAnswerScore 
+              answerScore.userID = decoded._id;
+              answerScore.answerID = req.body.answerID;
+              answerScore.createdAt = Date();
+              var newAnswerScore = LsquareAnswerScore(answerScore);
+              newAnswerScore.save();
+
+                LsquareAnswer.findOne({_id: req.body.answerID, active : 1}).lean().exec(function(err, answer){
+                  User.findOne({_id: answer.answered_by, isActive: 1}).lean().exec(function(err, user){
+                  Lsquare.findOne({_id: answer.questionID, active : 1}).lean().exec(function(err, question){  
+                    var mailOptions = {};
+                    mailOptions.social = false;
+                    mailOptions.to = user.email;
+                    mailOptions.answerID = req.body.answerID;
+                    mailOptions.questionID = answer.questionID;
+                    mailOptions.appHost = self.config.appHost;
+                    mailOptions.date = Date();
+                    var firstName = user.firstName;
+                    firstName = firstName.substring(0,1).toUpperCase() + firstName.substring(1);
+                    mailOptions.name = firstName;
+                    mailOptions.voter = decoded;
+                    if(decoded.googleId || decoded.facebookId) mailOptions.social = true;
+                    mailOptions.activity = "Upvote";              
+                    mailOptions.urlSlug = question.urlSlug;
+                    var newActivity = LsquareActivities(mailOptions);
+                    newActivity.save(function(err){
+                        if(err) return res.status(500).json(err);
+                        var emailTemplate = new EmailTemplate(path.join(templatesDir, 'upvote'));
+                        emailTemplate.render(mailOptions, function(err, results){            
+                          if(err) return console.error(err)
+                          self.transporter.sendMail({
+                            from: "help@themediaant.com", // sender address
+                            to: mailOptions.to, // list of receivers
+                            subject: 'LSquare – Upvote for your Answer',
+                            html: results.html
+                          }, function(err, responseStatus){
+                            if(err) return console.error(err);
+                             console.log("mail sent");
+                          })
+                        });
                     });
-                  });
-              })
-            });
-          });
+                  })
+                });
+              });
+            }  
+          })
         }
     });
   };
@@ -463,7 +520,7 @@ var Lsquare = function()
     CommonLib.uniqueVisits(visitor);
   };
 
-  this.search = function(req, res){    
+  this.filterSearch = function(req, res){
     var qString = req.query.q;
     console.log(req.query.filter);
     //return res.status(200).json(req.query.filter);
@@ -487,11 +544,34 @@ var Lsquare = function()
     }
   };
 
+  this.search = function(req, res){
+    var queryTerms = req.query.q;
+    queryTerms = queryTerms.split(' ');
+    var query = new RegExp('\\b'+queryTerms.join('|'), 'i');
+    for(i in queryTerms) 
+    {
+      queryTerms[i] = '/' + queryTerms[i] + '/';
+    }
+    queryTerms = queryTerms.join(' ')
+    console.log(query);
+    console.log(queryTerms);
+    Lsquare.aggregate(
+      //{ $match : { question : query } },
+      { $match : { $text : { $search : queryTerms } } },
+      { $sort: { score :  { $meta: "textScore" } } }, 
+      { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
+      { $limit : 5 }, { $skip : 0 },
+      function(err, questions){
+        if(err) console.log(err);
+        res.status(200).json({questions:questions});
+      }
+    );
+  };
 
   this.getUser = function(req, res){    
     var qString = req.query.q;
     var qRegExp = new RegExp('\\b'+qString, "i");    
-    User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+    User.find({firstName : { $regex: qRegExp }, isActive: 1 }).lean().exec(function(err, usersList){
       if(err) return res.status(500).json(err);
       return res.send({users:usersList, count:usersList.length});
     });

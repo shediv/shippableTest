@@ -125,7 +125,7 @@ var Common = function()
       twelthCross : function(callbackInner)
       {
         TwelthCross.aggregate(
-          {$match: {"urlSlug": { $exists: 1} }},
+          {$match: {"urlSlug": { $exists: 1}, isActive: 1 }},
           //{$skip : 0}, {$limit: 10},
           { $project: { url: { $concat: [ "http://", self.config.appHost,"/12thcross/", "$urlSlug" ] } } },
           { $group : { _id : "$url"}},
@@ -139,7 +139,7 @@ var Common = function()
       media : function(callbackInner)
       {
         Media.aggregate(
-          {$match: {"urlSlug": { $exists: 1}, "toolId": { $exists: 1} }},
+          {$match: {"urlSlug": { $exists: 1}, "toolId": { $exists: 1}, isActive: 1 }},
           //{$skip : 0}, {$limit: 5},
           { $group : { _id : "$toolId", count : {$sum : 1}, medias: {$push: "$urlSlug"}}},
           function(error, results)
@@ -363,66 +363,37 @@ var Common = function()
         async.series([
           function(callback)
           {
-            switch(toolName)
-            {
-              case 'magazine':
-              case 'newspaper':
-                Media.distinct('categoryId', { toolId:tool._id, isActive:1 }, function(err, results){
-                  Category.distinct('name', { _id:{ $in:results } }, function(err, cats){
-                    var params = {};
-                    params['category'] = cats;
-                    callback(err, params);
-                  });
-                });
-                break;
-              case 'radio':
-                async.parallel({
-                  station : function(callbackInner)
-                  {
-                    Media.distinct('station', { toolId:tool._id, isActive:1 }, function(err, results){
-                      callbackInner(err, results);
-                    });
-                  },
-                  city : function(callbackInner)
-                  {
-                    Media.distinct('city', { toolId:tool._id, isActive:1 }, function(err, results){
-                      callbackInner(err, results);
-                    });
-                  }
-                },function(err, results){
-                  callback(err, results);
-                });
-                break;
-              case 'cinema':
-                async.parallel({
-                  cinemaChain : function(callbackInner)
-                  {
-                    Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
-                      callbackInner(err, results);
-                    });
-                  },
-                  city : function(callbackInner)
-                  {
-                    Media.distinct('geography', { toolId:tool._id, isActive:1 }, function(err, results){
-                      Geography.distinct('city', { _id:{ $in:results } }, function(err, cities){
-                        callbackInner(err, cities);
-                      });
-                    });
-                  }
-                },function(err, results){
-                  callback(err, results);
-                });
-                break;
-              default:
-                callback(null, {});
-            }
+            self.fetchParamsForCategory(req, tool, toolName, callback);
           }
         ], function(err, params){
           params = params[0];
+          //return res.status(200).json(params);
           result = self.populateCategoryMetatags(result, toolName, req, params);
-          if(!result) return res.status(404).json("NOT FOUND");
-          Media.distinct('urlSlug',{ toolId:result._id },function(err, medias){
+          
+          if(!result) return res.status(410).json("NOT FOUND P");
+          match = self.createMatchForToolsMetaTags(req, params, toolName, tool._id);
+          //return res.status(200).json(match);
+          var project = {
+            'urlSlug' : 1,
+            'name' : 1,
+            //For Cinema
+            'theatreName' : 1,
+            'resultMallName' : 1,
+            'cinemaChain' : 1,
+            'mallName' : 1,
+            //For Radio
+            'station' : 1,
+            'city' : 1,
+            'type' : 1,
+            //For Newspaper
+            'areaCovered' : 1,
+            'editionName' : 1,
+            //For Digital
+            'medium' : 1
+          };
+          Media.find(match, project).lean().exec(function(err, medias){
             if(err) return res.status(500).json(err);
+            medias.map(function(media){ media = CommonLib.formMediaName(media, toolName); });
             result.metaTags.medias = medias;
             return res.status(200).json(result.metaTags);  
           });
@@ -490,6 +461,91 @@ var Common = function()
       }
     };
 
+    self.fetchParamsForCategory = function(req, tool, toolName, callback){
+      if(!req.query.category && !req.query.city && !req.query.station && !req.query['cinemaChain'])
+        return callback(null, {});
+      switch(toolName)
+      {
+        case 'magazine':
+        case 'newspaper':
+          if(req.query.category)
+          {
+            Media.distinct('categoryId', { toolId:tool._id, isActive:1 }, function(err, results){
+              for(i in results) results[i] = results[i].toString();
+              Category.find({ _id:{ $in:results }, name:req.query.category }).lean().exec(
+                function(err, cats){
+                  if(err) console.log(err);
+                  var categories = {};
+                  for(i in cats) categories[cats[i].name] = cats[i]._id;
+                  callback(err, {category:categories});
+                }
+              );
+            });
+          } else callback(null, {});
+          break;
+        case 'radio':
+          async.parallel({
+            station : function(callbackInner)
+            {
+              if(req.query.station)
+              {
+                Media.distinct('station', { toolId:tool._id, station:req.query.station, isActive:1 }, function(err, results){
+                  callbackInner(err, results);
+                });
+              } else callbackInner(null, []);
+            },
+            city : function(callbackInner)
+            {
+              if(req.query.city)
+              {
+                Media.distinct('city', { toolId:tool._id, city:req.query.city, isActive:1 }, function(err, results){
+                  callbackInner(err, results);
+                });  
+              } else callbackInner(null, []);
+            }
+          },function(err, results){
+            callback(err, results);
+          });
+          break;
+        case 'cinema':
+          async.parallel({
+            cinemaChain : function(callbackInner)
+            {
+              if(req.query['cinemaChain'])
+              {
+                Media.distinct('cinemaChain', { toolId:tool._id, isActive:1 }, function(err, results){
+                  callbackInner(err, results);
+                });  
+              } else callbackInner(null, []);
+            },
+            city : function(callbackInner)
+            {
+              if(req.query.city)
+              {
+                Geography.distinct('_id', { city:req.query.city, pincode:{ $exists:true } }, 
+                  function(err, cities){
+                    if(!cities.length) return callbackInner(null, {});
+                    for(i in cities) cities[i] = cities[i].toString();
+                    Media.distinct('geography', { geography:{ $in:cities }, toolId:tool._id, isActive:1 }, 
+                      function(err, results){
+                        var params = {};
+                        params[req.query.city] = results;
+                        callbackInner(err, params);
+                      }
+                    );
+                  }
+                );
+              } else callbackInner(null, {});
+            }
+          },function(err, results){
+            callback(err, results);
+          });
+          break;
+        default:
+          callback(null, {});
+      }
+    };
+
     self.populateCategoryMetatags = function(result, toolName, req, params){
       switch(toolName)
       {
@@ -498,7 +554,7 @@ var Common = function()
           if(req.query.category) 
           {
             var category = req.query.category;
-            if(params.category.indexOf(category) == -1) return false;
+            if(!params.category[category]) return false;
             result.metaTags.title = category + " Magazine Advertising in India";
             result.metaTags.description = "Advertise in "+category+" Magazines via TheMediaAnt. "+category+" Magazines in India are utilized to advertise a great variety of products. Find the best "+category+" Magazines advertising rates in India through The Media Ant.";
           }
@@ -511,7 +567,7 @@ var Common = function()
             var cinemaChain = req.query.cinemaChain;
             var city = req.query.city;
             if(params['cinemaChain'].indexOf(cinemaChain) == -1) return false;
-            if(params.city.indexOf(city) == -1) return false;
+            if(!params.city[city]) return false;
             result.metaTags.title = cinemaChain + " Cinema Advertising in " + city;
             result.metaTags.description = "Advertise in "+cinemaChain+" in "+city+" via TheMediaAnt. "+cinemaChain+" is one of the leading multiplex chains in India. "+cinemaChain+" Theatres in "+city+" have emerged as a promising advertising plaform for multiple brands. Get access to the list of "+cinemaChain+" Advertising Screens in "+city+" at The Media Ant. Find the best "+city+" "+cinemaChain+" advertising rates here.";
           }
@@ -527,7 +583,7 @@ var Common = function()
           if(req.query.city) 
           {
             var city = req.query.city;
-            if(params.city.indexOf(city) == -1) return false;
+            if(!params.city[city]) return false;
             result.metaTags.title = city + " Cinema Advertising";
             result.metaTags.description = "Advertise in "+city+" cinemas via TheMediaAnt. "+city+" is one of India's premier cities with a youth & family strong demographic. For this demography theatre is a primary medium of entertainment. You can explore "+city+" Cinema Advertising Rates & "+city+" Cinema Advertising Costs here.";
           }
@@ -557,7 +613,7 @@ var Common = function()
           if(req.query.category) 
           {
             var category = req.query.category;
-            if(params.category.indexOf(category) == -1) return false;
+            if(!params.category[category]) return false;
             result.metaTags.title = category + " Newspaper Advertising in India";
             result.metaTags.description = "Advertise in "+category+" Newspapers in India via TheMediaAnt. "+category+" Newspapers advertisement appears alongside regular editorial content.The list of "+category+" Newspapers in India display ads contain text, photographs,logos, maps, and other informational items. Find the best "+category+" Newspaper Advertising rates through The Media Ant.";
           }
@@ -565,6 +621,30 @@ var Common = function()
         }
       }
       return result;
+    };
+
+    self.createMatchForToolsMetaTags = function(req, params, toolName, toolId){
+      var match = {};
+      match.isActive = 1;
+      match.toolId = toolId;
+      if(!req.query.category && !req.query.city && !req.query.station && !req.query['cinemaChain'])
+        return match;
+      switch(toolName)
+      {
+        case 'magazine':
+        case 'newspaper':
+          if(req.query.category) match.categoryId = params.category[req.query.category];
+          break;
+        case 'radio':
+          if(req.query.station) match.station = req.query.station;
+          if(req.query.city) match.city = req.query.city;
+          break;
+        case 'cinema':
+          if(req.query['cinemaChain']) match['cinemaChain'] = req.query['cinemaChain'];
+          if(req.query.city) match.geography = { "$in":params.city[req.query.city] };
+          break;
+      }
+      return match;
     };
 
   this.getMediaName = function(req, res){

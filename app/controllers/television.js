@@ -219,9 +219,9 @@ var Television = function()
         results.genres = [];
         for(i in genres) results.genres.push(genres[i].name);
         var metaTags = {
-          title : results.name,
+          title : results.name + ' TV channel Advertising >> Rates for '+results.name+' TV channel Advertisement',
           image  : results.imageUrl,
-          description  : results.about,
+          description  : results.name+' is a '+results.language.join()+' TV channel in '+results.genres.join()+' Genre. You can explore '+results.name+' TV channel Advertising rates and '+results.name+' TV channel Advertising cost here.',
           facebook : self.config.facebook,
           twitter : self.config.twitter
         }  

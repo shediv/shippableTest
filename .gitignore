@@ -1,12 +1,14 @@
 .idea/
+bin/www.bak
+app/config/config.env.js
 node_modules/
-config.js
 public/images/
 public/temp/
+public/bestRate
+public/img
 npm-debug.log
 .idea/
 log/
-bin/www
 logs/
 bin/www
 app/config/config.js

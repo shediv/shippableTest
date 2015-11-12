@@ -282,7 +282,7 @@ var User = function()
 
 	this.getSession = function(req, res){
 		var token = req.body.token || req.query.Tokenn || req.headers['x-access-token'];
-		if(!token) return res.status(401).json("Token not found");
+		if(!token) return res.status(403).json("Token not found");
 		jwt.verify(token, self.config.secret, function(err, decoded){
 			if(err) res.status(401).json("Invalid Token");
 			else res.status(200).json({user:decoded});
@@ -374,6 +374,19 @@ var User = function()
 	  	else return "user logged";
 	  });
 	};
+
+	this.userCount = function(req, res){
+		if(req.query.list){
+			User.find({dateOfJoin: {"$gte": new Date(req.query.startDate), "$lt": new Date(req.query.endDate)}}).lean().exec(function(err, users){
+				return res.status(200).json(users);
+			})
+		}
+		else{
+			User.find({dateOfJoin: {"$gte": new Date(req.query.startDate), "$lt": new Date(req.query.endDate)}}).lean().exec(function(err, users){
+				return res.status(200).json(users.length);
+			})
+		}			
+	}
 }
 
 module.exports.User = User;

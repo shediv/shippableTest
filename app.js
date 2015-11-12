@@ -10,6 +10,7 @@ var jwt = require('jsonwebtoken');
 var RoutesCollection = require('./app/models/routesCollection').RoutesCollection;
 
 var config = require('./app/config/config.js');
+var envConfig = require('./app/config/config.env.js');
 
 var routes = require('./app/routes/index');
 var user = require('./app/routes/user');
@@ -40,39 +41,36 @@ app.set('view engine', 'jade');
 
 app.use(cors({
     allowedOrigins: [
-        'http://tma.dev', 
-        'http://themediaant.com', 
+        'http://tma.dev',
+        'http://themediaant.com',
         'http://www.themediaant.com',
         'http://testing.themediaant.com',
         'http://www.m20.in',
         'http://m20.in',
-		    'http://tma.dev:3000',
-		    'http://www.tma.dev:3000'
+        'http://tma.dev:3000',
+        'http://www.tma.dev:3000',
+        'http://127.0.0.1:3000'
     ],
 	headers: [
 		'x-access-token', 'Content-Type'
 	]
 }));
 
-mongoose.connect(config.mongoUrl, function(err){
+mongoose.connect(envConfig.mongoUrl, function(err){
   if(err) mongooseLog('Mongoose error: ' + err);
 });
 
-// CONNECTION EVENTS
-// When successfully connected
-mongoose.connection.on('connected', function () {
-  mongooseLog('Connection open to ' + config.mongoUrl);
-});
-
-// If the connection throws an error
-mongoose.connection.on('error',function (err) {
-  mongooseLog('Connection error: ' + err);
-});
-
-// When the connection is disconnected
-mongoose.connection.on('disconnected', function () {
-  mongooseLog('Connection disconnected');
-});
+//MONGODB CONNECTION EVENTS
+mongoose.connection
+    .on('connected', function () {
+        mongooseLog('Connection open to ' + envConfig.mongoUrl);
+    })
+    .on('error',function (err) {
+        mongooseLog('Connection error: ' + err);
+    })
+    .on('disconnected', function () {
+        mongooseLog('Connection disconnected');
+    });
 
 function mongooseLog(data) {
   return console.log(data);
@@ -90,7 +88,7 @@ app.use(bodyParser.urlencoded({limit: '50mb', extended: true}));
 app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
-app.use(multer({dest: './public/temp/'}).single('file'));
+app.use(multer({dest: './public/temp/'}).single('upload'));
 
 // check if login required
 app.use(function(req, res, next) {
