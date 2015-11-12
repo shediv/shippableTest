@@ -627,6 +627,24 @@ var Lsquare = function()
     
     // // console.log(obj.length);
   };
+
+  this.allTopics = function(req , res){
+    Lsquare.aggregate(
+      {$match: {active : 1}},
+      {$sort: {"views": -1} },
+      function(error, results) 
+      {
+        var Tags = [];
+        for(i in results){
+          for(j in results[i].tags){
+            Tags.push(results[i].tags[j]);
+          }
+        }  
+        var Tags = underscore.uniq(Tags);                  
+        res.status(200).json({allTopics:Tags, count: Tags.length}); 
+      }
+    );
+  }
 };
 
 module.exports.Lsquare = Lsquare;
