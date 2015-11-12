@@ -370,7 +370,7 @@ var Common = function()
           //return res.status(200).json(params);
           result = self.populateCategoryMetatags(result, toolName, req, params);
           
-          if(!result) return res.status(410).json("NOT FOUND");
+          if(!result) return res.status(410).json("NOT FOUND P");
           match = self.createMatchForToolsMetaTags(req, params, toolName, tool._id);
           //return res.status(200).json(match);
           var project = {
@@ -524,6 +524,7 @@ var Common = function()
               {
                 Geography.distinct('_id', { city:req.query.city, pincode:{ $exists:true } }, 
                   function(err, cities){
+                    if(!cities.length) return callbackInner(null, {});
                     for(i in cities) cities[i] = cities[i].toString();
                     Media.distinct('geography', { geography:{ $in:cities }, toolId:tool._id, isActive:1 }, 
                       function(err, results){
