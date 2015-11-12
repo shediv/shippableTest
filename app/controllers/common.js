@@ -341,7 +341,7 @@ var Common = function()
     if(req.query.city) req.query.city = decodeURIComponent(req.query.city);
     if(req.query.station) req.query.station = decodeURIComponent(req.query.station);
     if(req.query.cinemaChain) req.query.cinemaChain = decodeURIComponent(req.query.cinemaChain);
-
+    
     var visitor = {
       userAgent: req.headers['user-agent'],
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
