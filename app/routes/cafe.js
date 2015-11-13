@@ -10,6 +10,7 @@ router.get("/", Cafe.getCafe);
 router.post("/", Cafe.store);
 router.get("/filters", Cafe.getFilters);
 router.post("/update", Cafe.update);
+router.post("/createPost", Cafe.createPost);
 router.get("/search", Cafe.search);
 router.get("/allTopics", Cafe.allTopics);
 router.get("/trending", Cafe.trending);

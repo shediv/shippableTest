@@ -337,7 +337,11 @@ var Common = function()
 
   this.getMetaTags = function(req, res){
     var toolName = req.params.toolName;
-
+    if(req.query.category) req.query.category = decodeURIComponent(req.query.category);
+    if(req.query.city) req.query.city = decodeURIComponent(req.query.city);
+    if(req.query.station) req.query.station = decodeURIComponent(req.query.station);
+    if(req.query.cinemaChain) req.query.cinemaChain = decodeURIComponent(req.query.cinemaChain);
+    
     var visitor = {
       userAgent: req.headers['user-agent'],
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
@@ -357,7 +361,7 @@ var Common = function()
     }
     else
     {
-      Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){
+      Tools.findOne({ name:toolName },{ metaTags:1 }).lean().exec(function(err, result){                  
         var tool = result;
         if(!result) {console.log('Meta error: ',toolName); return res.status(404).json({status:"NOT OK"});}
         async.series([
@@ -369,6 +373,7 @@ var Common = function()
           params = params[0];
           //return res.status(200).json(params);
           result = self.populateCategoryMetatags(result, toolName, req, params);
+
           
           if(!result) return res.status(410).json("NOT FOUND P");
           match = self.createMatchForToolsMetaTags(req, params, toolName, tool._id);
@@ -555,8 +560,13 @@ var Common = function()
           {
             var category = req.query.category;
             if(!params.category[category]) return false;
-            result.metaTags.title = category + " Magazine Advertising in India";
-            result.metaTags.description = "Advertise in "+category+" Magazines via TheMediaAnt. "+category+" Magazines in India are utilized to advertise a great variety of products. Find the best "+category+" Magazines advertising rates in India through The Media Ant.";
+            result.metaTags.title = category + ' Magazines Advertising in India >> Rates for '+category+' Magazines Advertisement';            
+            result.metaTags.description = category + ' Magazines Advertising is utilized by a variety of brands to reach the target audience. Due to a low cost of distribution and high readership, '+ 
+                                          category+' Magazines Advertising Rates have a low CPM. You can explore '+ 
+                                          category+' magazines advertising rates and ' + 
+                                          category+' magazines advertising cost here.';
+            result.metaTags.keyWords = [category +' Magazines in India advertising rates', category +' Magazines in India ad rates', category +' Magazines in India media kit', category +' Magazines in India card rates', category +' Magazines in India advertising', category +' Magazines in India advertising details', category +' Magazines in India pricing details', 'how to advertise in '+category +' Magazines in India', category +' Magazines in India media rates', category +' Magazines in India advertising manager', category +' Magazines in India contact details', category +' Magazines in India advertising contact', category +' Magazines in India media contact', 'magazine advertisements'];                                         
+            //result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
@@ -568,24 +578,32 @@ var Common = function()
             var city = req.query.city;
             if(params['cinemaChain'].indexOf(cinemaChain) == -1) return false;
             if(!params.city[city]) return false;
-            result.metaTags.title = cinemaChain + " Cinema Advertising in " + city;
-            result.metaTags.description = "Advertise in "+cinemaChain+" in "+city+" via TheMediaAnt. "+cinemaChain+" is one of the leading multiplex chains in India. "+cinemaChain+" Theatres in "+city+" have emerged as a promising advertising plaform for multiple brands. Get access to the list of "+cinemaChain+" Advertising Screens in "+city+" at The Media Ant. Find the best "+city+" "+cinemaChain+" advertising rates here.";
+            cinemaChain = cinemaChain.replace("Cinemas", '');
+            result.metaTags.title = cinemaChain + ' Cinema Advertising in '+city+' >> Rates for '+cinemaChain+' Cinema Advertisement';
+            result.metaTags.description = cinemaChain + ' Advertising in '+city+' is utilized by a variety of brands to reach to their target audience. Get access to the list of '+cinemaChain+' Cinema Advertising Screens in '+city+' at The Media Ant. You can explore '+cinemaChain+' Cinema advertising rates and '+cinemaChain+' Cinema advertising cost in bangalore here.';
+            keyWords = [cinemaChain+' Cinema advertising rates in '+city, cinemaChain+' Cinema in '+city+' ad rates', cinemaChain+' Cinema in '+city+' media kit', cinemaChain+' Cinema in '+city+' card rates', cinemaChain+' Cinema in '+city+' advertising', cinemaChain+' Cinema in '+city+' advertising details', cinemaChain+' Cinema in'+city+' pricing details', 'how to advertise in'+cinemaChain+' Cinema in '+city, cinemaChain+' Cinema in '+city+' media rates',  cinemaChain+' Cinema in '+city+' advertising manager',  cinemaChain+' Cinema in '+city+'contact details', cinemaChain+' Cinema in '+city+' advertising contact', cinemaChain+' Cinema in '+city+' media contact', cinemaChain+' cinema slide advertising in '+city, city + ' ' +cinemaChain+' theatre ads', cinemaChain+' multiplex advertising in '+city, cinemaChain+' audio slide advertising in '+city, cinemaChain+' mute slide advertising in '+city]
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           else
           if(req.query.cinemaChain) 
           {
-            var cinemaChain = req.query.cinemaChain;
+            var cinemaChain = req.query.cinemaChain;            
             if(params['cinemaChain'].indexOf(cinemaChain) == -1) return false;
-            result.metaTags.title = cinemaChain + " Cinema Advertising in India";
-            result.metaTags.description = "Advertise in "+cinemaChain+" in India via TheMediaAnt. "+cinemaChain+" in India is one of the premier multiplex chains. "+cinemaChain+" Advertising is enabled in many cities. Get access to the list of "+cinemaChain+" Advertising Screens at The Media Ant. Find the best Inox cinema advertising rates here.";
+            cinemaChain = cinemaChain.replace("Cinemas", '');
+            result.metaTags.title = cinemaChain+' Cinema Advertising in India >> Rates for '+cinemaChain+' Cinema Advertisement';
+            result.metaTags.description = cinemaChain+' Cinema Advertising is enabled in many cities. '+cinemaChain+' Cinema in India is one of the premier multiplex chains. Get access to the list of '+cinemaChain+' Cinema Advertising Screens at The Media Ant. You can explore '+cinemaChain+' Cinema advertising rates and '+cinemaChain+' Cinema advertising cost here.';
+            keyWords = [cinemaChain+' Cinema in India advertising rates', cinemaChain+' Cinema in India ad rates', cinemaChain+' Cinema in India media kit', cinemaChain+' Cinema in India card rates', cinemaChain+' Cinema in India advertising', cinemaChain+' Cinema in India advertising details', cinemaChain+' Cinema in India pricing details', 'how to advertise in '+cinemaChain+' Cinema in India', cinemaChain+' Cinema in India media rates', cinemaChain+' Cinema in India advertising manager', cinemaChain+' Cinema in India contact details', cinemaChain+' Cinema in India advertising contact', cinemaChain+' Cinema in India media contact', cinemaChain+' cinema slide advertising', cinemaChain+' theatre ads',  cinemaChain+' multiplex advertising', cinemaChain+' audio slide advertising', cinemaChain+' mute slide advertising']
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           else
           if(req.query.city) 
           {
             var city = req.query.city;
             if(!params.city[city]) return false;
-            result.metaTags.title = city + " Cinema Advertising";
-            result.metaTags.description = "Advertise in "+city+" cinemas via TheMediaAnt. "+city+" is one of India's premier cities with a youth & family strong demographic. For this demography theatre is a primary medium of entertainment. You can explore "+city+" Cinema Advertising Rates & "+city+" Cinema Advertising Costs here.";
+            result.metaTags.title = 'Cinema Advertising in '+city+' >> Rates for '+city+' Cinema Advertisement';
+            result.metaTags.description = city+' Cinema Advertising is an excellent medium for premium audience targetting. Cinema Advertising in Bangalore has emerged as a promising advertising platform. For this demography theatre is a primary medium of entertainment. You can explore '+city+' Cinema Advertising Rates & '+city+' Cinema Advertising Costs here.';
+            keyWords = ['Cinema advertising rates in '+city, 'Cinema ad rates in ' +city, city+' Cinema media kit', city+' Cinema card rates', city+' Cinema advertising details', city+' Cinema pricing details', 'how to advertise in '+city+' Cinemas', city+' Cinema media rates', city+' Cinema advertising manager', city+' cinema contact details', 'Cinema in '+city+' advertising contact', 'Cinema in '+city+' media contact'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
@@ -595,16 +613,20 @@ var Common = function()
           {
             var station = req.query.station;
             if(params.station.indexOf(station) == -1) return false;
-            result.metaTags.title = station + " Radio Advertising in India";
-            result.metaTags.description = "Advertise in "+station+" in India via TheMediaAnt. "+station+" is a renowned radio channel with a strong foot-hold in India. We have absolute access to the advertising inventory of "+station+". Get access to the list of "+station+" Advertising Stations at The Media Ant. Find the best "+station+" advertising rates here.";
+            result.metaTags.title = station+' Advertising in India >> Rates for '+station+' Advertisement';
+            result.metaTags.description = station+' Advertising is enabled in many cities. '+station+' Advertising is utilized by a variety of brands to reach out to their target audience. '+station+' is a renowned radio channel with a strong foot-hold in India. We have absolute access to the ad inventory of '+station+'. You can explore '+station+' Advertising Rates & '+station+' Advertising Costs here.';
+            keyWords = [station+' in India advertising rates', station+' in India ad rates', station+' in India media kit', station+' in India card rates', station+' in India advertising', station+' in India advertising details', station+' in India pricing details', 'how to advertise in '+station+' in India', station+' in India media rates', station+' in India advertising manager', station+' in India contact details', station+' in India advertising contact', station+' in India media contact', station+' station advertising', station+' jingle ads', station+' RJ mentions', station+' RODP', station+' Primetime', station+' radio ad spots'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           else
           if(req.query.city) 
           {
             var city = req.query.city;
             if(params.city.indexOf(city) == -1) return false;
-            result.metaTags.title = city + " Radio Advertising";
-            result.metaTags.description = "Advertise in "+city+" Radio Station via TheMediaAnt. Radio Advertising in "+city+" has emerged as a promising advertising platform. "+city+" Radio Advertising is utilized by a variety of brand categories. Get access to the list of "+city+" Radio Advertising Stations at The Media Ant. Find the best "+city+" radio station advertising rates here.";
+            result.metaTags.title = 'Radio Advertising in '+city+' >> Rates for '+city+' Radio Advertisement';
+            result.metaTags.description = 'Radio Advertising in '+city+' is an excellent medium for mass audience targetting. Radio Advertising in '+city+' has emerged as a promising advertising platform. '+city+' Radio advertising is utilized by a variety of brand categories. You can explore '+city+' Radio Advertising Rates and '+city+' Radio Advertising costs here.';
+            keyWords = ['Radio advertising rates in ' +city, 'Radio ad rates in ' +city, city+' Radio media kit', city+' Radio card rates', city+' Radio advertising details', city+' Radio pricing details', 'how to advertise in '+city+' Radios', city+' Radio media rates', city+' Radio advertising manager', city+' Radio contact details', 'Radio in '+city+' advertising contact', 'Radio in '+city+' media contact', city+' jingle ads', city+' RJ mentions', city+' RODP', city+' radio ad spots'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
@@ -614,8 +636,10 @@ var Common = function()
           {
             var category = req.query.category;
             if(!params.category[category]) return false;
-            result.metaTags.title = category + " Newspaper Advertising in India";
-            result.metaTags.description = "Advertise in "+category+" Newspapers in India via TheMediaAnt. "+category+" Newspapers advertisement appears alongside regular editorial content.The list of "+category+" Newspapers in India display ads contain text, photographs,logos, maps, and other informational items. Find the best "+category+" Newspaper Advertising rates through The Media Ant.";
+            result.metaTags.title = category+' Newspaper Advertising in India >> Rates for '+category+' Newspaper Advertisement';
+            result.metaTags.description = category+' Newspapers Advertising is utilized by a variety of brands to reach out to their target audience. Due to a low cost of distribution and high readership, '+category+' Newspapers Advertising Rates have a low CPM. You can explore '+category+' Newspapers advertising rates and '+category+' Newspapers advertising cost here.';
+            keyWords = [category +' Newspapers in India advertising rates', category +' Newspapers in India ad rates', category +' Newspapers in India media kit', category +' Newspapers in India card rates', category +' Newspapers in India advertising', category +' Newspapers in India advertising details', category +' Newspapers in India pricing details', 'how to advertise in '+category +' Newspapers in India', category +' Newspapers in India media rates', category +' Newspapers in India advertising manager', category +' Newspapers in India contact details', category +' Newspapers in India advertising contact', category +' Newspapers in India media contact'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
