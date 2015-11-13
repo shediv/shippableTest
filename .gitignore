@@ -4,11 +4,9 @@ app/config/config.env.js
 node_modules/
 public/images/
 public/temp/
-public/bestRate
-public/img
+public/bestRate/
+public/img/
+public /lsquare/
 npm-debug.log
-.idea/
 log/
 logs/
-bin/www
-app/config/config.js
