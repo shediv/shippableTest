@@ -282,17 +282,19 @@ var Newspaper = function()
       if(!results) return res.status(404).json({error : 'No Such Media Found'});
       Category.findOne({ _id:results.categoryId },'name').lean().exec(function(err, cat){
         if(cat) results['categoryName'] = cat.name;
+        keyWords = [results.name+' Newspaper in '+results.areaCovered+' advertising rates', results.name+' Newspaper in '+results.areaCovered+' ad rates', results.name+' Newspaper in '+results.areaCovered+' media kit', results.name+' Newspaper in '+results.areaCovered+' card rates', results.name+' Newspaper in '+results.areaCovered+' advertising', results.name+' Newspaper in '+results.areaCovered+' advertising details', results.name+' Newspaper in '+results.areaCovered+' pricing details', 'how to advertise in '+results.name+' Newspaper in '+results.areaCovered, results.name+' Newspaper in '+results.areaCovered+' media rates', results.name+' Newspaper in '+results.areaCovered+' advertising manager', results.name+' Newspaper in '+results.areaCovered+' contact details', results.name+' Newspaper in '+results.areaCovered+' advertising contact', results.name+' Newspaper in '+results.areaCovered+' media contact', 'frequency', 'circulation'];
         if(results.about) {
           description = results.about;
         }else {
-          description = results.name+" that covers "+results.areaCovered+" is a popular newspaper in the "+results.categoryName+" Segment. "+results.name+" Newspaper Advertising is utilized by a variety of brands to reach the target audience. You can explore "+results.name+ " Newspaper Advertising Rates & "+results.name+" Newspaper Advertising Costs here";
+          description =  results.name+' Newspaper Advertising is utilized by a variety of brands to reach the target audience. '+results.name+' that covers '+results.areaCovered+' is a popular newspaper in the '+results.categoryName+' Segment. Due to a low cost of distribution and high readership, '+results.name+' Newspapers Advertising Rates have a low CPM. You can explore '+results.name+ ' Newspaper Advertising Rates & '+results.name+' Newspaper Advertising Costs here';
         }
         var metaTags = {
           title : results.name+ ' Newspaper Advertising in '+results.areaCovered+' >> Rates for '+results.name+' Newspaper Advertisement in '+results.areaCovered,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords          
         }
         res.status(200).json({newspaper : results, metaTags:metaTags});
       });
