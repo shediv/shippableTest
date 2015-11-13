@@ -51,6 +51,7 @@ var Common = function()
 		if(visitor.type == 'media') model = Media;
 		if(visitor.type == '12thcross') model =  TwelthCross;
 		if(visitor.type == 'lsquare') model =  Lsquare;
+		if(visitor.type == 'cafe') model =  Cafe;
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
