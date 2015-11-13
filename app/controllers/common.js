@@ -561,8 +561,8 @@ var Common = function()
                                           category+' Magazines Advertising Rates have a low CPM. You can explore '+ 
                                           category+' magazines advertising rates and ' + 
                                           category+' magazines advertising cost here.';
-            keyWords = [category +' Magazines in India advertising rates', category +' Magazines in India ad rates', category +' Magazines in India media kit', category +' Magazines in India card rates', category +' Magazines in India advertising', category +' Magazines in India advertising details', category +' Magazines in India pricing details', 'how to advertise in '+category +' Magazines in India', category +' Magazines in India media rates', category +' Magazines in India advertising manager', category +' Magazines in India contact details', category +' Magazines in India advertising contact', category +' Magazines in India media contact'];                                         
-            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
+            result.metaTags.keyWords = [category +' Magazines in India advertising rates', category +' Magazines in India ad rates', category +' Magazines in India media kit', category +' Magazines in India card rates', category +' Magazines in India advertising', category +' Magazines in India advertising details', category +' Magazines in India pricing details', 'how to advertise in '+category +' Magazines in India', category +' Magazines in India media rates', category +' Magazines in India advertising manager', category +' Magazines in India contact details', category +' Magazines in India advertising contact', category +' Magazines in India media contact', 'magazine advertisements'];                                         
+            //result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
@@ -609,16 +609,20 @@ var Common = function()
           {
             var station = req.query.station;
             if(params.station.indexOf(station) == -1) return false;
-            result.metaTags.title = station + " Radio Advertising in India";
-            result.metaTags.description = "Advertise in "+station+" in India via TheMediaAnt. "+station+" is a renowned radio channel with a strong foot-hold in India. We have absolute access to the advertising inventory of "+station+". Get access to the list of "+station+" Advertising Stations at The Media Ant. Find the best "+station+" advertising rates here.";
+            result.metaTags.title = station+' Advertising in India >> Rates for '+station+' Advertisement';
+            result.metaTags.description = station+' Advertising is enabled in many cities. '+station+' Advertising is utilized by a variety of brands to reach out to their target audience. '+station+' is a renowned radio channel with a strong foot-hold in India. We have absolute access to the ad inventory of '+station+'. You can explore '+station+' Advertising Rates & '+station+' Advertising Costs here.';
+            keyWords = [station+' in India advertising rates', station+' in India ad rates', station+' in India media kit', station+' in India card rates', station+' in India advertising', station+' in India advertising details', station+' in India pricing details', 'how to advertise in '+station+' in India', station+' in India media rates', station+' in India advertising manager', station+' in India contact details', station+' in India advertising contact', station+' in India media contact', station+' station advertising', station+' jingle ads', station+' RJ mentions', station+' RODP', station+' Primetime', station+' radio ad spots'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           else
           if(req.query.city) 
           {
             var city = req.query.city;
             if(params.city.indexOf(city) == -1) return false;
-            result.metaTags.title = city + " Radio Advertising";
-            result.metaTags.description = "Advertise in "+city+" Radio Station via TheMediaAnt. Radio Advertising in "+city+" has emerged as a promising advertising platform. "+city+" Radio Advertising is utilized by a variety of brand categories. Get access to the list of "+city+" Radio Advertising Stations at The Media Ant. Find the best "+city+" radio station advertising rates here.";
+            result.metaTags.title = 'Radio Advertising in '+city+' >> Rates for '+city+' Radio Advertisement';
+            result.metaTags.description = 'Radio Advertising in '+city+' is an excellent medium for mass audience targetting. Radio Advertising in '+city+' has emerged as a promising advertising platform. '+city+' Radio advertising is utilized by a variety of brand categories. You can explore '+city+' Radio Advertising Rates and '+city+' Radio Advertising costs here.';
+            keyWords = ['Radio advertising rates in ' +city, 'Radio ad rates in ' +city, city+' Radio media kit', city+' Radio card rates', city+' Radio advertising details', city+' Radio pricing details', 'how to advertise in '+city+' Radios', city+' Radio media rates', city+' Radio advertising manager', city+' Radio contact details', 'Radio in '+city+' advertising contact', 'Radio in '+city+' media contact', city+' jingle ads', city+' RJ mentions', city+' RODP', city+' radio ad spots'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }
@@ -628,8 +632,10 @@ var Common = function()
           {
             var category = req.query.category;
             if(!params.category[category]) return false;
-            result.metaTags.title = category + " Newspaper Advertising in India";
-            result.metaTags.description = "Advertise in "+category+" Newspapers in India via TheMediaAnt. "+category+" Newspapers advertisement appears alongside regular editorial content.The list of "+category+" Newspapers in India display ads contain text, photographs,logos, maps, and other informational items. Find the best "+category+" Newspaper Advertising rates through The Media Ant.";
+            result.metaTags.title = category+' Newspaper Advertising in India >> Rates for '+category+' Newspaper Advertisement';
+            result.metaTags.description = category+' Newspapers Advertising is utilized by a variety of brands to reach out to their target audience. Due to a low cost of distribution and high readership, '+category+' Newspapers Advertising Rates have a low CPM. You can explore '+category+' Newspapers advertising rates and '+category+' Newspapers advertising cost here.';
+            keyWords = [category +' Newspapers in India advertising rates', category +' Newspapers in India ad rates', category +' Newspapers in India media kit', category +' Newspapers in India card rates', category +' Newspapers in India advertising', category +' Newspapers in India advertising details', category +' Newspapers in India pricing details', 'how to advertise in '+category +' Newspapers in India', category +' Newspapers in India media rates', category +' Newspapers in India advertising manager', category +' Newspapers in India contact details', category +' Newspapers in India advertising contact', category +' Newspapers in India media contact'];
+            result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
           break;
         }

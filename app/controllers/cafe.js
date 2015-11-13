@@ -29,6 +29,7 @@ var Cafe = function()
       //req.body.cafe.baseUrl = (req.body.cafe.url).replace('https://','').split('/')[0];
       req.body.cafe.createdAt = new Date();
       if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
+      req.body.cafe.type = 'Link';
 
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
@@ -39,6 +40,41 @@ var Cafe = function()
           newCafe.save(function(err) {
             if(err) return res.status(500).json(err);
             res.status(200).json("Cafe Created Successfully");
+          });  
+      });    
+    });
+  };
+
+  this.createPost = function(req, res){
+    Cafe.findOne({ title:req.body.cafe.title }).lean().exec(function(err, cafe){
+      if(cafe) return res.status(500).json("Cafe Post already exists");
+
+      var newUrl = req.body.cafe.title;
+      newUrl = newUrl.replace(/ /g, "-");
+      // Make lowercase
+      newUrl = newUrl.toLowerCase();
+      // Remove characters that are not alphanumeric or a '-'
+      newUrl = newUrl.replace(/[^a-z0-9-]/g, "");
+      // Combine multiple dashes (i.e., '---') into one dash '-'.
+      req.body.cafe.title = req.body.cafe.title;
+      req.body.cafe.urlSlug = newUrl.replace(/[-]+/g, "-");
+      req.body.cafe.description = req.body.cafe.description;
+      req.body.cafe.topics = req.body.cafe.topics;
+      req.body.cafe.views = 0;      
+      req.body.cafe.createdAt = new Date();
+      req.body.cafe.type = 'Post';
+
+      //return res.status(200).json(req.body.cafe);      
+
+      var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, user){
+          req.body.cafe.userId = user._id;
+          var newCafe = Cafe(req.body.cafe);           
+          // save the Media
+          newCafe.save(function(err) {
+            if(err) return res.status(500).json(err);
+            res.status(200).json("Cafe Post Created Successfully");
           });  
       });    
     });
@@ -204,7 +240,6 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    //req.params.urlSlug = decodeURI(req.params.urlSlug);
     Cafe.findOne({urlSlug: req.params.urlSlug}).lean().exec(
       function(err, result)
       {
