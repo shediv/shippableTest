@@ -300,13 +300,14 @@ var NonTraditional = function()
 
         var mainTitle = result.name.replace("-", "Advertising in")
         var subTitle = result.name.replace("-", "Advertisement in")
-
+        keyWords = [  'advertising rates',   'ad rates',   'media kit',   'card rates',   'advertising',   'advertising details',   'pricing details',   'media rates',   'advertising manager',   'contact details',   'advertising contact',   'media contact'];
         var metaTags = {
           title : mainTitle+' >> Rates for '+subTitle,
           image  : result.imageUrl,
           description  : result.about,
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
         res.status(200).json({nontraditional : result, metaTags : metaTags});
       });
