@@ -109,7 +109,7 @@ var Common = function()
           from: req.body.email, // sender address
           to: mailOptions.to, // list of receivers
           cc: req.body.email,
-          subject: mailOptions.toolName+' - Request for Assistance ',
+          subject: req.body.urlSlug+'|'+mailOptions.toolName+' - Request for Assistance ',
           html: results.html
         }, function(err, responseStatus){
           if(err) return console.error(err);
