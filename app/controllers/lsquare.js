@@ -186,7 +186,7 @@ var Lsquare = function()
             var i;
 
             fs.readdir(path, function (err, list) {
-              if(list.length <= 0) return res.status(200).json({images:[]});
+              if(!list) return res.status(200).json({images:[]});
               for(i=0; i<list.length; i++) {
                   //if(path.extname(list[i]) === fileType) {
                       files.push('/images/users/'+ decoded._id+'/'+list[i]); //store the file name into the array files
