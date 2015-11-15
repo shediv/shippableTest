@@ -257,12 +257,14 @@ var Outdoor = function()
           //description = "This Hoarding is located at "+results.geographyData.locality+", "+results.geographyData.city;
           description = results.mediaType+' in '+results.geographyData.locality+', '+results.geographyData.city+' ('+results.uniqueId+') are an excellent medium for area-level mass targeting. We have access to '+results.mediaType+' Vendors in '+results.geographyData.locality+', '+results.geographyData.city+' ('+results.uniqueId+'). You can explore '+results.mediaType+' Advertising Rates in '+results.geographyData.locality+', '+results.geographyData.city+' ('+results.uniqueId+') and '+results.mediaType+' Advertising Cost in '+results.geographyData.locality+', '+results.geographyData.city+' ('+results.uniqueId+') here';
         }
+        keyWords= [  'advertising rates',   'ad rates',   'media kit',   'card rates',   'advertising',   'advertising details',   'pricing details',   'media rates',   'advertising manager',   'contact details',   'advertising contact',   'media contact'];
         var metaTags = {
           title : results.mediaType +' Advertising in '+results.geographyData.locality+', '+results.geographyData.city+' >> Rates for '+results.mediaType+' Advertisement in '+results.geographyData.locality+', '+results.geographyData.city,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
         res.status(200).json({outdoor : results, metaTags : metaTags});
       });

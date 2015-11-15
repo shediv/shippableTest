@@ -382,6 +382,7 @@ var Cinema = function()
             results.name = results.cinemaChain+ ", "+ results.mallName;
             mallName = results.mallName;
           }
+          var location = results.resultMallName + ' '+results.geography[0].city;
           if(results.about) 
           {
             description = results.about;
@@ -389,14 +390,17 @@ var Cinema = function()
           else 
           {
             //description = 'Get access to 'results.cinemaChain+" at "+mallName+" has a maximum capacity of "+results.seats+" per show. You can find Off Screen Advertising Rate and Advertising Cost for "+results.cinemaChainne+", "+results.mallName+" at The Media Ant";
-            description = 'Get access to '+results.cinemaChain+' Advertising through The Media Ant. We have tie-ups with all '+results.cinemaChain+' properties to ensure '+results.cinemaChain+' Advertising. You can explore '+results.cinemaChain+' Advertising Rates and '+results.cinemaChain+' Advertising Cost here.'
+            description = results.cinemaChain+ ' Advertising in '+location+' is utilized by a variety of brands to reach to their target audience. Get access to the list of '+results.cinemaChain+' Cinema Advertising Screens in '+results.cinemaChain+' at The Media Ant. You can explore '+results.cinemaChain+' Cinema advertising rates and '+results.cinemaChain+' Cinema advertising cost in '+location+' here.';
           }
+
+          keyWords = [results.cinemaChain+ ' Cinema advertising rates in '+location, results.cinemaChain+ ' Cinema in '+location+' ad rates', results.cinemaChain+ ' Cinema in '+location+' media kit', results.cinemaChain+ ' Cinema in '+location+' card rates', results.cinemaChain+ ' Cinema in '+location+' advertising', results.cinemaChain+ ' Cinema in '+location+' advertising details', results.cinemaChain+ ' Cinema in '+location+' pricing details', 'how to advertise in '+results.cinemaChain+ ' Cinema in '+location, results.cinemaChain+ ' Cinema in '+location+' media rates', results.cinemaChain+ ' Cinema in '+location+' advertising manager', results.cinemaChain+ ' Cinema in '+location+' contact details', results.cinemaChain+ ' Cinema in '+location+' advertising contact', results.cinemaChain+ ' Cinema in '+location+' media contact', results.cinemaChain+ ' cinema slide advertising in '+location, location+ results.cinemaChain+ ' theatre ads',  results.cinemaChain+ ' multiplex advertising in '+location, results.cinemaChain+ ' audio slide advertising in '+location, results.cinemaChain+ ' mute slide advertising in '+location];
           var metaTags = {
-            title : results.cinemaChain+ ' Advertising in '+results.theatreName+', '+ results.resultMallName+' >> Rates for '+results.cinemaChain+' Advertisement in '+results.resultMallName,
+            title : results.cinemaChain+ ' Advertising in '+location+' >> Rates for '+results.cinemaChain+' Advertisement in '+location,
             image  : results.imageUrl,
             description  : description,
             facebook : self.config.facebook,
-            twitter : self.config.twitter
+            twitter : self.config.twitter,
+            keyWords : keyWords
           }
           res.status(200).json({cinema : results, metaTags : metaTags});
         });

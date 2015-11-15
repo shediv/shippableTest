@@ -234,14 +234,17 @@ var Digital = function()
         if(cat) results.categoryName = cat.name;
         var newTitle = results.name.replace("App", '');
         newTitle = newTitle.replace("  ", " ");
-        newTitle = newTitle + ' ' +results.medium;
+        var Title = newTitle + ' ' +results.medium;
+        newTitle = Title + ' Advertising >> Rates for '+Title+' Advertisement';
+        keyWords= ['cost per click', 'cost per mille', 'cost per action', 'cost per like', 'cost per customer', 'cost per engagement', 'bidding', 'cost per view', 'CPA', 'CPC', 'CPM', 'CPV', 'cost per thousand impressions', 'video ads', Title+ ' advertising rates', Title+  ' ad rates', Title+  ' media kit', Title+  ' card rates', Title+ ' advertising', Title+  ' advertising details', Title+  ' pricing details', 'how to advertise in ' +Title, Title+  'media rates', Title+  ' advertising manager', Title+  ' contact details', Title+  ' advertising contact', Title+  ' media contact', 'ad spots'];
         var metaTags = {
           title : newTitle,
           image  : results.imageUrl,
           //description  : results.about,
-          description  : newTitle + ' is utilized by variety of brands to  reach out to their target audience. You can explore '+newTitle+' Advertising rates and '+newTitle+' Advertising cost here.',
+          description  : Title + ' Advertising is utilized by variety of brands to  reach out to their target audience. You can explore '+Title+' Advertising rates and '+Title+' Advertising cost here.',
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
         res.status(200).json({digital : results, metaTags : metaTags});
       });

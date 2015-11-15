@@ -919,17 +919,20 @@ var Magazine = function()
       Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
         if(category) results['categoryName'] = category.name;
         else results['categoryName'] = '';
+        keyWords = [results.categoryName+' Magazines in India advertising rates', results.categoryName+' Magazines in India ad rates', results.categoryName+' Magazines in India media kit', results.categoryName+' Magazines in India card rates', results.categoryName+' Magazines in India advertising', results.categoryName+' Magazines in India advertising details', results.categoryName+' Magazines in India pricing details', 'how to advertise in '+results.categoryName+' Magazines in India', results.categoryName+' Magazines in India media rates', results.categoryName+' Magazines in India advertising manager', results.categoryName+' Magazines in India contact details', results.categoryName+' Magazines in India advertising contact', results.categoryName+' Magazines in India media contact', 'circulation', 'frequency', 'readership', 'bleed', 'non bleed'];
+
         if(results.about) {
           description = results.about;
         }else {
-          description = results.name+" is a "+results.attributes.frequency.value+" Magazine in the "+results.categoryName+" Segment. "+results.name+" Magazine Advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+ results.name +" Magazine Advertising Rates & " + results.name +" Magazine Advertising Costs here";
+          description =  results.name+' Magazine Advertising is utilized by a variety of brands to reach the target audience. ' +results.name+' is a '+results.attributes.frequency.value+' Magazine in the '+results.categoryName+' Segment. '+results.name+' is a popular Magazine in the '+results.categoryName+' Segment. Due to a low cost of distribution and high readership, '+results.name+' Magazine Advertising Rates have a low CPM. You can explore '+results.name+ ' Magazine Advertising Rates & '+results.name+' Magazine Advertising Costs here';
         }
         var metaTags = {
           title : results.name+' Magazine Advertising >> Rates for ' + results.name+' Magazine Advertisement',
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
         res.status(200).json({magazine : results, metaTags : metaTags});
       });
