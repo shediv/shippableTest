@@ -919,8 +919,8 @@ var Magazine = function()
       Category.findOne({ _id : results.categoryId },'name').lean().exec(function(err, category){
         if(category) results['categoryName'] = category.name;
         else results['categoryName'] = '';
-        keyWords = [results.categoryName+' Magazines in India advertising rates', results.categoryName+' Magazines in India ad rates', results.categoryName+' Magazines in India media kit', results.categoryName+' Magazines in India card rates', results.categoryName+' Magazines in India advertising', results.categoryName+' Magazines in India advertising details', results.categoryName+' Magazines in India pricing details', 'how to advertise in '+results.categoryName+' Magazines in India', results.categoryName+' Magazines in India media rates', results.categoryName+' Magazines in India advertising manager', results.categoryName+' Magazines in India contact details', results.categoryName+' Magazines in India advertising contact', results.categoryName+' Magazines in India media contact', 'circulation', 'frequency', 'readership', 'bleed', 'non bleed'];
-
+        keyWords = [results.categoryName+' Magazines in India advertising rates', 'ad rates', 'media kit', 'card rates', 'advertisement', 'advertising details', 'pricing details', 'how to advertise in Magazines in India', 'media rates', 'advertising manager', 'contact details', 'advertising contact', 'media contact', 'circulation', 'frequency', 'readership', 'bleed', 'non bleed'];
+        keyWords = keyWords.concat(results.searchKeyWords);
         if(results.about) {
           description = results.about;
         }else {
@@ -932,7 +932,7 @@ var Magazine = function()
           description  : description,
           facebook : self.config.facebook,
           twitter : self.config.twitter,
-          keyWords : keyWords
+          searchKeyWords : keyWords
         }
         res.status(200).json({magazine : results, metaTags : metaTags});
       });
