@@ -240,7 +240,7 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    Cafe.findOne({_id: req.params._id.toString()}).lean().exec(
+    Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(
       function(err, result)
       {        
         if(!result) res.status(404).json({error : 'No Such Cafe Found'});
@@ -254,7 +254,7 @@ var Cafe = function()
     var visitor = {
       userAgent: req.headers['user-agent'],
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
-      _id: req.params._id.toString(),
+      _id: req.params.Id.toString(),
       type: 'cafe'
     };
     CommonLib.uniqueVisits(visitor);
