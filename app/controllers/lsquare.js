@@ -121,7 +121,7 @@ var Lsquare = function()
       async.each(results, function(result, callbackEach){            
         User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
           result.createdBy = userInfo;
-          LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err, answers){
+          LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err, answers){
           for(i in answers) {
             answerUsersIDs.push(answers[i].answered_by);
             answerIDs.push(answers[i]._id.toString());
@@ -437,7 +437,7 @@ var Lsquare = function()
   self.getAnswersQuestion = function(results, callbackInner){     
       var answerUsersIDs = [];        
       async.each(results, function(result, callbackEach){            
-        Lsquare.findOne({_id : result.questionID, active: 1}).lean().exec(function(err,questions){
+        Lsquare.findOne({_id : result.questionId, active: 1}).lean().exec(function(err,questions){
           result.question = questions;         
           callbackEach(null);                
         });            
@@ -459,7 +459,7 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          LsquareAnswerScore.findOne({userID : decoded._id, answerID : req.body.answerId}).lean().exec(function(err2, scoreUser){
+          LsquareAnswerScore.findOne({userID : decoded._id, answerId : req.body.answerId}).lean().exec(function(err2, scoreUser){
             if(scoreUser) res.status(500).json("User has already Upvoted this answer");
             else 
             {                    
@@ -478,12 +478,12 @@ var Lsquare = function()
 
                 LsquareAnswer.findOne({_id: req.body.answerId}).lean().exec(function(err4, answerData){
                   User.findOne({_id: answerData.answered_by}).lean().exec(function(err5, user){
-                  Lsquare.findOne({_id: answerData.questionID}).lean().exec(function(err6, question){  
+                  Lsquare.findOne({_id: answerData.questionId}).lean().exec(function(err6, question){  
                     var mailOptions = {};
                     mailOptions.social = false;
                     mailOptions.to = user.email;
                     mailOptions.answerId = req.body.answerId;
-                    mailOptions.questionId = answerData.questionID;
+                    mailOptions.questionId = answerData.questionId;
                     mailOptions.appHost = self.config.appHost;
                     mailOptions.date = Date();
                     var firstName = user.firstName;
@@ -499,7 +499,7 @@ var Lsquare = function()
                     activitiesData.appHost = self.config.appHost;
                     activitiesData.userId = decoded._id;
                     activitiesData.answerId = req.body.answerId;
-                    activitiesData.questionId = answerData.questionID;
+                    activitiesData.questionId = answerData.questionId;
                     activitiesData.date = Date();
                     var newActivity = LsquareActivities(activitiesData);
 
@@ -542,7 +542,7 @@ var Lsquare = function()
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       User.findOne({_id : result.createdBy}).lean().exec(function(err2,userInfo){
         result.createdBy = userInfo;
-        LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err3, answers){          
+        LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err3, answers){          
          for(i in answers) {
           answerUsersIDs.push(answers[i].answered_by);
           answerIDs.push(answers[i]._id.toString());
