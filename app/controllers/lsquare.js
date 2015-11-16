@@ -547,11 +547,10 @@ var Lsquare = function()
           answerUsersIDs.push(answers[i].answered_by);
           answerIDs.push(answers[i]._id.toString());
          }
-
+         
          CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           CommonLib.checkLoginUserVote(answerIDs, loggedinUserID, function(err4, loginUserVoteInfo){
-            //console.log(loginUserVoteInfo);
             for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
             result.answers = answers;
             //to get related question...
