@@ -240,9 +240,9 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    Cafe.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+    Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(
       function(err, result)
-      {
+      {        
         if(!result) res.status(404).json({error : 'No Such Cafe Found'});
         User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
           result['user'] = userInfo;
@@ -254,7 +254,7 @@ var Cafe = function()
     var visitor = {
       userAgent: req.headers['user-agent'],
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
-      urlSlug: req.params.urlSlug,
+      _id: req.params.Id.toString(),
       type: 'cafe'
     };
     CommonLib.uniqueVisits(visitor);
