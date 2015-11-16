@@ -73,7 +73,7 @@ var Lsquare = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){      
+    self.sortFilteredMedia = function(query, callback){
       var data = [];
       var user = []; 
       async.parallel({
@@ -115,7 +115,7 @@ var Lsquare = function()
       });
     };
 
-    self.getQuestionAnswers = function(results, callbackInner){                    
+    self.getQuestionAnswers = function(results, callbackInner){
       var answerUsersIDs = [];
       var answerIDs = [];    
       async.each(results, function(result, callbackEach){            
@@ -186,6 +186,7 @@ var Lsquare = function()
             var i;
 
             fs.readdir(path, function (err, list) {
+              if(!list) return res.status(200).json({images:[]});
               for(i=0; i<list.length; i++) {
                   //if(path.extname(list[i]) === fileType) {
                       files.push('/images/users/'+ decoded._id+'/'+list[i]); //store the file name into the array files
