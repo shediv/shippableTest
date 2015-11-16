@@ -33,8 +33,8 @@ var Common = function()
 	};
 
 	this.checkLoginUserVote = function(answerIDs, userID, callback) {
-		LsquareAnswerScore.find({userID:userID, answerID: {$in: answerIDs} }).lean().exec(function(err, loginUserVoteInfo){																
-			for(i in loginUserVoteInfo) loginUserVoteInfo[loginUserVoteInfo[i].answerID] = true;			
+		LsquareAnswerScore.find({userID:userID, answerId: {$in: answerIDs} }).lean().exec(function(err, loginUserVoteInfo){																
+			for(i in loginUserVoteInfo) loginUserVoteInfo[loginUserVoteInfo[i].answerId] = true;			
 			callback(err, loginUserVoteInfo);
 		});
 	};

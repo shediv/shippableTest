@@ -73,7 +73,7 @@ var Lsquare = function()
       return query;
     };
 
-    self.sortFilteredMedia = function(query, callback){      
+    self.sortFilteredMedia = function(query, callback){
       var data = [];
       var user = []; 
       async.parallel({
@@ -115,13 +115,13 @@ var Lsquare = function()
       });
     };
 
-    self.getQuestionAnswers = function(results, callbackInner){                    
+    self.getQuestionAnswers = function(results, callbackInner){
       var answerUsersIDs = [];
       var answerIDs = [];    
       async.each(results, function(result, callbackEach){            
         User.findOne({_id : result.createdBy}).lean().exec(function(err,userInfo){
           result.createdBy = userInfo;
-          LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err, answers){
+          LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err, answers){
           for(i in answers) {
             answerUsersIDs.push(answers[i].answered_by);
             answerIDs.push(answers[i]._id.toString());
@@ -186,6 +186,7 @@ var Lsquare = function()
             var i;
 
             fs.readdir(path, function (err, list) {
+              if(!list) return res.status(200).json({images:[]});
               for(i=0; i<list.length; i++) {
                   //if(path.extname(list[i]) === fileType) {
                       files.push('/images/users/'+ decoded._id+'/'+list[i]); //store the file name into the array files
@@ -280,8 +281,15 @@ var Lsquare = function()
               mailOptions.appHost = self.config.appHost;
               mailOptions.date = Date();
               mailOptions.askedBy = decoded;
-              if(decoded.googleId || decoded.facebookId) mailOptions.social = true;                
-              var newActivity = LsquareActivities(mailOptions);
+              if(decoded.googleId || decoded.facebookId) mailOptions.social = true;
+
+              var activitiesData = {};
+              activitiesData.activity =  'New Question';
+              activitiesData.appHost = self.config.appHost;
+              activitiesData.userId = decoded._id;
+              activitiesData.questionId = newQuestion._id;
+              activitiesData.date = Date();
+              var newActivity = LsquareActivities(activitiesData);
 
               newActivity.save(function(err){
                 if(err) return res.status(500).json(err);
@@ -316,7 +324,7 @@ var Lsquare = function()
           answer = req.body.answer;
           answer.createdAt = Date();
           answer.answered_by = decoded._id;
-          answer.questionID = req.body.answer.questionID;
+          answer.questionId = req.body.answer.questionId;
           answer.score = 0;
           answer.active = 1;
           //return res.status(200).json(answer);
@@ -324,15 +332,15 @@ var Lsquare = function()
           newAnswer.save(function(err){
             if (err) return res.send(500, { error: err });            
             res.status(200).json(newAnswer._id);
-            Lsquare.findOne({_id: req.body.answer.questionID}).lean().exec(function(err, question){               
+            Lsquare.findOne({_id: req.body.answer.questionId}).lean().exec(function(err, question){               
               User.findOne({_id : question.createdBy}).lean().exec(function(err,userInfo){
                 //send mail to creator of question...                
                 var mailOptions = {};
                 mailOptions.social = false;
                 mailOptions.to = userInfo.email;
-                mailOptions.questionID = req.body.answer.questionID;
+                mailOptions.questionId = req.body.answer.questionId;
                 mailOptions.activity =  'New Answer for a Question';
-                mailOptions.answerID =  newAnswer._id;
+                mailOptions.answerId =  newAnswer._id;
                 mailOptions.appHost = self.config.appHost;
                 mailOptions.date = Date();
                 var firstName = userInfo.firstName;
@@ -341,7 +349,15 @@ var Lsquare = function()
                 mailOptions.answerBy = decoded;
                 if(decoded.googleId || decoded.facebookId) mailOptions.social = true;               
                 mailOptions.urlSlug = question.urlSlug;
-                var newActivity = LsquareActivities(mailOptions);                
+
+                var activitiesData = {};
+                activitiesData.activity =  'New Answer';
+                activitiesData.appHost = self.config.appHost;
+                activitiesData.userId = decoded._id;
+                activitiesData.questionId = req.body.answer.questionId;
+                activitiesData.answerId =  newAnswer._id;                                
+                activitiesData.date = Date();
+                var newActivity = LsquareActivities(activitiesData);                
 
                 newActivity.save(function(err){
                   if(err) return res.status(500).json(err);
@@ -421,7 +437,7 @@ var Lsquare = function()
   self.getAnswersQuestion = function(results, callbackInner){     
       var answerUsersIDs = [];        
       async.each(results, function(result, callbackEach){            
-        Lsquare.findOne({_id : result.questionID, active: 1}).lean().exec(function(err,questions){
+        Lsquare.findOne({_id : result.questionId, active: 1}).lean().exec(function(err,questions){
           result.question = questions;         
           callbackEach(null);                
         });            
@@ -443,31 +459,31 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          LsquareAnswerScore.findOne({userID : decoded._id, answerID : req.body.answerID}).lean().exec(function(err2, scoreUser){
+          LsquareAnswerScore.findOne({userID : decoded._id, answerId : req.body.answerId}).lean().exec(function(err2, scoreUser){
             if(scoreUser) res.status(500).json("User has already Upvoted this answer");
             else 
             {                    
-              LsquareAnswer.findOneAndUpdate({ _id:req.body.answerID }, { $inc:{ score:1 } }, { upsert:true }).exec();
-              LsquareAnswer.findOne({ _id:req.body.answerID }).lean().exec(function(err3, scoreAnswer){
+              LsquareAnswer.findOneAndUpdate({ _id:req.body.answerId }, { $inc:{ score:1 } }, { upsert:true }).exec();
+              LsquareAnswer.findOne({ _id:req.body.answerId }).lean().exec(function(err3, scoreAnswer){
                 return res.status(200).json({score:scoreAnswer.score});
               });                     
 
               //Add answer score details in LsquareAnswerScore
               var answerScore = {}; 
               answerScore.userID = decoded._id;
-              answerScore.answerID = req.body.answerID;
+              answerScore.answerId = req.body.answerId;
               answerScore.createdAt = Date();
               var newAnswerScore = LsquareAnswerScore(answerScore);
               newAnswerScore.save();
 
-                LsquareAnswer.findOne({_id: req.body.answerID}).lean().exec(function(err4, answerData){
+                LsquareAnswer.findOne({_id: req.body.answerId}).lean().exec(function(err4, answerData){
                   User.findOne({_id: answerData.answered_by}).lean().exec(function(err5, user){
-                  Lsquare.findOne({_id: answerData.questionID}).lean().exec(function(err6, question){  
+                  Lsquare.findOne({_id: answerData.questionId}).lean().exec(function(err6, question){  
                     var mailOptions = {};
                     mailOptions.social = false;
                     mailOptions.to = user.email;
-                    mailOptions.answerID = req.body.answerID;
-                    mailOptions.questionID = answerData.questionID;
+                    mailOptions.answerId = req.body.answerId;
+                    mailOptions.questionId = answerData.questionId;
                     mailOptions.appHost = self.config.appHost;
                     mailOptions.date = Date();
                     var firstName = user.firstName;
@@ -477,7 +493,16 @@ var Lsquare = function()
                     if(decoded.googleId || decoded.facebookId) mailOptions.social = true;
                     mailOptions.activity = "Upvote";              
                     mailOptions.urlSlug = question.urlSlug;
-                    var newActivity = LsquareActivities(mailOptions);
+
+                    var activitiesData = {};
+                    activitiesData.activity =  'Upvote';
+                    activitiesData.appHost = self.config.appHost;
+                    activitiesData.userId = decoded._id;
+                    activitiesData.answerId = req.body.answerId;
+                    activitiesData.questionId = answerData.questionId;
+                    activitiesData.date = Date();
+                    var newActivity = LsquareActivities(activitiesData);
+
                     newActivity.save(function(err7){
                         if(err7) return res.status(500).json(err7);
                         var emailTemplate = new EmailTemplate(path.join(templatesDir, 'upvote'));
@@ -517,16 +542,15 @@ var Lsquare = function()
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       User.findOne({_id : result.createdBy}).lean().exec(function(err2,userInfo){
         result.createdBy = userInfo;
-        LsquareAnswer.find({questionID : result._id.toString()}).lean().exec(function(err3, answers){          
+        LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err3, answers){          
          for(i in answers) {
           answerUsersIDs.push(answers[i].answered_by);
           answerIDs.push(answers[i]._id.toString());
          }
-
+         
          CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           CommonLib.checkLoginUserVote(answerIDs, loggedinUserID, function(err4, loginUserVoteInfo){
-            //console.log(loginUserVoteInfo);
             for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
             result.answers = answers;
             //to get related question...
@@ -656,6 +680,24 @@ var Lsquare = function()
     
     // // console.log(obj.length);
   };
+
+  this.allTopics = function(req , res){
+    Lsquare.aggregate(
+      {$match: {active : 1}},
+      {$sort: {"views": -1} },
+      function(error, results) 
+      {
+        var Tags = [];
+        for(i in results){
+          for(j in results[i].tags){
+            Tags.push(results[i].tags[j]);
+          }
+        }  
+        var Tags = underscore.uniq(Tags);                  
+        res.status(200).json({allTopics:Tags, count: Tags.length}); 
+      }
+    );
+  }
 };
 
 module.exports.Lsquare = Lsquare;

@@ -218,12 +218,15 @@ var Television = function()
       Category.find({ _id:{ $in:results.categoryId } },'name').lean().exec(function(err, genres){
         results.genres = [];
         for(i in genres) results.genres.push(genres[i].name);
+
+        keyWords= [results.name+ ' Advertainment ', results.name+ ' Audience ', results.name+ ' Bumpers', results.name+ ' Campaign Period ', results.name+ ' Commercial Minutage ', results.name+ ' First In Break advertising ', results.name+ ' Frequency ', results.name+ ' Gross Rating Point (GRP) ', results.name+ ' Infomercial ', results.name+  ' advertising rates ', results.name+  ' ad rates ', results.name+  ' media kit ', results.name+  ' card rates ', results.name+  ' advertising ', results.name+  ' advertising details ', results.name+  ' pricing details ', 'how to advertise in ' +results.name, results.name+  ' media rates ', results.name+  'advertising manager ', results.name+  ' contact details ', results.name+  ' advertising contact', results.name+  ' media contact ', 'ad spots '];  
         var metaTags = {
           title : results.name + ' TV channel Advertising >> Rates for '+results.name+' TV channel Advertisement',
           image  : results.imageUrl,
           description  : results.name+' is a '+results.language.join()+' TV channel in '+results.genres.join()+' Genre. You can explore '+results.name+' TV channel Advertising rates and '+results.name+' TV channel Advertising cost here.',
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }  
         res.status(200).json({television : results, metaTags : metaTags});
       })

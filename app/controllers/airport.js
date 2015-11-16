@@ -257,14 +257,15 @@ var Airport = function()
 
       var newStr = result.name.split("-");
       console.log(newStr[0]);
-
+      keyWords = [  'advertising rates',   'ad rates',   'media kit',   'card rates',   'advertising',   'advertising details',   'pricing details',   'media rates',   'advertising manager',   'contact details',   'advertising contact',   'media contact'];
       var metaTags = {
           //title : result.name,          
           title : result.name.replace("-", "Advertising in")+ ' >> Rates for '+result.name.replace("-", "Advertisement in"),
           image  : result.imageUrl,
           description  : newStr[1]+ ' '+newStr[0]+'Advertising  has emerged as a promising Advertising platform. We have access to all media properties for'+newStr[1]+' '+ newStr[0]+'Advertising. Explore '+newStr[1]+' '+ newStr[0]+ 'Advertising rates and '+newStr[1]+ ' '+newStr[0]+'Advertising options here.',
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
       res.status(200).json({airport : result, metaTags : metaTags});
     });

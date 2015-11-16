@@ -90,7 +90,9 @@ var Common = function()
 
   this.contactMail = function(req, res){
     var toolName;
-    if(req.body.toolName) { toolName =  CommonLib.capitalizeFirstLetter(req.body.toolName);  }    
+    var urlGiven = '';
+    if(req.body.toolName) { toolName =  CommonLib.capitalizeFirstLetter(req.body.toolName);  }
+    if(req.body.urlSlug) { urlGiven =  req.body.urlSlug }    
     var mailOptions = {};
     mailOptions.email = req.body.email;
     mailOptions.to = "help@themediaant.com";
@@ -109,7 +111,7 @@ var Common = function()
           from: req.body.email, // sender address
           to: mailOptions.to, // list of receivers
           cc: req.body.email,
-          subject: mailOptions.toolName+' - Request for Assistance ',
+          subject: urlGiven+'|'+mailOptions.toolName+' - Request for Assistance ',
           html: results.html
         }, function(err, responseStatus){
           if(err) return console.error(err);

@@ -244,7 +244,10 @@ var Cafe = function()
       function(err, result)
       {
         if(!result) res.status(404).json({error : 'No Such Cafe Found'});
-        res.status(200).json({cafe : result});
+        User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
+          result['user'] = userInfo;
+          return res.status(200).json({cafe : result});
+        })        
       }
     );
     

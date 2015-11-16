@@ -220,14 +220,17 @@ var Radio = function()
       if(results.about) {
           description = results.about;
         }else {
-          description = results.station+ " in "+results.city+" plays music in "+results.language.join()+" language(s). "+results.station+" Advertising is utilized by a variety of brands to reach out to their target audience. You can explore "+results.station+ " Advertising Rates & "+results.station+" Advertising Costs here";        
+          description = results.station+ ' Advertising in '+results.city+' is utilized by a variety of brands to reach to their target audience. Get access to the list of '+results.station+' Cinema Advertising Screens in '+results.station+' at The Media Ant. You can explore '+results.station+' Cinema advertising rates and '+results.station+' Cinema advertising cost in bangalore here.';        
         }
+        keyWords = [results.station + ' in '+results.city+' advertising rates', results.station + ' in '+results.city+' ad rates', results.station + ' in '+results.city+' media kit', results.station + ' in '+results.city+' card rates', results.station + ' in '+results.city+' advertising', results.station + ' in '+results.city+' advertising details', results.station + ' in '+results.city+' pricing details', 'how to advertise in '+results.station+' in '+results.city, results.station + ' in '+results.city+' media rates', results.station + ' in '+results.city+' advertising manager', results.station + ' in '+results.city+' contact details', results.station + ' in '+results.city+' advertising contact', results.station + ' in '+results.city+' media contact', results.station + ' station advertising in '+results.city, results.station + ' jingle ads in '+results.city, results.station + ' RJ mentions in '+results.city, results.station + ' RODP in '+results.city, results.station + ' Primetime in '+results.city, results.station + ' radio ad spots in '+results.city];
+
         var metaTags = {
           title : results.station + ' Advertising in ' + results.city+' >> Rates for '+results.station+' Advertisement in '+ results.city,
           image  : results.imageUrl,
           description  : description,
           facebook : self.config.facebook,
-          twitter : self.config.twitter
+          twitter : self.config.twitter,
+          keyWords : keyWords
         }
       res.status(200).json({radio : results, metaTags : metaTags});        
     });
