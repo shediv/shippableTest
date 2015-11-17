@@ -249,24 +249,52 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(
-      function(err, result)
-      {        
-        if(!result) res.status(404).json({error : 'No Such Cafe Found'});
-        User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
-          result['user'] = userInfo;
-          return res.status(200).json({cafe : result});
-        })        
-      }
-    );
-    
-    var visitor = {
-      userAgent: req.headers['user-agent'],
-      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
-      _id: req.params.Id.toString(),
-      type: 'cafe'
-    };
-    CommonLib.uniqueVisits(visitor);
+    var type = req.query.type;
+    if(type == 'post'){
+      Cafe.findOne({urlSlug: req.params.Id}).lean().exec(
+        function(err, result)
+        {        
+          self.test = result;
+          if(!result) res.status(404).json({error : 'No Such Cafe Found'});
+          else{
+            User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
+              result['user'] = userInfo;
+              return res.status(200).json({cafe : result});
+            })
+
+            var visitor = {
+              userAgent: req.headers['user-agent'],
+              clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+              _id: result._id.toString(),
+              type: 'cafe'
+            };
+            CommonLib.uniqueVisits(visitor);
+          }          
+        }
+      );
+    }else{
+      Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(      
+        function(err, result)
+        {        
+          if(!result) res.status(404).json({error : 'No Such Cafe Found'});
+          else{
+            User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
+              result['user'] = userInfo;
+              return res.status(200).json({cafe : result});
+            })
+
+            var visitor = {
+              userAgent: req.headers['user-agent'],
+              clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+              _id: result._id.toString(),
+              type: 'cafe'
+            };
+            CommonLib.uniqueVisits(visitor);
+          }          
+        }
+      );
+    }
+      
   };
 
 };
