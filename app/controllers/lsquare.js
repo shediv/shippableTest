@@ -402,7 +402,7 @@ var Lsquare = function()
       },
       cafe : function(callbackInner)
       {          
-        Cafe.find({createdBy : req.query.userID}).lean().exec(function(err, cafes){            
+        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){                      
           callbackInner(err, cafes);
         })                
       },
