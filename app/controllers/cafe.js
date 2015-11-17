@@ -183,6 +183,7 @@ var Cafe = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
+            case 'createdAt': query.sortBy = { 'createdAt' : -1 }; break;
           }
           query.sortBy._id = 1;
           Cafe.aggregate(
