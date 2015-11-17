@@ -9,6 +9,7 @@ var Lsquare = function()
   var underscore = require('underscore');
   var LsquareActivities = require('../models/lsquareActivities').LsquareActivities;
   var LsquareAnswerScore = require('../models/lsquareAnswerScore').LsquareAnswerScore;
+  var Cafe = require('../models/cafe').Cafe;
   var nodeMailer = require('nodemailer');
   var multer = require('multer');
   var imagick = require('imagemagick');
@@ -399,6 +400,12 @@ var Lsquare = function()
               })                
           })
       },
+      cafe : function(callbackInner)
+      {          
+        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){                      
+          callbackInner(err, cafes);
+        })                
+      },
       answers : function(callbackInner)
       { 
         var answered_byIDs = [];
@@ -416,7 +423,7 @@ var Lsquare = function()
               });  
             });  
           })
-      }
+      }      
     },
     function(err, results) 
     {                                           
@@ -429,6 +436,11 @@ var Lsquare = function()
       for(i in results.answers){            
         results.answers[i].type = 'answer';
         activities.push(results.answers[i]);
+      }
+
+      for(i in results.cafe){            
+        results.cafe[i].type = 'cafe';
+        activities.push(results.cafe[i]);
       }   
       res.status(200).json(activities);
     });

@@ -582,7 +582,7 @@ var Common = function()
             if(!params.city[city]) return false;
             cinemaChain = cinemaChain.replace("Cinemas", '');
             result.metaTags.title = cinemaChain + ' Cinema Advertising in '+city+' >> Rates for '+cinemaChain+' Cinema Advertisement';
-            result.metaTags.description = cinemaChain + ' Advertising in '+city+' is utilized by a variety of brands to reach to their target audience. Get access to the list of '+cinemaChain+' Cinema Advertising Screens in '+city+' at The Media Ant. You can explore '+cinemaChain+' Cinema advertising rates and '+cinemaChain+' Cinema advertising cost in bangalore here.';
+            result.metaTags.description = cinemaChain + ' Advertising in '+city+' is utilized by a variety of brands to reach to their target audience. Get access to the list of '+cinemaChain+' Cinema Advertising Screens in '+city+' at The Media Ant. You can explore '+cinemaChain+' Cinema advertising rates and '+cinemaChain+' Cinema advertising cost in here.';
             keyWords = [cinemaChain+' Cinema advertising rates in '+city, cinemaChain+' Cinema in '+city+' ad rates', cinemaChain+' Cinema in '+city+' media kit', cinemaChain+' Cinema in '+city+' card rates', cinemaChain+' Cinema in '+city+' advertising', cinemaChain+' Cinema in '+city+' advertising details', cinemaChain+' Cinema in'+city+' pricing details', 'how to advertise in'+cinemaChain+' Cinema in '+city, cinemaChain+' Cinema in '+city+' media rates',  cinemaChain+' Cinema in '+city+' advertising manager',  cinemaChain+' Cinema in '+city+'contact details', cinemaChain+' Cinema in '+city+' advertising contact', cinemaChain+' Cinema in '+city+' media contact', cinemaChain+' cinema slide advertising in '+city, city + ' ' +cinemaChain+' theatre ads', cinemaChain+' multiplex advertising in '+city, cinemaChain+' audio slide advertising in '+city, cinemaChain+' mute slide advertising in '+city]
             result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
@@ -603,7 +603,7 @@ var Common = function()
             var city = req.query.city;
             if(!params.city[city]) return false;
             result.metaTags.title = 'Cinema Advertising in '+city+' >> Rates for '+city+' Cinema Advertisement';
-            result.metaTags.description = city+' Cinema Advertising is an excellent medium for premium audience targetting. Cinema Advertising in Bangalore has emerged as a promising advertising platform. For this demography theatre is a primary medium of entertainment. You can explore '+city+' Cinema Advertising Rates & '+city+' Cinema Advertising Costs here.';
+            result.metaTags.description = city+' Cinema Advertising is an excellent medium for premium audience targetting. Cinema Advertising in '+city+' has emerged as a promising advertising platform. For this demography theatre is a primary medium of entertainment. You can explore '+city+' Cinema Advertising Rates & '+city+' Cinema Advertising Costs here.';
             keyWords = ['Cinema advertising rates in '+city, 'Cinema ad rates in ' +city, city+' Cinema media kit', city+' Cinema card rates', city+' Cinema advertising details', city+' Cinema pricing details', 'how to advertise in '+city+' Cinemas', city+' Cinema media rates', city+' Cinema advertising manager', city+' cinema contact details', 'Cinema in '+city+' advertising contact', 'Cinema in '+city+' media contact'];
             result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }

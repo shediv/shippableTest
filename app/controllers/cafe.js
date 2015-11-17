@@ -116,16 +116,24 @@ var Cafe = function()
 
   this.search = function(req, res){    
     var qString = req.query.q;
-    var qRegExp = new RegExp('\\b'+qString, "i");    
-    Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
-      if(err) return res.status(500).json(err);
-      var topics = [];      
-      for(i in doc) {
-        topics = topics.concat(doc[i].topics);
-      }
-      var topics = underscore.uniq(topics);
-      return res.status(200).json({topics:topics, count:topics.length});
-    });
+    var qRegExp = new RegExp('\\b'+qString, "i");
+    if(req.query.filter == 'tags') {    
+      Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+        if(err) return res.status(500).json(err);
+        var topics = [];      
+        for(i in doc) {
+          topics = topics.concat(doc[i].topics);
+        }
+        var topics = underscore.uniq(topics);
+        return res.status(200).json({topics:topics, count:topics.length});
+      });
+    }
+    else if(req.query.filter == 'user'){
+      User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+        if(err) return res.status(500).json(err);
+        return res.send({users:usersList, count:usersList.length});
+      });
+    }
   };
   
   this.getCafe = function(req, res){
@@ -241,24 +249,51 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(
-      function(err, result)
-      {        
-        if(!result) res.status(404).json({error : 'No Such Cafe Found'});
-        User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
-          result['user'] = userInfo;
-          return res.status(200).json({cafe : result});
-        })        
-      }
-    );
-    
-    var visitor = {
-      userAgent: req.headers['user-agent'],
-      clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
-      _id: req.params.Id.toString(),
-      type: 'cafe'
-    };
-    CommonLib.uniqueVisits(visitor);
+    var type = req.query.type;
+    if(type == 'post'){
+      Cafe.findOne({urlSlug: req.params.Id}).lean().exec(
+        function(err, result)
+        {        
+          self.test = result;
+          if(!result) res.status(404).json({error : 'No Such Cafe Found'});
+          else{
+            User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
+              result['user'] = userInfo;
+              return res.status(200).json({cafe : result});
+            })
+
+            var visitor = {
+              userAgent: req.headers['user-agent'],
+              clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+              _id: result._id.toString(),
+              type: 'cafe'
+            };
+            CommonLib.uniqueVisits(visitor);
+          }          
+        }
+      );
+    }else{
+      Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(      
+        function(err, result)
+        {        
+          if(!result) res.status(404).json({error : 'No Such Cafe Found'});
+          else{
+            User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
+              result['user'] = userInfo;
+              return res.status(200).json({cafe : result});
+            })
+
+            var visitor = {
+              userAgent: req.headers['user-agent'],
+              clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
+              _id: result._id.toString(),
+              type: 'cafe'
+            };
+            CommonLib.uniqueVisits(visitor);
+          }          
+        }
+      );
+    }      
   };
 
 };
