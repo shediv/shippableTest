@@ -91,6 +91,7 @@ var _12thCross = function()
       
       if(self.params.filters.geographies.length) query.match['geography'] = { $in:self.params.filters.geographies };
       if(self.params.filters.subCategories.length) query.match['subCategoryId'] = { $in:self.params.filters.subCategories };
+      if(self.params.filters.types.length) query.match['isAgency'] = { $in:self.params.filters.types };
       query.match.isActive = 1;
       
       return query;
@@ -168,7 +169,8 @@ var _12thCross = function()
   this.getFilters = function(req, res){
     async.parallel({
       servicesProvided : self.getCategories,
-      geographies : self.getGeographies
+      geographies : self.getGeographies,
+      types: self.getTypes
     },                                                                                      
     function(err, results) 
     {
@@ -234,6 +236,14 @@ var _12thCross = function()
           });
         }
       );
+    };
+
+    self.getTypes = function(callback){
+      var types = [
+        {'_id' : true, 'name' : 'Agency'},
+        {'_id' : false, 'name' : 'Freelancer'}
+      ];
+      callback(null, types);
     };
 
   this.show = function(req, res){
