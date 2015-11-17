@@ -474,8 +474,11 @@ var Lsquare = function()
       },
       cafe : function(callbackInner)
       {          
-        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){                      
-          callbackInner(err, cafes);
+        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){
+          User.findOne({_id : req.query.userID}).lean().exec(function(err, userData){
+            for(i in cafes) cafes[i].createdBy = userData;
+            callbackInner(err, cafes);
+          })                              
         })                
       },
       answers : function(callbackInner)
