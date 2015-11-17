@@ -116,16 +116,24 @@ var Cafe = function()
 
   this.search = function(req, res){    
     var qString = req.query.q;
-    var qRegExp = new RegExp('\\b'+qString, "i");    
-    Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
-      if(err) return res.status(500).json(err);
-      var topics = [];      
-      for(i in doc) {
-        topics = topics.concat(doc[i].topics);
-      }
-      var topics = underscore.uniq(topics);
-      return res.status(200).json({topics:topics, count:topics.length});
-    });
+    var qRegExp = new RegExp('\\b'+qString, "i");
+    if(req.query.filter == 'tags') {    
+      Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+        if(err) return res.status(500).json(err);
+        var topics = [];      
+        for(i in doc) {
+          topics = topics.concat(doc[i].topics);
+        }
+        var topics = underscore.uniq(topics);
+        return res.status(200).json({topics:topics, count:topics.length});
+      });
+    }
+    else if(req.query.filter == 'user'){
+      User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+        if(err) return res.status(500).json(err);
+        return res.send({users:usersList, count:usersList.length});
+      });
+    }
   };
   
   this.getCafe = function(req, res){
@@ -183,6 +191,7 @@ var Cafe = function()
           switch(query.sortBy)
           {
             case 'views': query.sortBy = { 'views' : -1 }; break;
+            case 'createdAt': query.sortBy = { 'createdAt' : -1 }; break;
           }
           query.sortBy._id = 1;
           Cafe.aggregate(
@@ -240,9 +249,9 @@ var Cafe = function()
     };
 
   this.show = function(req, res){
-    Cafe.findOne({urlSlug: req.params.urlSlug}).lean().exec(
+    Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(
       function(err, result)
-      {
+      {        
         if(!result) res.status(404).json({error : 'No Such Cafe Found'});
         User.findOne({_id : result.userId}).lean().exec(function(err, userInfo){
           result['user'] = userInfo;
@@ -254,7 +263,7 @@ var Cafe = function()
     var visitor = {
       userAgent: req.headers['user-agent'],
       clientIPAddress: req.headers['x-forwarded-for'] || req.ip,
-      urlSlug: req.params.urlSlug,
+      _id: req.params.Id.toString(),
       type: 'cafe'
     };
     CommonLib.uniqueVisits(visitor);

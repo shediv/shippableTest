@@ -14,6 +14,6 @@ router.post("/createPost", Cafe.createPost);
 router.get("/search", Cafe.search);
 router.get("/allTopics", Cafe.allTopics);
 router.get("/trending", Cafe.trending);
-router.get("/:urlSlug", Cafe.show);
+router.get("/:Id", Cafe.show);
 
 module.exports = router;

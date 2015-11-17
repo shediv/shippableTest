@@ -51,7 +51,24 @@ var Common = function()
 		if(visitor.type == 'media') model = Media;
 		if(visitor.type == '12thcross') model =  TwelthCross;
 		if(visitor.type == 'lsquare') model =  Lsquare;
-		if(visitor.type == 'cafe') model =  Cafe;
+		//For cafe 
+		if(visitor.type == 'cafe') {
+			model =  Cafe;
+			UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
+				if(log)
+				{
+					if(model != undefined) model.update({ _id:visitor._id }, { $inc:{ views:1 } }).exec();
+					UniqueVisitor.update(visitor, { $inc:{ views:1 } }, { upsert:true }).exec();
+				}
+				else
+				{
+					if(model != undefined) model.update({ _id:visitor._id }, { $inc:{ views:1, uniqueViews:1 } }).exec();
+					visitor.views = 1;
+					var newVisitor = UniqueVisitor(visitor);
+					newVisitor.save();
+				}
+			});	
+		}
 		UniqueVisitor.findOne(visitor).lean().exec(function(err, log){
 			if(log)
 			{
