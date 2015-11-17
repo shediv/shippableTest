@@ -603,7 +603,7 @@ var Common = function()
             var city = req.query.city;
             if(!params.city[city]) return false;
             result.metaTags.title = 'Cinema Advertising in '+city+' >> Rates for '+city+' Cinema Advertisement';
-            result.metaTags.description = city+' Cinema Advertising is an excellent medium for premium audience targetting. Cinema Advertising in'+city+'has emerged as a promising advertising platform. For this demography theatre is a primary medium of entertainment. You can explore '+city+' Cinema Advertising Rates & '+city+' Cinema Advertising Costs here.';
+            result.metaTags.description = city+' Cinema Advertising is an excellent medium for premium audience targetting. Cinema Advertising in '+city+' has emerged as a promising advertising platform. For this demography theatre is a primary medium of entertainment. You can explore '+city+' Cinema Advertising Rates & '+city+' Cinema Advertising Costs here.';
             keyWords = ['Cinema advertising rates in '+city, 'Cinema ad rates in ' +city, city+' Cinema media kit', city+' Cinema card rates', city+' Cinema advertising details', city+' Cinema pricing details', 'how to advertise in '+city+' Cinemas', city+' Cinema media rates', city+' Cinema advertising manager', city+' cinema contact details', 'Cinema in '+city+' advertising contact', 'Cinema in '+city+' media contact'];
             result.metaTags.keyWords = result.metaTags.keyWords.concat(keyWords);
           }
