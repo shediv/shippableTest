@@ -332,7 +332,14 @@ var Lsquare = function()
           var newAnswer = LsquareAnswer(answer);
           newAnswer.save(function(err){
             if (err) return res.send(500, { error: err });            
-            res.status(200).json(newAnswer._id);
+            //send new answer to front end
+            LsquareAnswer.findOne({_id:newAnswer._id}).lean().exec(function(error, newAnswerData){
+             User.findOne({_id: newAnswerData.answered_by}).lean().exec(function(errUser, newAnswerUser){
+              newAnswerData.answered_by = newAnswerUser;
+              res.status(200).json({answer:newAnswerData});
+             })             
+            }) 
+            //to send mail to user and to make entry in Lsquareactivity table
             Lsquare.findOne({_id: req.body.answer.questionId}).lean().exec(function(err, question){               
               User.findOne({_id : question.createdBy}).lean().exec(function(err,userInfo){
                 //send mail to creator of question...                
@@ -367,7 +374,7 @@ var Lsquare = function()
                     if(err) return console.error(err)
                     self.transporter.sendMail({
                       from: "help@themediaant.com", // sender address
-                      to: mailOptions.to, // list of receivers
+                      //to: mailOptions.to, // list of receivers
                       subject: 'LSquare - New Answer for your Question',
                       html: results.html
                     }, function(err, responseStatus){
@@ -446,7 +453,8 @@ var Lsquare = function()
     });
   }
 
-  self.getAnswersQuestion = function(results, callbackInner){     
+  self.getAnswersQuestion = function(results, callbackInner){
+      console.log(results.length);     
       var answerUsersIDs = [];        
       async.each(results, function(result, callbackEach){            
         Lsquare.findOne({_id : result.questionId, active: 1}).lean().exec(function(err,questions){
