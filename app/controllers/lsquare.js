@@ -400,6 +400,12 @@ var Lsquare = function()
               })                
           })
       },
+      cafe : function(callbackInner)
+      {          
+        Cafe.find({createdBy : req.query.userID}).lean().exec(function(err, cafes){            
+          callbackInner(err, cafes);
+        })                
+      },
       answers : function(callbackInner)
       { 
         var answered_byIDs = [];
@@ -417,14 +423,7 @@ var Lsquare = function()
               });  
             });  
           })
-      },
-      cafe : function(callbackInner)
-      {          
-        Cafe.find({userId : self.UserID}).lean().exec(function(err, cafes){            
-          console.log(cafes.length);
-          callbackInner(err, cafes);
-        })                
-      }
+      }      
     },
     function(err, results) 
     {                                           
