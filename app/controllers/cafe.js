@@ -116,16 +116,24 @@ var Cafe = function()
 
   this.search = function(req, res){    
     var qString = req.query.q;
-    var qRegExp = new RegExp('\\b'+qString, "i");    
-    Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
-      if(err) return res.status(500).json(err);
-      var topics = [];      
-      for(i in doc) {
-        topics = topics.concat(doc[i].topics);
-      }
-      var topics = underscore.uniq(topics);
-      return res.status(200).json({topics:topics, count:topics.length});
-    });
+    var qRegExp = new RegExp('\\b'+qString, "i");
+    if(req.query.filter == 'tags') {    
+      Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+        if(err) return res.status(500).json(err);
+        var topics = [];      
+        for(i in doc) {
+          topics = topics.concat(doc[i].topics);
+        }
+        var topics = underscore.uniq(topics);
+        return res.status(200).json({topics:topics, count:topics.length});
+      });
+    }
+    else if(req.query.filter == 'user'){
+      User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
+        if(err) return res.status(500).json(err);
+        return res.send({users:usersList, count:usersList.length});
+      });
+    }
   };
   
   this.getCafe = function(req, res){
