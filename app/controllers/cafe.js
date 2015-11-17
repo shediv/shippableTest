@@ -293,8 +293,7 @@ var Cafe = function()
           }          
         }
       );
-    }
-      
+    }      
   };
 
 };
