@@ -132,6 +132,7 @@ var toolsProject= {
     'geography'    : 1,
     'urlSlug'      : 1,
     'logo'         : 1,
+    'cardRate'     : 1,
     'contact.primary.areasServiced' : 1
 	},
 
