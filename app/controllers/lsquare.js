@@ -407,7 +407,7 @@ var Lsquare = function()
                     if(err) return console.error(err)
                     self.transporter.sendMail({
                       from: "help@themediaant.com", // sender address
-                      //to: mailOptions.to, // list of receivers
+                      to: mailOptions.to, // list of receivers
                       subject: 'LSquare - New Answer for your Question',
                       html: results.html
                     }, function(err, responseStatus){
