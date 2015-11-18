@@ -129,9 +129,18 @@ var Cafe = function()
       });
     }
     else if(req.query.filter == 'user'){
+      var userIds = [];
+      var cafeIds = [];
       User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
         if(err) return res.status(500).json(err);
-        return res.send({users:usersList, count:usersList.length});
+        for(i in usersList) userIds.push(usersList[i]._id.toString());
+        Cafe.find({userId:{$in : userIds}}).lean().exec(function(errCafe, cafeInfo){
+          if(errCafe) return res.status(500).json(errCafe);
+          for(i in cafeInfo) cafeIds.push(cafeInfo[i].userId);
+          User.find({_id:{$in : cafeIds}}).lean().exec(function(errUser, cafeUsersList){            
+            return res.send({users:cafeUsersList, count:cafeUsersList.length});
+          })  
+        })        
       });
     }
   };
@@ -163,6 +172,7 @@ var Cafe = function()
       query.match = {};
 
       if(self.params.filters.topics.length) query.match['topics'] = { $all:self.params.filters.topics };
+      if(self.params.filters.askedBy.length) query.match['userId'] = { $in:self.params.filters.askedBy };
       //query.match.isActive = 1;
 
       //console.log(query.length);
