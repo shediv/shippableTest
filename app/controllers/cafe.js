@@ -306,6 +306,25 @@ var Cafe = function()
     }      
   };
 
+  this.topContributors = function(req, res){    
+    var userIds = [];
+    Cafe.aggregate(
+        {$match: {isActive : 1}},
+        {$group : { _id : '$userId', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          results = results.sort(function(a,b){ return b.count - a.count; });
+          results = results.slice(0,5);
+          for(i in results) userIds.push(results[i]._id.toString());
+          User.find({_id : {$in : userIds}, isActive : 1}).lean().exec(function(errUser, users){
+            if(errUser) res.status(500).json(errUser);
+            return res.status(200).json({users:users, count : users.length});
+          }) 
+          
+        }
+      );
+  };
+
 };
 
 module.exports.Cafe = Cafe;
