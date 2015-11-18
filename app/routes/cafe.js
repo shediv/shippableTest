@@ -13,6 +13,7 @@ router.post("/update", Cafe.update);
 router.post("/createPost", Cafe.createPost);
 router.get("/search", Cafe.search);
 router.get("/allTopics", Cafe.allTopics);
+router.get("/topContributors", Cafe.topContributors);
 router.get("/trending", Cafe.trending);
 router.get("/:Id", Cafe.show);
 

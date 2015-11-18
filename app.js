@@ -49,7 +49,8 @@ app.use(cors({
         'http://m20.in',
         'http://tma.dev:3000',
         'http://www.tma.dev:3000',
-        'http://127.0.0.1:3000'
+        'http://127.0.0.1:3000',
+        'http://192.168.1.111:3000'
     ],
 	headers: [
 		'x-access-token', 'Content-Type'
@@ -60,7 +61,7 @@ mongoose.connect(envConfig.mongoUrl, function(err){
   if(err) mongooseLog('Mongoose error: ' + err);
 });
 
-//MONGODB CONNECTION EVENTS
+//MONGODB CONNECTION EVENTS.
 mongoose.connection
     .on('connected', function () {
         mongooseLog('Connection open to ' + envConfig.mongoUrl);

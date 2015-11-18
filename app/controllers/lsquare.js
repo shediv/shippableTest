@@ -315,6 +315,38 @@ var Lsquare = function()
         });            
   };
 
+  this.updateQuestion = function(req, res){
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) res.status(401).json("Invalid Token");
+        else {                              
+            Lsquare.findOneAndUpdate({ _id:req.body._id }, { description : req.body.description, tags : req.body.tags, editedAt : Date() }, { upsert:true }).exec(function(updateErr, updatedQuestion){
+              if(err) return res.status(500).json(updateErr);
+              Lsquare.findOne({_id:req.body._id}).lean().exec(function(err, questionData){
+                if(err) return res.status(500).json(err);
+                User.findOne({_id:questionData.createdBy}).lean().exec(function(err, userData){
+                  questionData.createdBy = userData;
+                  return res.status(200).json(questionData);
+                })  
+              })              
+            }); 
+            var activitiesData = {};
+            activitiesData.activity =  'Update Question';
+            activitiesData.appHost = self.config.appHost;
+            activitiesData.userId = decoded._id;
+            activitiesData.questionId = req.body._id;
+            activitiesData.date = Date();
+            var newActivity = LsquareActivities(activitiesData);
+
+            newActivity.save(function(err){
+              if(err) return res.status(500).json(err);
+              console.log("Question Updated");                
+            });                       
+          }          
+          });            
+  };
+
   this.addAnswer = function(req, res){
     var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
@@ -324,6 +356,7 @@ var Lsquare = function()
           var answer = {};
           answer = req.body.answer;
           answer.createdAt = Date();
+          answer.editedAt = Date();
           answer.answered_by = decoded._id;
           answer.questionId = req.body.answer.questionId;
           answer.score = 0;
@@ -332,7 +365,14 @@ var Lsquare = function()
           var newAnswer = LsquareAnswer(answer);
           newAnswer.save(function(err){
             if (err) return res.send(500, { error: err });            
-            res.status(200).json(newAnswer._id);
+            //send new answer to front end
+            LsquareAnswer.findOne({_id:newAnswer._id}).lean().exec(function(error, newAnswerData){
+             User.findOne({_id: newAnswerData.answered_by}).lean().exec(function(errUser, newAnswerUser){
+              newAnswerData.answered_by = newAnswerUser;
+              res.status(200).json({answer:newAnswerData});
+             })             
+            }) 
+            //to send mail to user and to make entry in Lsquareactivity table
             Lsquare.findOne({_id: req.body.answer.questionId}).lean().exec(function(err, question){               
               User.findOne({_id : question.createdBy}).lean().exec(function(err,userInfo){
                 //send mail to creator of question...                
@@ -383,6 +423,38 @@ var Lsquare = function()
       });
   };
 
+  this.updateAnswer = function(req, res){
+    var token = req.body.token || req.query.token || req.headers['x-access-token'];
+      if(!token) return res.status(401).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) res.status(401).json("Invalid Token");
+        else {                              
+            LsquareAnswer.findOneAndUpdate({ _id:req.body.answer.answerId }, { answer : req.body.answer.answer, editedAt : Date() }, { upsert:true }).exec(function(updateErr, updatedAnswer){
+              if(err) return res.status(500).json(updateErr);
+              LsquareAnswer.findOne({_id:req.body.answer.answerId}).lean().exec(function(err, answerData){
+                if(err) return res.status(500).json(err);
+                User.findOne({_id:answerData.answered_by}).lean().exec(function(err, userData){
+                  answerData.answered_by = userData;
+                  return res.status(200).json(answerData);
+                })  
+              })              
+            }); 
+            var activitiesData = {};
+            activitiesData.activity =  'Update Answer';
+            activitiesData.appHost = self.config.appHost;
+            activitiesData.userId = decoded._id;
+            activitiesData.questionId = req.body.answer.answerId;
+            activitiesData.date = Date();
+            var newActivity = LsquareActivities(activitiesData);
+
+            newActivity.save(function(err){
+              if(err) return res.status(500).json(err);
+              console.log("Answer Updated");                
+            });                       
+          }          
+          });            
+  };
+
   this.userActivities = function(req, res){
     self.token = req.body.token || req.query.token || req.headers['x-access-token'];
     jwt.verify(self.token, self.config.secret, function(err, decoded){
@@ -402,8 +474,11 @@ var Lsquare = function()
       },
       cafe : function(callbackInner)
       {          
-        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){                      
-          callbackInner(err, cafes);
+        Cafe.find({userId : req.query.userID}).lean().exec(function(err, cafes){
+          User.findOne({_id : req.query.userID}).lean().exec(function(err, userData){
+            for(i in cafes) cafes[i].createdBy = userData;
+            callbackInner(err, cafes);
+          })                              
         })                
       },
       answers : function(callbackInner)
@@ -446,7 +521,8 @@ var Lsquare = function()
     });
   }
 
-  self.getAnswersQuestion = function(results, callbackInner){     
+  self.getAnswersQuestion = function(results, callbackInner){
+      console.log(results.length);     
       var answerUsersIDs = [];        
       async.each(results, function(result, callbackEach){            
         Lsquare.findOne({_id : result.questionId, active: 1}).lean().exec(function(err,questions){

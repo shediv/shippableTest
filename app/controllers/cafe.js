@@ -46,7 +46,7 @@ var Cafe = function()
   };
 
   this.createPost = function(req, res){
-    Cafe.findOne({ title:req.body.cafe.title }).lean().exec(function(err, cafe){
+    Cafe.findOne({ title:req.body.cafe.title, isActive : 1 }).lean().exec(function(err, cafe){
       if(cafe) return res.status(500).json("Cafe Post already exists");
 
       var newUrl = req.body.cafe.title;
@@ -83,14 +83,14 @@ var Cafe = function()
   this.update = function(req, res){
     var cafeID = req.body.vendor._id;
     var cafeData = req.body.vendor;
-    Cafe.findOneAndUpdate({_id : cafeID}, cafeData, {upsert:true}, function(err, doc){
+    Cafe.findOneAndUpdate({_id : cafeID, isActive : 1}, cafeData, {upsert:true}, function(err, doc){
       if(err) return res.status(500).json(err);
       return res.status(200).json("Cafe info succesfully updated");
     });
   };
 
   this.trending = function(req, res){    
-    Cafe.find({}).lean().exec(function(err, doc){
+    Cafe.find({isActive : 1}).lean().exec(function(err, doc){
       if(err) return res.status(500).json(err);
       var topics = [];      
       for(i in doc) {
@@ -103,7 +103,7 @@ var Cafe = function()
   };
 
   this.allTopics = function(req, res){    
-    Cafe.find({}).lean().exec(function(err, doc){
+    Cafe.find({isActive : 1}).lean().exec(function(err, doc){
       if(err) return res.status(500).json(err);
       var topics = [];      
       for(i in doc) {
@@ -118,7 +118,7 @@ var Cafe = function()
     var qString = req.query.q;
     var qRegExp = new RegExp('\\b'+qString, "i");
     if(req.query.filter == 'tags') {    
-      Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
+      Cafe.find({topics : { $elemMatch: { $regex: qRegExp } }, isActive : 1}, { topics : { $elemMatch: { $regex: qRegExp } } }).lean().exec(function(err, doc){
         if(err) return res.status(500).json(err);
         var topics = [];      
         for(i in doc) {
@@ -129,9 +129,18 @@ var Cafe = function()
       });
     }
     else if(req.query.filter == 'user'){
+      var userIds = [];
+      var cafeIds = [];
       User.find({firstName : { $regex: qRegExp } }).lean().exec(function(err, usersList){
         if(err) return res.status(500).json(err);
-        return res.send({users:usersList, count:usersList.length});
+        for(i in usersList) userIds.push(usersList[i]._id.toString());
+        Cafe.find({userId:{$in : userIds}, isActive : 1}).lean().exec(function(errCafe, cafeInfo){
+          if(errCafe) return res.status(500).json(errCafe);
+          for(i in cafeInfo) cafeIds.push(cafeInfo[i].userId);
+          User.find({_id:{$in : cafeIds}}).lean().exec(function(errUser, cafeUsersList){            
+            return res.send({users:cafeUsersList, count:cafeUsersList.length});
+          })  
+        })        
       });
     }
   };
@@ -163,7 +172,8 @@ var Cafe = function()
       query.match = {};
 
       if(self.params.filters.topics.length) query.match['topics'] = { $all:self.params.filters.topics };
-      //query.match.isActive = 1;
+      if(self.params.filters.askedBy.length) query.match['userId'] = { $in:self.params.filters.askedBy };
+      query.match.isActive = 1;
 
       //console.log(query.length);
       
@@ -251,7 +261,7 @@ var Cafe = function()
   this.show = function(req, res){
     var type = req.query.type;
     if(type == 'post'){
-      Cafe.findOne({urlSlug: req.params.Id}).lean().exec(
+      Cafe.findOne({urlSlug: req.params.Id, isActive : 1}).lean().exec(
         function(err, result)
         {        
           self.test = result;
@@ -273,7 +283,7 @@ var Cafe = function()
         }
       );
     }else{
-      Cafe.findOne({_id: req.params.Id.toString()}).lean().exec(      
+      Cafe.findOne({_id: req.params.Id.toString(), isActive : 1}).lean().exec(      
         function(err, result)
         {        
           if(!result) res.status(404).json({error : 'No Such Cafe Found'});
@@ -294,6 +304,25 @@ var Cafe = function()
         }
       );
     }      
+  };
+
+  this.topContributors = function(req, res){    
+    var userIds = [];
+    Cafe.aggregate(
+        {$match: {isActive : 1}},
+        {$group : { _id : '$userId', count : {$sum : 1}}},
+        function(error, results) 
+        {
+          results = results.sort(function(a,b){ return b.count - a.count; });
+          results = results.slice(0,5);
+          for(i in results) userIds.push(results[i]._id.toString());
+          User.find({_id : {$in : userIds}, isActive : 1}).lean().exec(function(errUser, users){
+            if(errUser) res.status(500).json(errUser);
+            return res.status(200).json({users:users, count : users.length});
+          }) 
+          
+        }
+      );
   };
 
 };

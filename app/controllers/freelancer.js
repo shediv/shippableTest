@@ -33,6 +33,7 @@ var Freelancer = function()
 
   this.store = function(req, res){
     var freelancer = req.body.freelancer;
+    freelancer.createdAt = new Date();
     var newLancer = Freelancer(freelancer);
     
     // save the Media
@@ -42,7 +43,7 @@ var Freelancer = function()
     
       var mailOptions = {
           email: freelancer.email,
-          to : "mukesh@themediaant.com",
+          to : "samir@themediaant.com",
           name: {
             first: CommonLib.capitalizeFirstLetter(freelancer.firstName),
             last: CommonLib.capitalizeFirstLetter(freelancer.lastName)
