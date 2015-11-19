@@ -60,7 +60,7 @@ mongoose.connect(envConfig.mongoUrl, function(err){
   if(err) mongooseLog('Mongoose error: ' + err);
 });
 
-//MONGODB CONNECTION EVENTS
+//MONGODB CONNECTION EVENTS.
 mongoose.connection
     .on('connected', function () {
         mongooseLog('Connection open to ' + envConfig.mongoUrl);

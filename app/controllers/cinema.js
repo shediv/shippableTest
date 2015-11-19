@@ -126,21 +126,22 @@ var Cinema = function()
       var group = {
         "$group" : { _id : '$geography', geoBasedMedias:{$push : '$$ROOT'}, count : {$sum : 1}}
       };
-      var project = ToolsProject[self.toolName];
 
       if(self.params.filters.mediaType == 'onScreen')
-        self.fetchOnScreenData(geographies, match, group, project, callbackMain);
+        self.fetchOnScreenData(geographies, match, group, callbackMain);
       else
-        self.fetchOffScreenData(geographies, match, group, project, callbackMain);
+        self.fetchOffScreenData(geographies, match, group, callbackMain);
     };
 
-    self.fetchOnScreenData = function(geographies, match, group, project, callbackMain){
+    self.fetchOnScreenData = function(geographies, match, group, callbackMain){
+      project = ToolsProject[self.toolName];
+      delete project['mediaOptions'];
+      delete project['dimensions'];
       project['resultMallName'] = 1;
       project['cinemaName'] = 1;
       project['theatreName'] = 1;
       project['screenNumber'] = 1;
       project['creativeFormat'] = 1;
-      project['urlSlug'] = 1;
       project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday] = 1;
       project['mediaOptions.30SecVideo.'+self.params.nextFriday] = 1;
@@ -234,7 +235,17 @@ var Cinema = function()
       return data;
     }
 
-    self.fetchOffScreenData = function(geographies, match, group, project, callbackMain){
+    self.fetchOffScreenData = function(geographies, match, group, callbackMain){
+      var project = ToolsProject[self.toolName];
+      delete project['resultMallName'];
+      delete project['cinemaName'];
+      delete project['theatreName'];
+      delete project['screenNumber'];
+      delete project['creativeFormat'];
+      delete project['mediaOptions.10SecMuteSlide.'+self.params.nextFriday];
+      delete project['mediaOptions.10SecAudioSlide.'+self.params.nextFriday];
+      delete project['mediaOptions.30SecVideo.'+self.params.nextFriday];
+      delete project['mediaOptions.60SecVideo.'+self.params.nextFriday];
       project['mediaOptions'] = 1;
       project['dimensions'] = 1;
       Media.aggregate(match, {$project:project}, function(err, medias){

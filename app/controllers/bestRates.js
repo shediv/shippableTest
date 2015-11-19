@@ -147,9 +147,12 @@ var BestRates = function()
     },function(err){
       if(err) return res.status(500).json(err);
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
-      res.status(200).json({email:self.emailContent,excel:self.excelContent});
-      excelContent = self.createExcel(self.excelContent, token);
-
+      if(!token) return res.status(404).json("Token not found");
+      jwt.verify(token, self.config.secret, function(err, decoded){
+        if(err) return res.status(403).json("Invalid Token");
+        res.status(200).json({email:self.emailContent,excel:self.excelContent});
+        excelContent = self.createExcel(self.excelContent, token);
+      });
     });
   };
 
@@ -472,7 +475,7 @@ var BestRates = function()
     {
       if(!token) console.log("No Token"); //res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, decoded){
-        if(err) console.log("Invalid Token");
+        if(err) return console.log("Invalid Token");
         var user = decoded;
         var mailOptions = {
           email: user.email,
