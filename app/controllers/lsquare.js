@@ -112,6 +112,9 @@ var Lsquare = function()
       },
       function(err, results) 
       {                                           
+        for(i in results.questions){
+          if(results.questions[i].createdBy._id == self.UserID) results.questions[i].selfUser = true; 
+        }
         callback(err, results);
       });
     };
@@ -124,14 +127,17 @@ var Lsquare = function()
           result.createdBy = userInfo;
           LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err, answers){
           for(i in answers) {
-            answerUsersIDs.push(answers[i].answered_by);
+            answerUsersIDs.push(answers[i].answeredBy);
             answerIDs.push(answers[i]._id.toString());
             }
            CommonLib.getUserInfo(answerUsersIDs, function(err, userInfo){
-            for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
+            for(i in answers) { answers[i].answeredBy = userInfo[answers[i].answeredBy];}
             CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
               for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
               result.answers = answers;
+              for(i in result.answers){
+                if(result.answers[i].answeredBy._id == self.UserID) result.answers[i].selfUser = true; 
+              }
               result.answers.sort(function(a,b){ return a.created_at < b.created_at });
               result.answersCount = answers.length;
               callbackEach(null);
@@ -358,7 +364,7 @@ var Lsquare = function()
           answer = req.body.answer;
           answer.createdAt = Date();
           answer.editedAt = Date();
-          answer.answered_by = decoded._id;
+          answer.answeredBy = decoded._id;
           answer.questionId = req.body.answer.questionId;
           answer.score = 0;
           answer.active = 1;
@@ -368,8 +374,8 @@ var Lsquare = function()
             if (err) return res.send(500, { error: err });            
             //send new answer to front end
             LsquareAnswer.findOne({_id:newAnswer._id}).lean().exec(function(error, newAnswerData){
-             User.findOne({_id: newAnswerData.answered_by}).lean().exec(function(errUser, newAnswerUser){
-              newAnswerData.answered_by = newAnswerUser;
+             User.findOne({_id: newAnswerData.answeredBy}).lean().exec(function(errUser, newAnswerUser){
+              newAnswerData.answeredBy = newAnswerUser;
               res.status(200).json({answer:newAnswerData});
              })             
             }) 
@@ -434,8 +440,8 @@ var Lsquare = function()
               if(err) return res.status(500).json(updateErr);
               LsquareAnswer.findOne({_id:req.body.answer.answerId}).lean().exec(function(err, answerData){
                 if(err) return res.status(500).json(err);
-                User.findOne({_id:answerData.answered_by}).lean().exec(function(err, userData){
-                  answerData.answered_by = userData;
+                User.findOne({_id:answerData.answeredBy}).lean().exec(function(err, userData){
+                  answerData.answeredBy = userData;
                   return res.status(200).json(answerData);
                 })  
               })              
@@ -484,15 +490,15 @@ var Lsquare = function()
       },
       answers : function(callbackInner)
       { 
-        var answered_byIDs = [];
+        var answeredByIDs = [];
         var answerIDs = [];
-        LsquareAnswer.find({answered_by : req.query.userID, active: 1}).lean().exec(function(err, results){
+        LsquareAnswer.find({answeredBy : req.query.userID, active: 1}).lean().exec(function(err, results){
             for(i in results){
-             answered_byIDs.push(results[i].answered_by);
+             answeredByIDs.push(results[i].answeredBy);
              answerIDs.push(results[i]._id.toString());
             }
-            CommonLib.getUserInfo(answered_byIDs, function(err, userInfo){
-              for(i in results) results[i].answered_by = userInfo[0];
+            CommonLib.getUserInfo(answeredByIDs, function(err, userInfo){
+              for(i in results) results[i].answeredBy = userInfo[0];
               CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
                 for(i in results) { results[i].loggedinUserScore = loginUserVoteInfo[results[i]._id];}
                 self.getAnswersQuestion(results, callbackInner);
@@ -515,7 +521,7 @@ var Lsquare = function()
       for(i in results.answers){            
         results.answers[i].type = 'answer';
         for(i in results.answers){
-          if(results.answers[i].answered_by._id == self.UserID) results.answers[i].selfUser = true;
+          if(results.answers[i].answeredBy._id == self.UserID) results.answers[i].selfUser = true;
         }
         activities.push(results.answers[i]);
       }
@@ -575,7 +581,7 @@ var Lsquare = function()
               newAnswerScore.save();
 
                 LsquareAnswer.findOne({_id: req.body.answerId}).lean().exec(function(err4, answerData){
-                  User.findOne({_id: answerData.answered_by}).lean().exec(function(err5, user){
+                  User.findOne({_id: answerData.answeredBy}).lean().exec(function(err5, user){
                   Lsquare.findOne({_id: answerData.questionId}).lean().exec(function(err6, question){  
                     var mailOptions = {};
                     mailOptions.social = false;
@@ -648,17 +654,17 @@ var Lsquare = function()
         result.createdBy = userInfo;
         LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err3, answers){          
          for(i in answers) {
-          answerUsersIDs.push(answers[i].answered_by);
+          answerUsersIDs.push(answers[i].answeredBy);
           answerIDs.push(answers[i]._id.toString());
          }
          
          CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){          
-          for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
+          for(i in answers) { answers[i].answeredBy = userInfo[answers[i].answeredBy];}
           CommonLib.checkLoginUserVote(answerIDs, loggedinUserID, function(err4, loginUserVoteInfo){
             for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
             result.answers = answers;
             for(i in result.answers){
-              if(result.answers[i].answered_by._id == loggedinUserID) result.answers[i].selfUser = true; 
+              if(result.answers[i].answeredBy._id == loggedinUserID) result.answers[i].selfUser = true; 
             }
 
             result.answers.sort(function(a,b){ return a.created_at < b.created_at });
