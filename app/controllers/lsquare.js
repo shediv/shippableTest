@@ -132,6 +132,7 @@ var Lsquare = function()
             CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
               for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
               result.answers = answers;
+              result.answers.sort(function(a,b){ return a.created_at < b.created_at });
               result.answersCount = answers.length;
               callbackEach(null);
             });   
@@ -654,13 +655,14 @@ var Lsquare = function()
          CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){          
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           CommonLib.checkLoginUserVote(answerIDs, loggedinUserID, function(err4, loginUserVoteInfo){
-            console.log(loginUserVoteInfo);
             for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
             result.answers = answers;
             for(i in result.answers){
               if(result.answers[i].answered_by._id == loggedinUserID) result.answers[i].selfUser = true; 
             }
-            //to get related question...
+
+            result.answers.sort(function(a,b){ return a.created_at < b.created_at });
+            // to get related question...
             Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().limit(5).exec(function(err6, Rquestions){
               res.status(200).json({lsquare : result, answersCount : result.answers.length, relatedQuestion : Rquestions});
             })           
