@@ -378,7 +378,7 @@ var Lsquare = function()
               })               
             });
           });          
-          }          
+        }          
       });
   };
 
