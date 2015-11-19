@@ -505,16 +505,25 @@ var Lsquare = function()
       var activities = [];
       for(i in results.questions){
         results.questions[i].type = 'question';
+        for(i in results.questions){
+          if(results.questions[i].createdBy._id == self.UserID) results.questions[i].selfUser = true;
+        }
         activities.push(results.questions[i]);            
       }
 
       for(i in results.answers){            
         results.answers[i].type = 'answer';
+        for(i in results.answers){
+          if(results.answers[i].answered_by._id == self.UserID) results.answers[i].selfUser = true;
+        }
         activities.push(results.answers[i]);
       }
 
       for(i in results.cafe){            
         results.cafe[i].type = 'cafe';
+        for(i in results.cafe){
+          if(results.cafe[i].createdBy._id == self.UserID) results.cafe[i].selfUser = true;
+        }
         activities.push(results.cafe[i]);
       }   
       res.status(200).json(activities);
@@ -547,7 +556,7 @@ var Lsquare = function()
       jwt.verify(token, self.config.secret, function(err, decoded){
         if(err) res.status(401).json("Invalid Token");
         else {
-          LsquareAnswerScore.findOne({userID : decoded._id, answerId : req.body.answerId}).lean().exec(function(err2, scoreUser){
+          LsquareAnswerScore.findOne({userId : decoded._id, answerId : req.body.answerId}).lean().exec(function(err2, scoreUser){
             if(scoreUser) res.status(500).json("User has already Upvoted this answer");
             else 
             {                    
@@ -558,7 +567,7 @@ var Lsquare = function()
 
               //Add answer score details in LsquareAnswerScore
               var answerScore = {}; 
-              answerScore.userID = decoded._id;
+              answerScore.userId = decoded._id;
               answerScore.answerId = req.body.answerId;
               answerScore.createdAt = Date();
               var newAnswerScore = LsquareAnswerScore(answerScore);
@@ -627,8 +636,14 @@ var Lsquare = function()
 
     Lsquare.findOne({urlSlug: req.params.urlSlug}).lean().exec(function(err1, result){
       if(err1) return res.status(500).json(err1);
+      //check if question is by logged in user
+      if(result.createdBy == loggedinUserID) result.selfUser = true;
       if(!result) return res.status(404).json({error : 'No Such Media Found'});
       User.findOne({_id : result.createdBy}).lean().exec(function(err2,userInfo){
+        delete userInfo.password;
+        delete userInfo.dateofBirth;
+        delete userInfo.dateofJoin;
+        delete userInfo.oldId;
         result.createdBy = userInfo;
         LsquareAnswer.find({questionId : result._id.toString()}).lean().exec(function(err3, answers){          
          for(i in answers) {
@@ -636,11 +651,15 @@ var Lsquare = function()
           answerIDs.push(answers[i]._id.toString());
          }
          
-         CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){
+         CommonLib.getUserInfo(answerUsersIDs, function(err4, userInfo){          
           for(i in answers) { answers[i].answered_by = userInfo[answers[i].answered_by];}
           CommonLib.checkLoginUserVote(answerIDs, loggedinUserID, function(err4, loginUserVoteInfo){
+            console.log(loginUserVoteInfo);
             for(i in answers) { answers[i].loggedinUserScore = loginUserVoteInfo[answers[i]._id];}
             result.answers = answers;
+            for(i in result.answers){
+              if(result.answers[i].answered_by._id == loggedinUserID) result.answers[i].selfUser = true; 
+            }
             //to get related question...
             Lsquare.find({tags:{$in:result.tags }}).sort({ views: 1}).lean().limit(5).exec(function(err6, Rquestions){
               res.status(200).json({lsquare : result, answersCount : result.answers.length, relatedQuestion : Rquestions});
