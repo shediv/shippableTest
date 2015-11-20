@@ -6,6 +6,11 @@ var Cafe = function()
   var Cafe = require('../models/cafe').Cafe;
   var underscore = require('underscore');
   var jwt = require('jsonwebtoken');
+  var nodeMailer = require('nodemailer');
+  var path = require('path');
+  var EmailTemplate = require('email-templates').EmailTemplate;
+  var templatesDir = path.resolve(__dirname, '../..', 'public/templates/emailTemplates');
+
   
   this.params = {};
   var self = this;
@@ -13,6 +18,13 @@ var Cafe = function()
   this.params = {};
   this.config = require('../config/config.js');
   var self = this;
+
+  this.transporter = nodeMailer.createTransport({
+    service: self.config.smtpService,
+    host: self.config.smtpHost,
+    port: self.config.smtpPort,
+    auth: self.config.smtpAuth
+  });
 
   this.store = function(req, res){
     Cafe.findOne({ url:req.body.cafe.url }).lean().exec(function(err, cafe){
@@ -34,12 +46,46 @@ var Cafe = function()
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
       jwt.verify(token, self.config.secret, function(err, user){
+
           req.body.cafe.userId = user._id;
           var newCafe = Cafe(req.body.cafe);           
           // save the Media
           newCafe.save(function(err) {
             if(err) return res.status(500).json(err);
             res.status(200).json("Cafe Created Successfully");
+            //email sending
+            User.findOne({_id : req.body.cafe.userId }).lean().exec(function(error, cafeUser){
+              
+              var mailOptions = {
+                email: "sandhya@themediaant.com",
+                appHost:self.config.appHost,
+                url: req.body.cafe.url,
+                name: {
+                  first: CommonLib.capitalizeFirstLetter(cafeUser.firstName),
+                  last: CommonLib.capitalizeFirstLetter(cafeUser.lastName),
+                },
+                email:cafeUser.email
+              };  
+
+               var emailTemplate = new EmailTemplate(path.join(templatesDir, 'cafeLink'));
+                
+               emailTemplate.render(mailOptions, function(err, results){
+                  if(err){ 
+                    return console.error(err);
+                  }else
+                  {
+                    self.transporter.sendMail({
+                      from: self.config.noreply, // sender address
+                      to: mailOptions.email, // list of receivers
+                      subject: 'New link submited!',
+                      html: results.html
+                    }, function(err, responseStatus){
+                        if(err) return console.log(err);
+                        console.log("responseStatus.message");
+                      });
+                  }
+                });
+            });
           });  
       });    
     });
@@ -75,6 +121,39 @@ var Cafe = function()
           newCafe.save(function(err) {
             if(err) return res.status(500).json(err);
             res.status(200).json("Cafe Post Created Successfully");
+
+            User.findOne({_id : req.body.cafe.userId }).lean().exec(function(error, cafeUser){
+              
+              var mailOptions = {
+                email: "sandhya@themediaant.com",
+                appHost:self.config.appHost,
+                title: req.body.cafe.title,
+                name: {
+                  first: CommonLib.capitalizeFirstLetter(cafeUser.firstName),
+                  last: CommonLib.capitalizeFirstLetter(cafeUser.lastName),
+                },
+                email:cafeUser.email
+              };  
+
+              var emailTemplate = new EmailTemplate(path.join(templatesDir, 'cafePost'));
+                
+              emailTemplate.render(mailOptions, function(err, results){
+                if(err){ 
+                  return console.error(err);
+                }else
+                {
+                  self.transporter.sendMail({
+                    from: self.config.noreply, // sender address
+                    to: mailOptions.email, // list of receivers
+                    subject: 'New link posted!',
+                    html: results.html
+                  }, function(err, responseStatus){
+                      if(err) return console.log(err);
+                      console.log("responseStatus.message");
+                    });
+                }
+              });
+            });  
           });  
       });    
     });
