@@ -547,7 +547,6 @@ var Lsquare = function()
         });            
       }, 
       function(err){
-        //console.log(results);
         var questionCreatedByIDs = [];
         for(i in results) questionCreatedByIDs.push(results[i].question.createdBy);
           CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
