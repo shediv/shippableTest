@@ -27,13 +27,19 @@ var Common = function()
 
 	this.getUserInfo = function(questionUserIds, callback) {
 		User.find({_id : {$in: questionUserIds}}).lean().exec(function(err, userInfo){
+			for(i in userInfo) {
+				delete userInfo[i].password;
+		        delete userInfo[i].dateofBirth;
+		        delete userInfo[i].dateofJoin;
+		        delete userInfo[i].oldId;
+			}
 			for(i in userInfo) userInfo[userInfo[i]._id] = userInfo[i];							
 			callback(err, userInfo);
 		});
 	};
 
 	this.checkLoginUserVote = function(answerIDs, userID, callback) {
-		LsquareAnswerScore.find({userID:userID, answerId: {$in: answerIDs} }).lean().exec(function(err, loginUserVoteInfo){																
+		LsquareAnswerScore.find({userId:userID, answerId: {$in: answerIDs} }).lean().exec(function(err, loginUserVoteInfo){																
 			for(i in loginUserVoteInfo) loginUserVoteInfo[loginUserVoteInfo[i].answerId] = true;			
 			callback(err, loginUserVoteInfo);
 		});

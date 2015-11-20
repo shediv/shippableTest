@@ -103,6 +103,7 @@ var Cafe = function()
       newUrl = newUrl.replace(/[^a-z0-9-]/g, "");
       // Combine multiple dashes (i.e., '---') into one dash '-'.
       req.body.cafe.title = req.body.cafe.title;
+      req.body.cafe.isActive = 1; 
       req.body.cafe.urlSlug = newUrl.replace(/[-]+/g, "-");
       req.body.cafe.description = req.body.cafe.description;
       req.body.cafe.topics = req.body.cafe.topics;
