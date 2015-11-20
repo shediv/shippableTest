@@ -514,25 +514,19 @@ var Lsquare = function()
       var activities = [];
       for(i in results.questions){
         results.questions[i].type = 'question';
-        for(i in results.questions){
-          if(results.questions[i].createdBy._id == self.UserID) results.questions[i].selfUser = true;
-        }
+        if(results.questions[i].createdBy._id == self.UserID) results.questions[i].selfUser = true;
         activities.push(results.questions[i]);            
       }
 
       for(i in results.answers){            
         results.answers[i].type = 'answer';
-        for(i in results.answers){
-          if(results.answers[i].answeredBy._id == self.UserID) results.answers[i].selfUser = true;
-        }
+        if(results.answers[i].answeredBy._id == self.UserID) results.answers[i].selfUser = true;
         activities.push(results.answers[i]);
       }
 
       for(i in results.cafe){            
         results.cafe[i].type = 'cafe';
-        for(i in results.cafe){
-          if(results.cafe[i].createdBy._id == self.UserID) results.cafe[i].selfUser = true;
-        }
+        if(results.cafe[i].createdBy._id == self.UserID) results.cafe[i].selfUser = true;
         activities.push(results.cafe[i]);
       }   
       res.status(200).json(activities);
@@ -729,7 +723,7 @@ var Lsquare = function()
     console.log(queryTerms);
     Lsquare.aggregate(
       //{ $match : { question : query } },
-      { $match : { $text : { $search : queryTerms } } },
+      { $match : { $text : { $search : queryTerms } }},
       { $sort: { score :  { $meta: "textScore" } } }, 
       { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
       { $limit : 5 }, { $skip : 0 },
