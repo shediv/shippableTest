@@ -65,7 +65,7 @@ var Cafe = function()
                   first: CommonLib.capitalizeFirstLetter(cafeUser.firstName),
                   last: CommonLib.capitalizeFirstLetter(cafeUser.lastName),
                 },
-                email:cafeUser.email
+                cafeEmail:cafeUser.email
               };  
 
                var emailTemplate = new EmailTemplate(path.join(templatesDir, 'cafeLink'));
@@ -78,7 +78,7 @@ var Cafe = function()
                     self.transporter.sendMail({
                       from: self.config.noreply, // sender address
                       to: mailOptions.email, // list of receivers
-                      subject: 'New link submited!',
+                      subject: 'New link submitted!',
                       html: results.html
                     }, function(err, responseStatus){
                         if(err) return console.log(err);
@@ -135,7 +135,7 @@ var Cafe = function()
                   first: CommonLib.capitalizeFirstLetter(cafeUser.firstName),
                   last: CommonLib.capitalizeFirstLetter(cafeUser.lastName),
                 },
-                email:cafeUser.email
+                cafeEmail:cafeUser.email
               };  
 
               var emailTemplate = new EmailTemplate(path.join(templatesDir, 'cafePost'));
@@ -148,7 +148,7 @@ var Cafe = function()
                   self.transporter.sendMail({
                     from: self.config.noreply, // sender address
                     to: mailOptions.email, // list of receivers
-                    subject: 'New link posted!',
+                    subject: 'New post created!',
                     html: results.html
                   }, function(err, responseStatus){
                       if(err) return console.log(err);
