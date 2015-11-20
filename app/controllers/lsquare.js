@@ -497,8 +497,9 @@ var Lsquare = function()
              answeredByIDs.push(results[i].answeredBy);
              answerIDs.push(results[i]._id.toString());
             }
+
             CommonLib.getUserInfo(answeredByIDs, function(err, userInfo){
-              for(i in results) results[i].answeredBy = userInfo[0];
+              for(i in results) results[i].answeredBy = userInfo[0];              
               CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
                 for(i in results) { results[i].loggedinUserScore = loginUserVoteInfo[results[i]._id];}
                 self.getAnswersQuestion(results, callbackInner);
