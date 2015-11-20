@@ -30,6 +30,7 @@ var Cafe = function()
       req.body.cafe.createdAt = new Date();
       if(req.body.cafe.isFeatured == undefined) req.body.cafe.isFeatured = false;
       req.body.cafe.type = 'Link';
+      req.body.cafe.isActive = 1;
 
       var token = req.body.token || req.query.token || req.headers['x-access-token'];
       if(!token) return res.status(401).json("Token not found");
@@ -61,7 +62,8 @@ var Cafe = function()
       req.body.cafe.urlSlug = newUrl.replace(/[-]+/g, "-");
       req.body.cafe.description = req.body.cafe.description;
       req.body.cafe.topics = req.body.cafe.topics;
-      req.body.cafe.views = 0;      
+      req.body.cafe.views = 0;
+      req.body.cafe.isActive = 1;      
       req.body.cafe.createdAt = new Date();
       req.body.cafe.type = 'Post';
 
