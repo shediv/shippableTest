@@ -502,6 +502,7 @@ var Lsquare = function()
               for(i in results) results[i].answeredBy = userInfo[0];              
               CommonLib.checkLoginUserVote(answerIDs, self.UserID, function(err4, loginUserVoteInfo){  
                 for(i in results) { results[i].loggedinUserScore = loginUserVoteInfo[results[i]._id];}
+                //callbackInner(err, results);
                 self.getAnswersQuestion(results, callbackInner);
               });  
             });  
@@ -538,23 +539,25 @@ var Lsquare = function()
     });
   }
 
-  self.getAnswersQuestion = function(results, callbackInner){
-      console.log(results.length);     
+  self.getAnswersQuestion = function(results, callbackInner){           
       var answerUsersIDs = [];        
       async.each(results, function(result, callbackEach){            
-        Lsquare.findOne({_id : result.questionId, active: 1}).lean().exec(function(err,questions){
-          result.question = questions;         
+        Lsquare.findOne({_id : result.questionId.toString(), active: 1}).lean().exec(function(err,question){          
+          result.question = question;                            
           callbackEach(null);                
         });            
       }, 
       function(err){
-        //console.log(results);
         var questionCreatedByIDs = [];
-        for(i in results) questionCreatedByIDs.push(results[i].question.createdBy);
-          CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
-            for(i in results) { results[i].question.createdBy = QuserInfo[results[i].question.createdBy];}
-            callbackInner(err, results);
-          })
+        for(i in results) {
+          if(results[i].question){ questionCreatedByIDs.push(results[i].question.createdBy)} 
+        }
+        CommonLib.getUserInfo(questionCreatedByIDs, function(err, QuserInfo){
+          for(i in results) {
+           if(results[i].question){ results[i].question.createdBy = QuserInfo[results[i].question.createdBy];}
+          }
+          callbackInner(err, results);
+        })
       });                  
   };
 
