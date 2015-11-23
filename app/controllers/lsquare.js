@@ -723,7 +723,7 @@ var Lsquare = function()
     console.log(queryTerms);
     Lsquare.aggregate(
       //{ $match : { question : query } },
-      { $match : { $text : { $search : queryTerms } }, active = 1 },
+      { $match : { $text : { $search : queryTerms } } },
       { $sort: { score :  { $meta: "textScore" } } }, 
       { $project : { urlSlug : 1, question : 1, score : { $meta : "textScore"  } } }, 
       { $limit : 5 }, { $skip : 0 },
