@@ -1,16 +1,35 @@
 <html>
   <head>
     <title>Contacting for your service | The Media Ant</title>
+    <style>
+      table, th, td {
+          border: 1px solid black;
+          border-collapse: collapse;
+          margin: 30px 0;
+      }
+      th, td {
+          padding: 5px;
+      }
+    </style>  
   </head>
   <body>
     <div style="margin:30px 0;">
       <h3>Hi, Please list me as a freelancer on www.themediaant.com</h3>
       <table>
-        <th>Name : <%= name.first %> <%= name.last %></th>
-        <th>Email : <%= email %></th>
-        <th>Contact : <%= contact %></th>
-        <th>Area Of Expertise : <%= areaOfExpertise %></th>
-        <th>Is Agency : <%= isAgency %></th>
+      <tr>
+        <th>Name </th>
+        <th>Email </th>
+        <th>Contact </th>
+        <th>Area Of Expertise </th>
+        <th>Is Agency </th>
+      </tr>  
+      <tr>
+        <td><%= name.first %> <%= name.last %></td>
+        <td><%= email %></td>    
+        <td><%= contact %></td>
+        <td><%= areaOfExpertise %></td>
+        <td><%= isAgency %></td>
+      </tr>
       </table>
       <h3>Thank you</h3>
     </div>
