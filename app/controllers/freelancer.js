@@ -40,13 +40,16 @@ var Freelancer = function()
     newLancer.save(function(err) {
       if(err) return res.status(500).json(err);
       res.status(200).json("New FreeLancer Created Successfully");
+
+      if(freelancer.isAgency) { var Agency = 'Agency';}
+      else { var Agency = 'Freelancer'; }  
     
       var mailOptions = {
           email: freelancer.email,
-          to : "samir@themediaant.com",
+          to : "videsh@themediaant.com",
           contact : freelancer.contact,
           areaOfExpertise :freelancer.areaOfExpertise,
-          isAgency : freelancer.isAgency,
+          isAgency : Agency,
           name: {
             first: CommonLib.capitalizeFirstLetter(freelancer.firstName),
             last: CommonLib.capitalizeFirstLetter(freelancer.lastName)
