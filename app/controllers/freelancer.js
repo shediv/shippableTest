@@ -46,7 +46,7 @@ var Freelancer = function()
     
       var mailOptions = {
           email: freelancer.email,
-          to : "videsh@themediaant.com",
+          to : "samir@themediaant.com",
           contact : freelancer.contact,
           areaOfExpertise :freelancer.areaOfExpertise,
           isAgency : Agency,
