@@ -5,8 +5,6 @@ var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
 var cors = require('express-cors');
 var jwt = require('jsonwebtoken');
-
-var config = require('./app/config/config.js');
 var envConfig = require('./app/config/config.env.js');
 
 var routes = require('./app/routes/index');
