@@ -1,7 +1,6 @@
 var User = function()
 {
 	var async = require('async');
-	var CommonLib = require('../libraries/common').Common;
 	var User = require('../models/user').User;
 	var UsersLogs = require('../models/usersLogs').UsersLogs;
 	var jwt = require('jsonwebtoken');
@@ -29,52 +28,60 @@ var User = function()
     auth: self.config.smtpAuth
   });
 
-	this.store = function(req, res){
+	this.signup = function(req, res){
 		var user = req.body.user;
-		User.count({email: user.email}, function(err, result){
+		User.count({mobile: user.mobile}, function(err, result){
 			if(err) throw err;
 			if(result) return res.status(500).json("Email Already Exists");
 
 			user.password = md5(user.password);
 			user.isActive = 0;
+			user.vcode = 5555;
 			user.dateOfJoin = new Date();
 			var newUser = User(user);
 
 			// save the User
 			newUser.save(function(err){
 				if(err) return res.status(500).json(err);
-				res.status(200).json({userId:newUser._id});
-				var mailOptions = {
-			      email: user.email,
-			      name: {
-			        first: CommonLib.capitalizeFirstLetter(user.firstName),
-			        last: CommonLib.capitalizeFirstLetter(user.lastName)
-			      },
-			      userId:newUser._id,
-			      emailHash:md5(user.email),
-			      appHost:self.config.appHost
-			    };
-
-			    var newContact = Contact(mailOptions);
-
-			    newContact.save(function(err){
-			    	if(err) return res.status(500).json(err);
-				    var emailTemplate = new EmailTemplate(path.join(templatesDir, 'register'));
-					emailTemplate.render(mailOptions, function(err, results){
-						if(err) return console.error(err)
-						self.transporter.sendMail({
-			        from: self.config.noreply, // sender address
-			        to: mailOptions.email, // list of receivers
-			        subject: 'One Last Step To Create Your Account!',
-			        html: results.html
-						}, function(err, responseStatus){
-							if(err) return console.log(err);
-						   console.log("responseStatus.message");
-						})
-					});
-					mkdirp('../public/images/users/'+newUser._id);
-				});
+				res.status(200).json({userId:newUser});
 			});	
+
+		});
+	};
+
+	this.store = function(req, res){
+		var user = req.body.user;
+		res.status(200).json("Done");
+		// User.count({mobile: user.mobile}, function(err, result){
+		// 	if(err) throw err;
+		// 	if(result) return res.status(500).json("Email Already Exists");
+
+		// 	user.password = md5(user.password);
+		// 	user.isActive = 0;
+		// 	user.vcode = 5555;
+		// 	user.dateOfJoin = new Date();
+		// 	var newUser = User(user);
+
+		// 	// save the User
+		// 	newUser.save(function(err){
+		// 		if(err) return res.status(500).json(err);
+		// 		res.status(200).json({userId:newUser});
+		// 	});	
+
+		// });
+	};
+
+	this.verify = function(req, res){
+		var user = req.body.user;
+		console.log(typeof(user.userId));
+		User.findOne({_id : user.userId, mobile: user.mobile, vcode : user.vcode}).lean().exec(function(err, result){			
+			if(err || result === null) return res.status(500).json("No value found");
+			//if(result) return res.status(200).json(result);
+
+			User.findOneAndUpdate({_id : result._id}, {$set: { isActive: 1 }}, {upsert:true}, function(err, doc){
+			  if(err) return res.status(500).json(err);
+			  return res.status(200).json("Mobile Number verified");
+			});
 
 		});
 	};
@@ -113,20 +120,20 @@ var User = function()
 		});
 	};
 
-	this.verify = function(req, res){
-		var confirmationCode = req.params.confirmationCode;
-		var confirmationCode = confirmationCode.split(":");
-		var dbEmail = false;
+	// this.verify = function(req, res){
+	// 	var confirmationCode = req.params.confirmationCode;
+	// 	var confirmationCode = confirmationCode.split(":");
+	// 	var dbEmail = false;
 
-		User.findOne({_id : confirmationCode[1]}, function(err, result){
-			var dbEmailHash = md5(result.email);
-			if(confirmationCode[0] != dbEmailHash) return res.status(500).json("not verified");
-			User.findOneAndUpdate({_id : confirmationCode[1]}, {$set: { isActive: 1 }}, {upsert:true}, function(err, doc){
-			  if(err) return res.status(500).json(err);
-			  return res.status(200).json("User's email verified");
-			});
-		})
-	}
+	// 	User.findOne({_id : confirmationCode[1]}, function(err, result){
+	// 		var dbEmailHash = md5(result.email);
+	// 		if(confirmationCode[0] != dbEmailHash) return res.status(500).json("not verified");
+	// 		User.findOneAndUpdate({_id : confirmationCode[1]}, {$set: { isActive: 1 }}, {upsert:true}, function(err, doc){
+	// 		  if(err) return res.status(500).json(err);
+	// 		  return res.status(200).json("User's email verified");
+	// 		});
+	// 	})
+	// }
 
 	this.facebookSignin = function(req, res){
 		var user = req.body.user;
@@ -261,23 +268,50 @@ var User = function()
 
 	this.authenticate = function(req, res){
 		var user = req.body.user;
-		User.findOne({email: user.username}).lean().exec(function(err, result){
-			if(err) return res.status(500).json(err);
-			if(!result) return res.status(404).json("User Does Not Exist");
+		console.log(user);
+		var data  = {
+							_id: "55e77e9f8ead0ebe0c8b46e0",
+							mobile: "7022532828",		
+							building : {
+								name : "building 1",
+								venue : "B block",
+								restuarants : [
+                            {
+                                _id : "1",
+                                "name" : "res 1",
+                                "food" : "veg"
+                            },
+                            {
+                                _id : "1",
+                                "name" : "res 2",
+                                "food" : "non veg"
+                            },
+                            {
+                                _id : "1",
+                                "name" : "res 3",
+                                "food" : "non veg and veg"
+                            }
+                        ]
+							}		
+		}
+		return res.status(200).json({data : data});
+		// User.findOne({email: user.username}).lean().exec(function(err, result){
+		// 	if(err) return res.status(500).json(err);
+		// 	if(!result) return res.status(404).json("User Does Not Exist");
 
-			//Verify Password
-			if(md5(user.password) != result.password) return res.status(401).json("Invalid Password");
-			if(!result.isActive) return res.status(401).json("Account Not Verified");
-			else
-			{
-				var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
-		        res.status(200).json({token:token});
-		    }
+		// 	//Verify Password
+		// 	if(md5(user.password) != result.password) return res.status(401).json("Invalid Password");
+		// 	if(!result.isActive) return res.status(401).json("Account Not Verified");
+		// 	else
+		// 	{
+		// 		var token = jwt.sign(result, self.config.secret, { expiresInMinutes: 11340 });
+		//         res.status(200).json({token:token});
+		//     }
 
-			result.userAgent= req.headers['user-agent'];
-			result.clientIPAddress = req.headers['x-forwarded-for'] || req.ip;
-			self.userLoginInfo(result);
-		});
+		// 	result.userAgent= req.headers['user-agent'];
+		// 	result.clientIPAddress = req.headers['x-forwarded-for'] || req.ip;
+		// 	self.userLoginInfo(result);
+		// });
 	};
 
 	this.getSession = function(req, res){

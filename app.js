@@ -7,32 +7,14 @@ var mongoose = require('mongoose');
 var cors = require('express-cors');
 var multer = require('multer');
 var jwt = require('jsonwebtoken');
-var RoutesCollection = require('./app/models/routesCollection').RoutesCollection;
 
 var config = require('./app/config/config.js');
 var envConfig = require('./app/config/config.env.js');
 
 var routes = require('./app/routes/index');
 var user = require('./app/routes/user');
-var magazine = require('./app/routes/magazine');
-var cinema = require('./app/routes/cinema');
-var radio = require('./app/routes/radio');
-var airport = require('./app/routes/airport');
-var outdoor = require('./app/routes/outdoor');
-var television = require('./app/routes/television');
-var newspaper = require('./app/routes/newspaper');
-var media = require('./app/routes/media');
-var geography = require('./app/routes/geography');
-var nonTraditional = require('./app/routes/nonTraditional');
-var digital = require('./app/routes/digital');
-var lsquare = require('./app/routes/lsquare');
-var _12thCross = require('./app/routes/12thCross');
-var search = require('./app/routes/search');
-var bestRates = require('./app/routes/bestRates');
-var cafe = require('./app/routes/cafe');
-var mtwenty = require('./app/routes/mtwenty');
-var parseExcel = require('./app/routes/parseExcel');
-var freelancer = require('./app/routes/freelancer');
+
+
 var app = express();
 
 // view engine setup
@@ -49,6 +31,7 @@ app.use(cors({
         'http://m20.in',
         'http://tma.dev:3000',
         'http://www.tma.dev:3000',
+        'http://localhost:3000',
         'http://127.0.0.1:3000'
     ],
 	headers: [
@@ -93,48 +76,28 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(multer({dest: './public/temp/'}).single('file'));
 
 // check if login required
-app.use(function(req, res, next) {
-  RoutesCollection.findOne({url:req.url, isAuthReq:true}).lean().exec(
-    function(err, result)
-    {
-      if(err) return res.status(500).json(err);
-      if(result){
-        var token = req.body.token || req.query.token || req.headers['x-access-token'];
-        if(!token) return res.status(401).json("Token not found");
-        jwt.verify(token, config.secret, function(tokenErr, decoded){
-          if(tokenErr) return res.status(401).json("Invalid Token");
-          else next();
-        });
-      }
-      else{
-         next();
-      }
-    }
-  );
-});
+// app.use(function(req, res, next) {
+//   RoutesCollection.findOne({url:req.url, isAuthReq:true}).lean().exec(
+//     function(err, result)
+//     {
+//       if(err) return res.status(500).json(err);
+//       if(result){
+//         var token = req.body.token || req.query.token || req.headers['x-access-token'];
+//         if(!token) return res.status(401).json("Token not found");
+//         jwt.verify(token, config.secret, function(tokenErr, decoded){
+//           if(tokenErr) return res.status(401).json("Invalid Token");
+//           else next();
+//         });
+//       }
+//       else{
+//          next();
+//       }
+//     }
+//   );
+// });
 
+ 
 app.use('/user', user);
-app.use('/magazine', magazine);
-app.use('/cinema', cinema);
-app.use('/radio', radio);
-app.use('/airport', airport);
-app.use('/newspaper', newspaper);
-app.use('/outdoor', outdoor);
-app.use('/television', television);
-app.use('/digital', digital);
-app.use('/lsquare', lsquare);
-app.use('/media', media);
-app.use('/geography', geography);
-app.use('/nonTraditional', nonTraditional);
-app.use('/12thCross', _12thCross);
-app.use('/search', search);
-app.use('/bestRates', bestRates);
-app.use('/cafe', cafe);
-app.use('/mtwenty', mtwenty);
-app.use('/parseExcel', parseExcel);
-app.use('/freelancer', freelancer);
-
-
 app.use('/', routes);
 
 // error handlers

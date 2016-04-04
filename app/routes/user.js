@@ -6,13 +6,14 @@ var express = require('express');
 var router = express.Router();
 var UserCtrl = new (require('../controllers/user')).User();
 
-router.post("/signup", UserCtrl.store);
+router.post("/signup", UserCtrl.signup);
+router.post("/register", UserCtrl.store);
 router.get("/userCount", UserCtrl.userCount);
 router.post("/reverification", UserCtrl.reVerificationMail);
-router.get("/verify/:confirmationCode", UserCtrl.verify);
+router.post("/verify", UserCtrl.verify);
 router.put("/", UserCtrl.update);
 router.put("/uploadProfilePic", UserCtrl.uploadProfilePic);
-router.post("/localSignin", UserCtrl.authenticate);
+router.post("/authenticate", UserCtrl.authenticate);
 router.post("/facebookSignin", UserCtrl.facebookSignin);
 router.post("/googleSignin", UserCtrl.googleSignin);
 router.post("/current", UserCtrl.getSession);
