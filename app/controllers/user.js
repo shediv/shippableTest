@@ -5,9 +5,6 @@ var User = function()
 	var fs = require('fs');
 	var mkdirp = require('mkdirp');
 	var crypto =require('crypto');
-
-	var path = require('path');
-
 	//.................
 	var github = require('octonode');
 	var client = github.client();
